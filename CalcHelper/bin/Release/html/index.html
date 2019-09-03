@@ -1,0 +1,73 @@
+<html lang="jp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="60">
+<script src="jquery-3.4.1.min.js"></script>
+<script type="text/javascript">
+function getUrlParam(){
+	var url = location.href.split("?");
+
+	if(url.length != 2){ 
+        console.error("url parameter error"); 
+        return;
+    }
+
+	var ans = new Object();	
+	var param = url[1].split("&");
+	param.forEach(function(valueKey){
+		var vk = valueKey.split("=");
+		if(vk.length==2){ ans[vk[0]] = vk[1]; }
+	});
+	
+	return ans;
+}
+
+function setImgLinkTag(line){
+    var node = line.split("\t");
+    if(node.length!=2){ return;}
+    console.log("tag: "+node[0] + " // " + node[1]);
+    $('#imgLink').append("<div><a href=\"index.html?file="+node[1]+"\">"+node[0]+"</a></div>");
+}
+
+function setImgLink(){
+    var items = $('#imageList').val().split(/[\r\n]{1,2}/);
+    $('#imgLink').empty();
+    for(var line of items){
+        line = line.trim();
+        if(line.length==0) { continue; }
+        setImgLinkTag(line);
+    }
+    $('#imgLink').show();
+}
+
+window.onload = function () {
+    $('#capture').hide();
+    $('#imageList').hide();
+    $('#imgLink').hide();
+    var param = getUrlParam();
+    if(param == undefined){
+        //初期ページ
+        setImgLink();
+    }else{
+        //特定画像ページ
+        $('#capture').show();
+        $('#capture').attr('src',"/img/capture/"+param["file"]);
+    }
+}
+
+
+</script>
+</head>
+<body>
+<img id="capture" src="loading01_r1_c1.gif" />
+<textarea id="imageList">
+__IMAGE_LIST__
+</textarea>
+<div id="imgLink"> </div>
+<!-- name[tab]url
+__IMAGE_NAME__1	url1
+__IMAGE_NAME__2	url2
+__IMAGE_NAME__3	url3
+-->
+</body>
+</html>

@@ -1,0 +1,42 @@
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\MiotoServer.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\MiotoServer.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServer.csprojResolveAssemblyReference.cache
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServer.csproj.GenerateResource.Cache
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\System.Data.SQLite.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\System.Data.SQLite.xml
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\MiotoServerW.exe.config
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServerW.Form1.resources
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServerW.Properties.Resources.resources
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\MiotoServerW.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\MiotoServerW.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServerW.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\obj\Debug\MiotoServerW.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\EntityFramework.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\EntityFramework.xml
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServerW.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServerW.exe
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServerW.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\EntityFramework.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServer.exe
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Data.SQLite.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServer.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoServer.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\EntityFramework.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Data.SQLite.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Data.SQLite.dll.config
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServerW.Form1.resources
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServerW.Properties.Resources.resources
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csproj.GenerateResource.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csproj.CoreCompileInputs.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csproj.CopyComplete
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServerW.exe
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServerW.pdb

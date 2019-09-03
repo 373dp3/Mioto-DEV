@@ -1,0 +1,6 @@
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\bin\Release\OutputServer.exe.config
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\bin\Release\OutputServer.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\bin\Release\OutputServer.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\obj\Release\OutputServer.csprojResolveAssemblyReference.cache
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\obj\Release\OutputServer.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\OutputServer\obj\Release\OutputServer.pdb

@@ -1,0 +1,15 @@
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\bin\Release\IoTBasics.exe.config
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\bin\Release\IoTBasics.exe
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\bin\Release\IoTBasics.pdb
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\bin\Release\System.Data.SQLite.dll
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\bin\Release\System.Data.SQLite.xml
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\obj\Release\IoTBasics.exe
+C:\Users\min\Source\Repos\WiFi-Arduino-Barcode-experimental-\IoTBasics\IoTBasics\obj\Release\IoTBasics.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\bin\Release\IoTBasics.exe.config
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\obj\Release\IoTBasics.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\obj\Release\IoTBasics.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\bin\Release\IoTBasics.exe
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\bin\Release\IoTBasics.pdb
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\bin\Release\System.Data.SQLite.dll
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\bin\Release\System.Data.SQLite.xml
+C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\IoTBasics\obj\Release\IoTBasics.csprojResolveAssemblyReference.cache
