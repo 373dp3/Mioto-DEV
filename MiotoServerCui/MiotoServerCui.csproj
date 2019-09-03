@@ -72,6 +72,7 @@
     <Compile Include="DbChecker.cs" />
     <Compile Include="DbWrapper.cs" />
     <Compile Include="HttpdWorker.cs" />
+    <Compile Include="IMonoPacket.cs" />
     <Compile Include="PacketCommon.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="TweCtPacket.cs" />
     <Compile Include="TwePacket.cs" />
     <Compile Include="TwePacketParser.cs" />
+    <Compile Include="TwePalSensePacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

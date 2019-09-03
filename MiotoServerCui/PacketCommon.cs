@@ -50,5 +50,21 @@ namespace MiotoServer
             string str = readString(msg, ref ofs, 4);
             return Convert.ToUInt32(str, 16);
         }
+
+        protected sbyte readSigned1Byte(string msg, ref int ofs)
+        {
+            string str = readString(msg, ref ofs, 1);
+            return Convert.ToSByte(str, 16);
+        }
+        protected Int16 readSigned2Byte(string msg, ref int ofs)
+        {
+            string str = readString(msg, ref ofs, 2);
+            return Convert.ToInt16(str, 16);
+        }
+        protected Int32 readSigned4Byte(string msg, ref int ofs)
+        {
+            string str = readString(msg, ref ofs, 4);
+            return Convert.ToInt32(str, 16);
+        }
     }
 }

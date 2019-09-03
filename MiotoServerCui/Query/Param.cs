@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace MiotoServer.Query
 {
-    class Param
+    public class Param
     {
         public enum VOLUME { NORMAL, THINING, FINAL };
-        public enum TYPE { CT, TWE };
+        public enum TYPE { CT, TWE, PAL };
         public VOLUME volume { get; internal set; }
         public TYPE type { get; internal set; }
         public int thiningSec { get; internal set; }

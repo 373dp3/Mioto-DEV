@@ -40,6 +40,13 @@ namespace MiotoServer
             2C: LRC
          */
 
+        private List<IMonoPacket> listPacketFilter;
+        public TwePacketParser()
+        {
+            listPacketFilter = new List<IMonoPacket>();
+            listPacketFilter.Add(new TwePalSensePacket());
+        }
+
         public void parse(string msg)
         {
             parse(msg, 4);
@@ -56,6 +63,18 @@ namespace MiotoServer
                     break;
                 }
             }
+
+            //TWE-Lite PAL以降の新しいパケットフォーマットに対する処理
+            foreach(var filter in listPacketFilter)
+            {
+                if(filter.parse(msg, ref ofs) == false) { continue; }
+                filter.registDb(DbWrapper.getInstance());
+                Program.d(filter.ToString());
+                return;
+            }
+
+            //以降、従来型のパケット処理
+
             //解釈(48文字)
             if (((msg.Length - ofs) != 49) && ((msg.Length - ofs) != 48))
             {

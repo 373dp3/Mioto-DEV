@@ -27,17 +27,21 @@ namespace MiotoServerW
 
         public void d(string msg)
         {
-            if (InvokeRequired)
+            try
             {
-                Invoke(new Action<string>(d), msg);
+                if (InvokeRequired)
+                {
+                    Invoke(new Action<string>(d), msg);
+                }
+                else
+                {
+                    if (dMsgCnt > 100) { this.textBoxStatus.Text = ""; dMsgCnt = 0; }
+                    var hhmm = DateTime.Now.ToString("HH:mm:ss ");
+                    this.textBoxStatus.AppendText(hhmm + msg + Environment.NewLine);
+                    dMsgCnt++;
+                }
             }
-            else
-            {
-                if (dMsgCnt > 100) { this.textBoxStatus.Text = ""; dMsgCnt = 0; }
-                var hhmm = DateTime.Now.ToString("HH:mm:ss ");
-                this.textBoxStatus.AppendText(hhmm + msg + Environment.NewLine);
-                dMsgCnt++;
-            }
+            catch (Exception e) { }
         }
 
         private void buttonUpdateComList_Click(object sender, EventArgs e)

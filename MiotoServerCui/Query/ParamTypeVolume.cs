@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer.Query
 {
-    class ParamTypeVolume : ParamFilter
+    public class ParamTypeVolume : ParamFilter
     {
         static Regex ptnTin = new Regex("/t(\\d{1,10})s", RegexOptions.Compiled);
         static Regex ptnFix = new Regex("/fix(\\d{1,10})", RegexOptions.Compiled);
@@ -16,6 +16,20 @@ namespace MiotoServer.Query
             if (param.url.Contains("/twe"))
             {
                 param.type = Param.TYPE.TWE;
+
+                //間引き確認
+                var m = ptnTin.Match(param.url);
+                if (m.Success)
+                {
+                    param.thiningSec = Convert.ToInt32(m.Groups[1].ToString());
+                    Program.d("thinning :" + param.thiningSec);
+                    param.volume = Param.VOLUME.THINING;
+                }
+            }
+
+            if (param.url.Contains("/pal"))
+            {
+                param.type = Param.TYPE.PAL;
 
                 //間引き確認
                 var m = ptnTin.Match(param.url);

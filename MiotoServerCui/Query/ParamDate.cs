@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer.Query
 {
-    class ParamDate : ParamFilter
+    public class ParamDate : ParamFilter
     {
         static Regex ptnDate = new Regex("/(\\d{8})", RegexOptions.Compiled);
         public override void update(Param param)

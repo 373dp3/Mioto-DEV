@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer.Query
 {
-    class ParamMac : ParamFilter
+    public class ParamMac : ParamFilter
     {
         static Regex ptnMac = new Regex("/([\\da-fA-F]{8})", RegexOptions.Compiled);
         public override void update(Param param)

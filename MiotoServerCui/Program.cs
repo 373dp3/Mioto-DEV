@@ -71,7 +71,7 @@ namespace MiotoServer
         public const string PORT_BPS_KEY = "bps";
         public const string HM_KEY = "hm";
         public const string DIR_KEY = "d";
-        public static Dictionary<string, string> config { get; private set; }
+        public static Dictionary<string, string> config { get; set; }
 
         static void Main(string[] args)
         {

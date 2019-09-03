@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer.Query
 {
-    abstract class ParamFilter
+    public abstract class ParamFilter
     {
         public abstract void update(Param param);
     }

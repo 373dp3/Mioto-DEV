@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer
 {
-    class DbWrapper
+    public class DbWrapper
     {
         private static DbWrapper instance = null;
         public ulong beginRowId { get; private set; }
@@ -239,19 +239,58 @@ namespace MiotoServer
                 _updateDate();
             }
         }
+
+        const int FLG_TWE = 2;
+        const int FLG_PAL = 3;
+
+
         public void insertCsv(TwePacket packet, string csv)
         {
             var data = csv;
             string query = "INSERT INTO csvcash (mac, ticks, csv, flg) "
                 + " values ("
                 + packet.mac + ", "
-                + packet.dt.Ticks + ", '" + data + "', 2)";//純正TWE-Liteパケットは2固定
+                + packet.dt.Ticks + ", '" + data + "', "+ FLG_TWE+")";//純正TWE-Liteパケットは2固定
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
                 _updateDate();
             }
+        }
+
+        public void insertCsv(TwePalSensePacket pal)
+        {
+            //toCsv
+            string query = "INSERT INTO csvcash (mac, ticks, csv, flg) "
+                + " values ("
+                + pal.mac + ", "
+                + pal.dt.Ticks + ", '" + pal.toCsv() + "', " + FLG_PAL + ")";//TWE-Lite PALパケットは3固定
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.ExecuteNonQuery();
+                _updateDate();
+            }
+            /*
+            using (var tran = conn.BeginTransaction())
+            {
+                foreach(var item in pal.toCsvList())
+                {
+                    string query = "INSERT INTO csvcash (mac, ticks, csv, flg) "
+                        + " values ("
+                        + pal.mac + ", "
+                        + pal.dt.Ticks + ", '" + item + "', "+ FLG_PAL+")";//TWE-Lite PALパケットは3固定
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = query;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                _updateDate();
+                tran.Commit();
+            }
+            //*/
         }
 
 
@@ -272,7 +311,11 @@ namespace MiotoServer
                     break;
                 case Param.TYPE.TWE:
                     header = "date time,mac,btn,btnChg,batt,lqi,ad1,ad2,ad3,ad4\r\n";
-                    whereKey = " flg IS NOT NULL and ";
+                    whereKey = " flg=" + FLG_TWE + " and ";
+                    break;
+                case Param.TYPE.PAL:
+                    header = "date time,mac,lqi,batt,temp,humi,lux\r\n";
+                    whereKey = " flg=" + FLG_PAL + " and ";
                     break;
             }
 

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace MiotoServer
 {
-    class DbChecker
+    public class DbChecker
     {
         /*
          * 起動時に稼働上の日付変更時刻を受け取り、時刻をまたいだ場合にDBの
