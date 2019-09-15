@@ -67,6 +67,9 @@ namespace MiotoServerW
                 setComboItemAndUpdateSelected(comboBoxComList2, port, preSelect2);
             }
 
+            //前回使用したポートは必ず残す
+            setComboItemAndUpdateSelected(comboBoxComList, preSelect, preSelect);
+            setComboItemAndUpdateSelected(comboBoxComList2, preSelect2, preSelect2);
 
             if (comboBoxComList.SelectedItem == null)
             {
