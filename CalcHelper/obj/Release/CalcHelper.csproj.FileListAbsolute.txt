@@ -9,3 +9,17 @@ C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\CalcHelper\obj\Rele
 C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\CalcHelper\bin\Release\System.Data.SQLite.dll
 C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\CalcHelper\bin\Release\System.Data.SQLite.xml
 C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\CalcHelper\obj\Release\CalcHelper.csprojResolveAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\CalcHelper.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\CalcHelper.exe
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\CalcHelper.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\System.Data.SQLite.dll
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\System.Data.SQLite.xml
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Release\System.Data.SQLite.dll.config
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.Form1.resources
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.Properties.Resources.resources
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.GenerateResource.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.CoreCompileInputs.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.CopyComplete
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.exe
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.pdb

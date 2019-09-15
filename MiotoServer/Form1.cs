@@ -46,33 +46,56 @@ namespace MiotoServerW
 
         private void buttonUpdateComList_Click(object sender, EventArgs e)
         {
+
             string preSelect = Settings.Default.comport;
             this.comboBoxComList.Items.Clear();
-            setComboItemAndUpdateSelected(PORT_NO_USE_KEY, preSelect);
+            this.comboBoxComList2.Items.Clear();
+            setComboItemAndUpdateSelected(comboBoxComList, PORT_NO_USE_KEY, preSelect);
+            setComboItemAndUpdateSelected(comboBoxComList2, PORT_NO_USE_KEY, preSelect);
 
             var portlist = SerialPort.GetPortNames();
-            foreach(var port in portlist)
+            foreach (var port in portlist)
             {
-                setComboItemAndUpdateSelected(port, preSelect);
+                setComboItemAndUpdateSelected(comboBoxComList, port, preSelect);
+            }
+            foreach (var port in portlist)
+            {
+                setComboItemAndUpdateSelected(comboBoxComList2, port, preSelect);
             }
 
             if (comboBoxComList.SelectedItem == null)
             {
                 comboBoxComList.SelectedItem = PORT_NO_USE_KEY;
             }
+            if (comboBoxComList2.SelectedItem == null)
+            {
+                comboBoxComList2.SelectedItem = PORT_NO_USE_KEY;
+            }
         }
 
-        private void setComboItemAndUpdateSelected(string item, string preSelected)
+        private void setComboItemAndUpdateSelected(ComboBox box, string item, string preSelected)
         {
-            this.comboBoxComList.Items.Add(item);
+            box.Items.Add(item);
             if (item.CompareTo(preSelected) != 0) { return; }
-            this.comboBoxComList.SelectedItem = item;
+            box.SelectedItem = item;
         }
 
         private void comboBoxComList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Settings.Default.comport = this.comboBoxComList.SelectedItem.ToString();
-            Settings.Default.Save();
+            if(!(sender is ComboBox)) { return; }
+            var box = (ComboBox)sender;
+
+            //[TODO] 一方で選択済みの項目を他方から外す処理の実装
+            if (box.Name.CompareTo(comboBoxComList.Name) == 0)
+            {
+                Settings.Default.comport = box.SelectedItem.ToString();
+                Settings.Default.Save();
+            }
+            if (box.Name.CompareTo(comboBoxComList2.Name) == 0)
+            {
+                Settings.Default.comport2 = box.SelectedItem.ToString();
+                Settings.Default.Save();
+            }
         }
 
         private void Form1_Shown(object sender, EventArgs e)
@@ -82,6 +105,7 @@ namespace MiotoServerW
 
             //bps初期値更新
             comboBoxBps.SelectedItem = Settings.Default.bps;
+            comboBoxBps2.SelectedItem = Settings.Default.bps;
 
             //DBフォルダ
             if ((Settings.Default.dbDir == null)
@@ -116,11 +140,25 @@ namespace MiotoServerW
             var dir = Directory.GetParent(Assembly.GetEntryAssembly().Location).FullName;
             var exe = dir + "\\MiotoServer.exe";
             var arg = "-hm "+hhmm;//-hm 500 -p COM5
-            var port = comboBoxComList.SelectedItem.ToString();
-            if(port.CompareTo(PORT_NO_USE_KEY)!=0) {
-                arg += " -p " + port;
-                arg += " -bps " + comboBoxBps.SelectedItem.ToString();
+            var portList = new List<string>();
+            var bpsList = new List<string>();
+
+            foreach(var box in new ComboBox[] { comboBoxComList, comboBoxComList2 })
+            {
+                var port = box.SelectedItem.ToString();
+                if(port.CompareTo(PORT_NO_USE_KEY)==0) { continue; }
+                portList.Add(port);
             }
+            foreach(var box in new ComboBox[] { comboBoxBps, comboBoxBps2 })
+            {
+                bpsList.Add(box.SelectedItem.ToString());
+            }
+            if (portList.Count > 0)
+            {
+                arg += " -p " + String.Join(",", portList);
+                arg += " -bps " + String.Join(",", bpsList);
+            }
+
             arg += " -d \"" + textBoxDbDir.Text+"\" "; 
 
             d(exe);
@@ -154,7 +192,9 @@ namespace MiotoServerW
         private void updateButtonCtrl(bool isStart)
         {
             this.comboBoxComList.Enabled = !isStart;
+            this.comboBoxComList2.Enabled = !isStart;
             this.comboBoxBps.Enabled = !isStart;
+            this.comboBoxBps2.Enabled = !isStart;
             this.dateTimePickerHHMM.Enabled = !isStart;
             this.buttonStart.Enabled = !isStart;
             this.buttonUpdateComList.Enabled = !isStart;
@@ -195,8 +235,20 @@ namespace MiotoServerW
 
         private void comboBoxBps_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Settings.Default.bps = comboBoxBps.SelectedItem.ToString();
-            Settings.Default.Save();
+            if (sender == null) { return; }
+            if(!(sender is ComboBox)) { return; }
+
+            var box = (ComboBox)sender;
+            if (box.Name.CompareTo(comboBoxBps.Name) == 0)
+            {
+                Settings.Default.bps = box.SelectedItem.ToString();
+                Settings.Default.Save();
+            }
+            if (box.Name.CompareTo(comboBoxBps2.Name) == 0)
+            {
+                Settings.Default.bps2 = box.SelectedItem.ToString();
+                Settings.Default.Save();
+            }
         }
 
         private void buttonDbDir_Click(object sender, EventArgs e)

@@ -5,7 +5,7 @@
 ; アプリケーションの削除メニューに表示されるバージョンは、メニューを閉じて再表示すれば更新される。
 ;
 #define MyAppName "MiotoServer"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "dp3"
 #define MyAppURL "https://mioto.dp3.jp"
 #define MyAppExeName "MiotoServerW.exe"
@@ -39,20 +39,20 @@ Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\MiotoServerW.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\EntityFramework.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\MiotoServer.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\MiotoServerW.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\bin\Release\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoServer\iot.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServerW.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServerW.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\iot.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

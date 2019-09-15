@@ -39,6 +39,8 @@ namespace MiotoServer
      *  
      *  -hm 500 -p COM4 -d .\test2 -bps 38400
      *  
+     *  2019.9.15 複数COMポート対応(CT、PAL併用の為)
+     *  
      */
 
     public class Program
@@ -61,7 +63,7 @@ namespace MiotoServer
             CTRL_SHUTDOWN_EVENT = 6
         }
 
-        public static SerialPort serial = null;
+        public static List<SerialPort> serialList = new List<SerialPort>();
         static HandlerRoutine myHandlerDele;
         static TwePacketParser parser = new TwePacketParser();
 
@@ -101,9 +103,8 @@ namespace MiotoServer
                     bpsInt = 115200;
                     d("ポートの速度設定に初期値を用いました。 " + bpsInt.ToString());
                 }
-                serial = new SerialPort(config[PORT_KEY], bpsInt);
-                //serial = new SerialPort(config[PORT_KEY], 38400);//ハードコーディング oida
-                //serial = new SerialPort(config[PORT_KEY], 115200);//ハードコーディング
+                var serial = new SerialPort(config[PORT_KEY], bpsInt);
+                serialList.Add(serial);
                 serial.DataReceived += Serial_DataReceived;
                 serial.ReadTimeout = 100;//100msまで待機
                 serial.Open();
@@ -224,22 +225,26 @@ namespace MiotoServer
                     + HM_KEY + " <日付変更時刻 HHMM>");
                 return true;
             }
-            var isInValid = true;
+
             if (config.ContainsKey(PORT_KEY))
             {
-                foreach (var port in SerialPort.GetPortNames())
+                var portOrders = config[PORT_KEY].ToLower().Split(',');
+                var portNames = SerialPort.GetPortNames();
+
+                if (portOrders.Length == 0)
                 {
-                    if (port.ToLower().CompareTo(config[PORT_KEY].ToLower()) == 0)
+                    d("シリアルポートが指定されていません。");
+                    return false;
+                }
+
+                foreach(var port in portOrders)
+                {
+                    if(port.Length==0) { continue; }
+                    if((!portNames.Contains(port)) && (!portNames.Contains(port.ToUpper())))
                     {
-                        isInValid = false;
-                        break;
+                        d("指定されたポートは見つかりません "+port);
                     }
                 }
-            }
-            if (isInValid)
-            {
-                Program.d("シリアルポート番号が無効か指定されていません。");
-                return false;
             }
             return false;
         }
@@ -290,6 +295,8 @@ namespace MiotoServer
 
         private static void Serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            if(!(sender is SerialPort)) { return; }
+            var serial = (SerialPort)sender;
             try
             {
                 string line = serial.ReadLine();
@@ -326,11 +333,13 @@ namespace MiotoServer
         static bool myHandler(CtrlTypes ctrlType)
         {
             isActive = false;
-            if ((serial != null) && (serial.IsOpen))
+            foreach(var serial in serialList)
             {
-                serial.Close();
-                serial.Dispose();
-                serial = null;
+                if ((serial != null) && (serial.IsOpen))
+                {
+                    serial.Close();
+                    serial.Dispose();
+                }
             }
             return false;
         }
