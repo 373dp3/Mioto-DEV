@@ -37,7 +37,7 @@ namespace CalcHelper
                 {
                     instance.Invoke(new Action<string>(log), msg);
                 }
-                catch (Exception e) { }
+                catch (Exception e) { log(e.ToString()); }
             }
             else
             {
@@ -193,7 +193,7 @@ namespace CalcHelper
                         Thread.Sleep(10 * 1000);
                         this.WindowState = FormWindowState.Minimized;
                     }
-                    catch (Exception ex) { }
+                    catch (Exception ex) { log(ex.ToString()); }
 
                 })).Start();
                 isMinimizedOnce = true;

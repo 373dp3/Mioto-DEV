@@ -81,7 +81,6 @@ namespace CalcHelper
                 
                 listener.Start();
                 isThreadEnable = true;
-                const string IF_MOD_SINCE = "If-Modified-Since";
 
                 httpTh = new Thread(() => {
                     Form1.log("Httpd working ... ");
@@ -119,7 +118,8 @@ namespace CalcHelper
                         }
                         catch (HttpListenerException le)
                         {
-                            Form1.log("HttpListenerを停止しました");
+                            le.ToString();
+                            Form1.log("HttpListenerを停止しました:");
                         }
                         catch (Exception ee)
                         {

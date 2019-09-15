@@ -190,6 +190,7 @@
             this.comboBoxComList2.Name = "comboBoxComList2";
             this.comboBoxComList2.Size = new System.Drawing.Size(92, 20);
             this.comboBoxComList2.TabIndex = 11;
+            this.comboBoxComList2.SelectedIndexChanged += new System.EventHandler(this.comboBoxComList_SelectedIndexChanged);
             // 
             // comboBoxBps2
             // 

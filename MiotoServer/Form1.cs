@@ -41,27 +41,32 @@ namespace MiotoServerW
                     dMsgCnt++;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) { e.ToString(); }
         }
 
         private void buttonUpdateComList_Click(object sender, EventArgs e)
         {
 
             string preSelect = Settings.Default.comport;
+            string preSelect2 = Settings.Default.comport2;
             this.comboBoxComList.Items.Clear();
             this.comboBoxComList2.Items.Clear();
-            setComboItemAndUpdateSelected(comboBoxComList, PORT_NO_USE_KEY, preSelect);
-            setComboItemAndUpdateSelected(comboBoxComList2, PORT_NO_USE_KEY, preSelect);
 
-            var portlist = SerialPort.GetPortNames();
+            setComboItemAndUpdateSelected(comboBoxComList, PORT_NO_USE_KEY, preSelect);
+            setComboItemAndUpdateSelected(comboBoxComList2, PORT_NO_USE_KEY, preSelect2);
+
+            var portlist = new List<string>();
+            portlist.AddRange(SerialPort.GetPortNames());
+            portlist.Sort();
             foreach (var port in portlist)
             {
                 setComboItemAndUpdateSelected(comboBoxComList, port, preSelect);
             }
             foreach (var port in portlist)
             {
-                setComboItemAndUpdateSelected(comboBoxComList2, port, preSelect);
+                setComboItemAndUpdateSelected(comboBoxComList2, port, preSelect2);
             }
+
 
             if (comboBoxComList.SelectedItem == null)
             {
@@ -75,7 +80,10 @@ namespace MiotoServerW
 
         private void setComboItemAndUpdateSelected(ComboBox box, string item, string preSelected)
         {
-            box.Items.Add(item);
+            if (box.Items.Contains(item) == false)
+            {
+                box.Items.Add(item);
+            }
             if (item.CompareTo(preSelected) != 0) { return; }
             box.SelectedItem = item;
         }
@@ -85,16 +93,29 @@ namespace MiotoServerW
             if(!(sender is ComboBox)) { return; }
             var box = (ComboBox)sender;
 
-            //[TODO] 一方で選択済みの項目を他方から外す処理の実装
             if (box.Name.CompareTo(comboBoxComList.Name) == 0)
             {
                 Settings.Default.comport = box.SelectedItem.ToString();
-                Settings.Default.Save();
+                if(comboBoxComList2.SelectedIndex == box.SelectedIndex)
+                {
+                    comboBoxComList2.SelectedIndex = 0;
+                }
+                if (Settings.Default.comport.CompareTo(PORT_NO_USE_KEY) != 0)
+                {
+                    Settings.Default.Save();
+                }
             }
             if (box.Name.CompareTo(comboBoxComList2.Name) == 0)
             {
                 Settings.Default.comport2 = box.SelectedItem.ToString();
-                Settings.Default.Save();
+                if (comboBoxComList.SelectedIndex == box.SelectedIndex)
+                {
+                    comboBoxComList.SelectedIndex = 0;
+                }
+                if (Settings.Default.comport2.CompareTo(PORT_NO_USE_KEY) != 0)
+                {
+                    Settings.Default.Save();
+                }
             }
         }
 
@@ -105,7 +126,7 @@ namespace MiotoServerW
 
             //bps初期値更新
             comboBoxBps.SelectedItem = Settings.Default.bps;
-            comboBoxBps2.SelectedItem = Settings.Default.bps;
+            comboBoxBps2.SelectedItem = Settings.Default.bps2;
 
             //DBフォルダ
             if ((Settings.Default.dbDir == null)
@@ -142,17 +163,17 @@ namespace MiotoServerW
             var arg = "-hm "+hhmm;//-hm 500 -p COM5
             var portList = new List<string>();
             var bpsList = new List<string>();
+            var boxComList = new List<ComboBox> { comboBoxComList, comboBoxComList2 };
+            var boxBpsList = new List<ComboBox> { comboBoxBps, comboBoxBps2 };
 
-            foreach(var box in new ComboBox[] { comboBoxComList, comboBoxComList2 })
+            for(var i=0; i< boxComList.Count; i++)
             {
-                var port = box.SelectedItem.ToString();
-                if(port.CompareTo(PORT_NO_USE_KEY)==0) { continue; }
+                var port = boxComList[i].SelectedItem.ToString();
+                if (port.CompareTo(PORT_NO_USE_KEY) == 0) { continue; }
                 portList.Add(port);
+                bpsList.Add(boxBpsList[i].SelectedItem.ToString());
             }
-            foreach(var box in new ComboBox[] { comboBoxBps, comboBoxBps2 })
-            {
-                bpsList.Add(box.SelectedItem.ToString());
-            }
+
             if (portList.Count > 0)
             {
                 arg += " -p " + String.Join(",", portList);

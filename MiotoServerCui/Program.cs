@@ -88,22 +88,29 @@ namespace MiotoServer
 
             //シリアルポート番号のキーが含まれている場合、ポートを開く
             //指定時は引数にて「-p com22 -hm 500」等。
+
+            var portList = new string[] { };
+            var bpsList = new string[] { };
             if (config.ContainsKey(PORT_KEY))
             {
-                //SerialのみでCPU負荷が5%前後コンスタントにかかる。
-                var bps = config[PORT_BPS_KEY];
-                int bpsInt = 0;
-                if(bps==null) { bps = "115200"; }
-                try
-                {
-                    bpsInt = Convert.ToInt32(bps);
-                }
-                catch
-                {
-                    bpsInt = 115200;
-                    d("ポートの速度設定に初期値を用いました。 " + bpsInt.ToString());
-                }
-                var serial = new SerialPort(config[PORT_KEY], bpsInt);
+                portList = config[PORT_KEY].Split(',');
+            }
+            if (config.ContainsKey(PORT_BPS_KEY))
+            {
+                bpsList = config[PORT_BPS_KEY].Split(',');
+            }
+            if(portList.Length!= bpsList.Length)
+            {
+                d("[Error] com and bps size missmatch.");
+                d("Please check config and restart searvice.");
+                return;
+            }
+            for (var i = 0; i < portList.Length; i++)
+            {
+                var port = portList[i];
+                var bps = bpsList[i];
+
+                var serial = new SerialPort(port, Convert.ToInt32(bps));
                 serialList.Add(serial);
                 serial.DataReceived += Serial_DataReceived;
                 serial.ReadTimeout = 100;//100msまで待機
