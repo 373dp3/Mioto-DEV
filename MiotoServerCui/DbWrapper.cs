@@ -527,6 +527,9 @@ namespace MiotoServer
 
         public void updateDate2Row(string dateStr)
         {
+            //重複回避のため、対象となる日付が登録済みかを確認する。
+            if (isDate2RowExist(dateStr)) { return; }
+
             //csvcashの最大ROWID取得
             ulong rowid = getMaxRowId();
 
