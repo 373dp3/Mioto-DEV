@@ -70,7 +70,7 @@ namespace MiotoServer
                 if (DateTime.Now > workEndDt)
                 {
                     //日付をまたいでいるのでテーブルに情報追加
-                    p.updateDate2Row(workEndDt.ToString("yyyyMMdd"));
+                    p.updateDate2Row(workEndDt.AddDays(-1).ToString("yyyyMMdd"));
                 }
             }
         }
