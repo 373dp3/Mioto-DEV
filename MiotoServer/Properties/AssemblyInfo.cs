@@ -32,5 +32,15 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+
+/*
+ * 2019.10.8    1.2.0
+ * ・CSVフォーマット変更
+ * ・バックアップ処理の追加
+ * ・PAL(環境)、TWE2525(面)対応
+ * ・-Nd、today指定対応
+ * ・noheader対応
+ * 
+ * */

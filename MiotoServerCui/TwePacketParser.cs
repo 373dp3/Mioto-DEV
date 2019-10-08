@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MiotoServer
@@ -45,6 +46,7 @@ namespace MiotoServer
         {
             listPacketFilter = new List<IMonoPacket>();
             listPacketFilter.Add(new TwePalSensePacket());
+            listPacketFilter.Add(new Twe2525APacket());
         }
 
         public void parse(string msg)
@@ -65,10 +67,13 @@ namespace MiotoServer
             }
 
             //TWE-Lite PAL以降の新しいパケットフォーマットに対する処理
-            foreach(var filter in listPacketFilter)
+            var p = DbWrapper.getInstance();
+            foreach (var filter in listPacketFilter)
             {
-                if(filter.parse(msg, ref ofs) == false) { continue; }
-                filter.registDb(DbWrapper.getInstance());
+                if(filter.parse(msg, ref ofs) == false) {
+                    continue;
+                }
+                filter.registDb(p);
                 Program.d(filter.ToString());
                 return;
             }
@@ -119,9 +124,9 @@ namespace MiotoServer
                 {
                     deltaSec = packet.getTimeSpanSec(list[0]).ToString("0.0");
                 }
-                string csv = "";
                 for (int i = 0; i < btnBitLength; i++)
                 {
+                    string csv = "";
                     bool flg = packet.isOn(i);
                     TweCtPacket flip = null;
                     TweCtPacket again = null;
@@ -155,17 +160,14 @@ namespace MiotoServer
                         {
                             csv += "," + packet.getTimeSpanSec(again).ToString("0.0") + ",," + packet.getTimeSpanSec(flip).ToString("0.0") + ",";
                         }
-                    }
-                    else
-                    {
-                        csv += ",,,,";
+                        //date,mac,seq,btn,bat,lqi,on/off
+                        csv = packet.ToCSV() + csv;
+                        if(i>0) { csv += "," + (i + 1); }
+                        Program.d("Th:" + System.Threading.Thread.CurrentThread.ManagedThreadId + " " + csv);
+                        wrapper.insertCsv(packet, csv);
                     }
                 }//flg 0-btnBitLength loop
 
-                //date,mac,seq,btn,bat,lqi,1off-off,1off-on,1on-off,1on-on,2...........
-                csv = packet.ToCSV() + csv;
-                Program.d("Th:" + System.Threading.Thread.CurrentThread.ManagedThreadId + " " + csv);
-                wrapper.insertCsv(packet, csv);
             }
 
             return ofs;

@@ -66,7 +66,7 @@ namespace MiotoServer
         public string ToCSV()
         {
             byte ms = (byte)(dt.Millisecond / 100);
-            return "" + dt.ToString("M/d HH:mm:ss")
+            return "" + dt.ToString("yyyy/MM/dd HH:mm:ss")
                 + "," + Convert.ToString(mac, 16) + "," + seq + "," + btn + "," + (batt/1000d).ToString("0.0")
                 + "," + lqi;
 

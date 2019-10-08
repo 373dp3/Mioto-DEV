@@ -34,6 +34,11 @@ namespace MiotoServerW
                     Installer.Uninstall();
                     break;
                 case OPT.NOMAL:
+                    var path = Application.ExecutablePath;
+                    var fi = new FileInfo(path);
+                    var dir = fi.DirectoryName;
+                    System.Environment.CurrentDirectory = dir;
+
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.Run(new Form1());

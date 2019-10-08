@@ -94,5 +94,17 @@ namespace MiotoServerW.Properties {
                 this["bps2"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string backDir {
+            get {
+                return ((string)(this["backDir"]));
+            }
+            set {
+                this["backDir"] = value;
+            }
+        }
     }
 }

@@ -20,5 +20,8 @@
     <Setting Name="bps2" Type="System.String" Scope="User">
       <Value Profile="(Default)">115200</Value>
     </Setting>
+    <Setting Name="backDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -8,8 +8,10 @@ using System.Drawing;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -133,14 +135,17 @@ namespace MiotoServerW
 
             //DBフォルダ
             if ((Settings.Default.dbDir == null)
-                || (Settings.Default.dbDir.Length==0))
+                || (Settings.Default.dbDir.Length == 0))
             {
-                Settings.Default.dbDir = 
+                Settings.Default.dbDir =
                     Environment.GetFolderPath(Environment.SpecialFolder.Personal)
                     + "\\MitoServerDb";
                 Settings.Default.Save();
             }
             textBoxDbDir.Text = Settings.Default.dbDir;
+
+            //Backupフォルダ
+            textBoxBackupDir.Text = Settings.Default.backDir;
 
             //timepicker更新
             var hhmm = Settings.Default.HHMM;
@@ -151,6 +156,7 @@ namespace MiotoServerW
         }
 
         private Process p = null;
+        private Thread thPoling = null;
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
@@ -204,9 +210,45 @@ namespace MiotoServerW
             p.Start();
             p.BeginOutputReadLine();//非同期読み取り開始
 
+            //バックアップ用スレッド起動
+            thPoling = new Thread(doBackupThreadLoop);
+            thPoling.Start();
+
             updateButtonCtrl(true);
 
         }
+
+        private void doBackupThreadLoop()
+        {
+            var thHHMM = getHHMM(dateTimePickerHHMM.Value);
+            try
+            {
+                var preHHMM = getHHMM(DateTime.Now);
+                while (thPoling.IsAlive)
+                {
+                    //[TODO]時間経過を判定した後にバックアップ処理の呼出
+                    var hhmm = getHHMM(DateTime.Now);
+                    if ((preHHMM < thHHMM) && (hhmm >= thHHMM))
+                    {
+                        ButtonDoBackup_Click(null, null);
+                    }
+                    preHHMM = hhmm;
+                    Thread.Sleep(2000);
+                }
+            }
+            catch(ThreadAbortException te) { }
+            catch (Exception e)
+            {
+                d("Polling thread exception:" + e.ToString());
+            }
+        }
+
+        private int getHHMM(DateTime dt)
+        {
+            var str = dt.ToString("HHmm");
+            return Convert.ToInt32(str);
+        }
+
 
         private void P_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -224,8 +266,11 @@ namespace MiotoServerW
             this.buttonUpdateComList.Enabled = !isStart;
             this.textBoxDbDir.Enabled = !isStart;
             this.buttonDbDir.Enabled = !isStart;
+            this.textBoxBackupDir.Enabled = !isStart;
+            this.buttonBackupDir.Enabled = !isStart;
 
             this.buttonStop.Enabled = isStart;
+            this.buttonDoBackup.Enabled = isStart;
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
@@ -249,6 +294,14 @@ namespace MiotoServerW
 
                 }
                 catch (Exception ee) { d(ee.ToString()); }
+            }
+            if(thPoling != null)
+            {
+                try
+                {
+                    thPoling.Abort();
+                    thPoling = null;
+                }catch(Exception ex) { d(ex.ToString()); }
             }
         }
 
@@ -287,6 +340,88 @@ namespace MiotoServerW
                 Settings.Default.dbDir = dlg.SelectedPath;
                 Settings.Default.Save();
                 Settings.Default.Save();
+            }
+        }
+
+        private void ButtonBackupDir_Click(object sender, EventArgs e)
+        {
+            var dlg = new FolderBrowserDialog();
+            dlg.Description = "バックアップ先フォルダを選択してください";
+            dlg.SelectedPath = this.textBoxBackupDir.Text;
+            dlg.ShowNewFolderButton = true;
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                this.textBoxBackupDir.Text = dlg.SelectedPath;
+                Settings.Default.backDir = dlg.SelectedPath;
+                Settings.Default.Save();
+                Settings.Default.Save();
+            }
+        }
+
+        private Dictionary<string, string> getBackupFileDict()
+        {
+            var ans = new Dictionary<string, string>();
+            var keys = new string[] { "", "pal", "twe", "t2525" };
+            var filePrefix = "mioto_backup";
+            foreach (var key in keys)
+            {
+                var targetFile = this.textBoxBackupDir.Text + "\\" + filePrefix + "_";
+                if (key.Length == 0)
+                {
+                    targetFile += "ct.csv";
+                }
+                else
+                {
+                    targetFile += key + ".csv";
+                }
+                ans.Add(key, targetFile);
+            }
+
+            return ans;
+        }
+
+        private void ButtonDoBackup_Click(object sender, EventArgs e)
+        {
+            if (this.textBoxBackupDir.Text.Length==0)
+            {
+                if (sender != null) d("バックアップ先フォルダ指定されていません。");
+                return;
+            }
+            if (Directory.Exists(this.textBoxBackupDir.Text) == false)
+            {
+                if (sender != null) d("バックアップ先フォルダが存在しないためバックアップを中断しました。");
+                return;
+            }
+            using(var wc = new WebClient())
+            {
+                var dt = DateTime.Parse("2016/1/1 0:00:00");
+                var files = getBackupFileDict();
+                foreach (var file in files.Values)
+                {
+                    if (File.Exists(file))
+                    {
+                        var fileDt = File.GetLastWriteTime(file);
+                        if (dt < fileDt) { dt = fileDt; }
+                    }
+                }
+                foreach (var key in files.Keys)
+                {
+                    var targetFile = files[key];
+
+                    var url = "http://localhost/" + key + "/backup/-1d/";
+                    url += dt.ToString("yyyyMMdd");
+
+                    var contents = wc.DownloadString(url);
+                    if ((contents.Length > 5) || (File.Exists(targetFile)==false))
+                    {
+                        d("backup file:" + targetFile);
+                        d("url:" + url);
+                        using (var sw = new StreamWriter(targetFile, true, Encoding.ASCII))
+                        {
+                            sw.Write(contents);
+                        }
+                    }
+                }
             }
         }
     }

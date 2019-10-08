@@ -44,6 +44,10 @@
             this.buttonDbDir = new System.Windows.Forms.Button();
             this.comboBoxComList2 = new System.Windows.Forms.ComboBox();
             this.comboBoxBps2 = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxBackupDir = new System.Windows.Forms.TextBox();
+            this.buttonBackupDir = new System.Windows.Forms.Button();
+            this.buttonDoBackup = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // comboBoxComList
@@ -96,9 +100,9 @@
             // 
             // buttonStart
             // 
-            this.buttonStart.Location = new System.Drawing.Point(477, 22);
+            this.buttonStart.Location = new System.Drawing.Point(446, 4);
             this.buttonStart.Name = "buttonStart";
-            this.buttonStart.Size = new System.Drawing.Size(88, 23);
+            this.buttonStart.Size = new System.Drawing.Size(119, 23);
             this.buttonStart.TabIndex = 6;
             this.buttonStart.Text = "サービス開始";
             this.buttonStart.UseVisualStyleBackColor = true;
@@ -106,9 +110,9 @@
             // 
             // buttonStop
             // 
-            this.buttonStop.Location = new System.Drawing.Point(477, 49);
+            this.buttonStop.Location = new System.Drawing.Point(446, 33);
             this.buttonStop.Name = "buttonStop";
-            this.buttonStop.Size = new System.Drawing.Size(88, 23);
+            this.buttonStop.Size = new System.Drawing.Size(119, 23);
             this.buttonStop.TabIndex = 7;
             this.buttonStop.Text = "停止";
             this.buttonStop.UseVisualStyleBackColor = true;
@@ -117,7 +121,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 109);
+            this.label3.Location = new System.Drawing.Point(12, 137);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(50, 12);
             this.label3.TabIndex = 7;
@@ -125,12 +129,12 @@
             // 
             // textBoxStatus
             // 
-            this.textBoxStatus.Location = new System.Drawing.Point(12, 124);
+            this.textBoxStatus.Location = new System.Drawing.Point(14, 152);
             this.textBoxStatus.Multiline = true;
             this.textBoxStatus.Name = "textBoxStatus";
             this.textBoxStatus.ReadOnly = true;
             this.textBoxStatus.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxStatus.Size = new System.Drawing.Size(553, 125);
+            this.textBoxStatus.Size = new System.Drawing.Size(553, 87);
             this.textBoxStatus.TabIndex = 8;
             // 
             // comboBoxBps
@@ -168,9 +172,9 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(12, 84);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(69, 12);
+            this.label5.Size = new System.Drawing.Size(57, 12);
             this.label5.TabIndex = 10;
-            this.label5.Text = "データ格納先";
+            this.label5.Text = "DB格納先";
             // 
             // buttonDbDir
             // 
@@ -205,11 +209,52 @@
             this.comboBoxBps2.TabIndex = 12;
             this.comboBoxBps2.SelectedIndexChanged += new System.EventHandler(this.comboBoxBps_SelectedIndexChanged);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 114);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(55, 12);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "バックアップ";
+            // 
+            // textBoxBackupDir
+            // 
+            this.textBoxBackupDir.Location = new System.Drawing.Point(87, 111);
+            this.textBoxBackupDir.Name = "textBoxBackupDir";
+            this.textBoxBackupDir.ReadOnly = true;
+            this.textBoxBackupDir.Size = new System.Drawing.Size(284, 19);
+            this.textBoxBackupDir.TabIndex = 14;
+            // 
+            // buttonBackupDir
+            // 
+            this.buttonBackupDir.Location = new System.Drawing.Point(377, 109);
+            this.buttonBackupDir.Name = "buttonBackupDir";
+            this.buttonBackupDir.Size = new System.Drawing.Size(63, 23);
+            this.buttonBackupDir.TabIndex = 15;
+            this.buttonBackupDir.Text = "選択";
+            this.buttonBackupDir.UseVisualStyleBackColor = true;
+            this.buttonBackupDir.Click += new System.EventHandler(this.ButtonBackupDir_Click);
+            // 
+            // buttonDoBackup
+            // 
+            this.buttonDoBackup.Location = new System.Drawing.Point(446, 109);
+            this.buttonDoBackup.Name = "buttonDoBackup";
+            this.buttonDoBackup.Size = new System.Drawing.Size(119, 23);
+            this.buttonDoBackup.TabIndex = 16;
+            this.buttonDoBackup.Text = "バックアップ実行";
+            this.buttonDoBackup.UseVisualStyleBackColor = true;
+            this.buttonDoBackup.Click += new System.EventHandler(this.ButtonDoBackup_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(577, 261);
+            this.ClientSize = new System.Drawing.Size(577, 251);
+            this.Controls.Add(this.buttonDoBackup);
+            this.Controls.Add(this.buttonBackupDir);
+            this.Controls.Add(this.textBoxBackupDir);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.comboBoxBps2);
             this.Controls.Add(this.comboBoxComList2);
             this.Controls.Add(this.buttonDbDir);
@@ -254,6 +299,10 @@
         private System.Windows.Forms.Button buttonDbDir;
         private System.Windows.Forms.ComboBox comboBoxComList2;
         private System.Windows.Forms.ComboBox comboBoxBps2;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBoxBackupDir;
+        private System.Windows.Forms.Button buttonBackupDir;
+        private System.Windows.Forms.Button buttonDoBackup;
     }
 }
 

@@ -81,6 +81,7 @@
     <Compile Include="Query\ParamFilter.cs" />
     <Compile Include="Query\ParamMac.cs" />
     <Compile Include="Query\ParamTypeVolume.cs" />
+    <Compile Include="Twe2525APacket.cs" />
     <Compile Include="TweCtPacket.cs" />
     <Compile Include="TwePacket.cs" />
     <Compile Include="TwePacketParser.cs" />

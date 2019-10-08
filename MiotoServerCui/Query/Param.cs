@@ -9,8 +9,10 @@ namespace MiotoServer.Query
     public class Param
     {
         public enum VOLUME { NORMAL, THINING, FINAL };
-        public enum TYPE { CT, TWE, PAL };
+        public enum OPTION { NORMAL, BACKUP };
+        public enum TYPE { CT, TWE, PAL, TWE2525 };
         public VOLUME volume { get; internal set; }
+        public OPTION option { get; internal set; }
         public TYPE type { get; internal set; }
         public int thiningSec { get; internal set; }
         public List<UInt32> macList { get; internal set; }
@@ -26,6 +28,7 @@ namespace MiotoServer.Query
         {
             this.url = url;
             volume = VOLUME.NORMAL;
+            option = OPTION.NORMAL;
             type = TYPE.CT;
             macList = new List<uint>();
             dateList = new List<uint>();
