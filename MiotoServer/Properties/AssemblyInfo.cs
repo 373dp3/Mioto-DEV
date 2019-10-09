@@ -32,10 +32,14 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.0.1")]
+[assembly: AssemblyFileVersion("1.2.0.1")]
 
 /*
+ * 2019.10.8    1.2.1
+ * ・初めてインストールするPCにて、ポート初期選択がNULLになることに起因するエラーの対策
+ * ・日付変更によるバックアップ処理を+5分の遅延実行に変更
+ * 
  * 2019.10.8    1.2.0
  * ・CSVフォーマット変更
  * ・バックアップ処理の追加

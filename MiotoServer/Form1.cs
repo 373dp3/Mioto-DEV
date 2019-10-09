@@ -51,6 +51,8 @@ namespace MiotoServerW
 
             string preSelect = Settings.Default.comport;
             string preSelect2 = Settings.Default.comport2;
+            if (preSelect.Length == 0) { preSelect = PORT_NO_USE_KEY; }
+            if (preSelect2.Length == 0) { preSelect2 = PORT_NO_USE_KEY; }
             this.comboBoxComList.Items.Clear();
             this.comboBoxComList2.Items.Clear();
 
@@ -220,7 +222,7 @@ namespace MiotoServerW
 
         private void doBackupThreadLoop()
         {
-            var thHHMM = getHHMM(dateTimePickerHHMM.Value);
+            var thHHMM = getHHMM(dateTimePickerHHMM.Value.AddMinutes(5));
             try
             {
                 var preHHMM = getHHMM(DateTime.Now);

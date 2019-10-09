@@ -136,7 +136,7 @@ namespace MiotoServer
 
         public string toCsv()
         {
-            return dt.ToString("M/d HH:mm:ss") + string.Format(",{0:x},{1:D},{2:F1},{3:D}",
+            return dt.ToString("yyyy/MM/dd HH:mm:ss") + string.Format(",{0:x},{1:D},{2:F1},{3:D}",
                 mac, lqi, batt, state);
         }
     }

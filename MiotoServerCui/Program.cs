@@ -109,6 +109,7 @@ namespace MiotoServer
             {
                 var port = portList[i];
                 var bps = bpsList[i];
+                if(port.Length==0) { continue; }
 
                 var serial = new SerialPort(port, Convert.ToInt32(bps));
                 serialList.Add(serial);

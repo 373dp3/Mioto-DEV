@@ -218,7 +218,7 @@ C8	チェックサム2(チェックサム1も含め、2の補数)
             var ans = new List<string>();
             foreach(var item in this.listValueAndAttr)
             {
-                var csv = "" + dt.ToString("M/d HH:mm:ss")
+                var csv = "" + dt.ToString("yyyy/MM/dd HH:mm:ss")
                 + "," + Convert.ToString(mac, 16) + "," + lqi + "," +item;
                 ans.Add(csv);
             }
@@ -228,7 +228,7 @@ C8	チェックサム2(チェックサム1も含め、2の補数)
 
         public string toCsv()
         {
-            return dt.ToString("M/d HH:mm:ss") + string.Format(",{0:x},{1:D},{2:F1},{3:F1},{4:F1},{5:D}",
+            return dt.ToString("yyyy/MM/dd HH:mm:ss") + string.Format(",{0:x},{1:D},{2:F1},{3:F1},{4:F1},{5:D}",
                 mac, lqi, batt, temp, humi, lux);
         }
 
