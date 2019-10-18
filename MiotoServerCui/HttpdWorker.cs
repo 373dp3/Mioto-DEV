@@ -85,6 +85,9 @@ namespace MiotoServer
                             headers.Add(HttpResponseHeader.LastModified,
                                 dbWrapper.getLastUpdateHttpdFormat());
 
+                            //音声再生リクエストの判定と処理
+                            if (isSoundRequest(context)) { continue; }
+
                             //Not Modifiedレスポンス処理
                             if (reqHeaders.AllKeys.Contains(IF_MOD_SINCE)
                                 && (!dbWrapper.isModified(reqHeaders.Get(IF_MOD_SINCE))))
@@ -126,6 +129,7 @@ namespace MiotoServer
                                 continue;
                             }
 
+                            //DB参照リクエスト
                             byte[] content = getContents(dbWrapper, context);
                             if(content == null)
                             {
@@ -163,6 +167,55 @@ namespace MiotoServer
 
 
         private static BlockingCollection<ParamFilter> paramFilterList = new BlockingCollection<ParamFilter>();
+
+        private static Regex ptnSoundFile = new Regex("(.*)\\.(mp3|wav)", RegexOptions.Compiled);
+
+        private static bool isSoundRequest(HttpListenerContext context)
+        {
+            /**
+             * http://localhost/sound/filename.(mp3|wav)/sessionid
+             * */
+            if(context.Request.HttpMethod.CompareTo("HEAD")==0) { return false; }
+            var url = context.Request.RawUrl.ToLower();
+            if (url.Contains("sound") == false) { return false; }
+            if (url.Contains("\\")) { return false; }//\を含むURLは処理しない。
+            var ary = context.Request.RawUrl.Split('/');
+
+            var soundFile = "";
+            foreach(var node in ary)
+            {
+                var m = ptnSoundFile.Match(node);
+                if(m.Success==false) { continue; }
+                soundFile = m.Groups[0].Value;
+                Program.d("sound:" + soundFile);
+                break;
+            }
+
+            HttpListenerResponse res = context.Response;
+
+            if (soundFile.Length == 0)
+            {
+                res.StatusCode = 404;
+                res.Close();
+            }
+            else
+            {
+                var headers = context.Response.Headers;
+                headers.Add(HttpResponseHeader.ContentType, "text/plain; charset=UTF-8");
+                res.StatusCode = 200;
+
+                var p = DbSoundOrder.getInstance();
+                p.insertOrUpdateFile(soundFile);
+                byte[] content = null;
+                content = Encoding.UTF8.GetBytes("file: "+soundFile);
+                res.OutputStream.Write(content, 0, content.Length);
+                res.Close();
+            }
+
+
+
+            return true;
+        }
 
         private static byte[] getContents(DbWrapper dbWrapper, HttpListenerContext context)
         {

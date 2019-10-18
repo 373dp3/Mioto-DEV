@@ -25,7 +25,8 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\EntityFramework.Sql
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Data.SQLite.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Data.SQLite.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerCui.csprojAssemblyReference.cache
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerCui.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerCui.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.exe
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\Interop.WMPLib.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerCui.csproj.ResolveComReference.cache

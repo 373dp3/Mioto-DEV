@@ -8,6 +8,5 @@ C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\bin\Debug\OutputServer.exe.conf
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\bin\Debug\OutputServer.exe
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\bin\Debug\OutputServer.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Debug\OutputServer.csprojAssemblyReference.cache
-C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Debug\OutputServer.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Debug\OutputServer.exe
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Debug\OutputServer.pdb

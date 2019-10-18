@@ -19,7 +19,6 @@ C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csprojAsse
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.Form1.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.Properties.Resources.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.GenerateResource.cache
-C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.exe
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.pdb

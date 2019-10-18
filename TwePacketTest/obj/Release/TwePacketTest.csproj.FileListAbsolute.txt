@@ -24,7 +24,6 @@ C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\Microsoft.VisualSt
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\System.Data.SQLite.xml
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\System.Data.SQLite.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.csprojAssemblyReference.cache
-C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.dll
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.pdb

@@ -137,10 +137,14 @@ namespace MiotoServer
             var dbChecker = DbChecker.getInstance(config[HM_KEY]);
             var dbcTh = new Thread(() => {
                 d("DBチェッカ起動");
+                var sIns = DbSoundOrder.getInstance();
+                sIns.setDataPath(config["d"]);
+
                 while (isActive)
                 {
                     try
                     {
+                        sIns.fetch();
                         dbChecker.fetch();
                         Thread.Sleep(1000);
                     }catch(Exception dbex)

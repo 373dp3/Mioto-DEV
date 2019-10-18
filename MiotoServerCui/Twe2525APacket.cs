@@ -129,7 +129,7 @@ namespace MiotoServer
         public void registDb(DbWrapper db)
         {
             var packet = db.getLatestTwe2525PacketByMac(this.mac);
-            if((packet!=null) && (packet.state == state)) { return; }
+            if((packet!=null) && (packet.state == state)) { return; }//[TODO]要因登録時は有効に。トラッキング時は無効に
             db.insertOrUpdatePacket(this);
 
         }
