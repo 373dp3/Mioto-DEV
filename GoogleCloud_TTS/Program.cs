@@ -17,6 +17,8 @@ namespace GoogleCloud_TTS
 
         static void Main(string[] args)
         {
+            var text = "ハイドロセル５MC3。停止しました。";
+            var file = "stop_5mc3.mp3";
             // Instantiate a client
             TextToSpeechClient client = TextToSpeechClient.Create();
 
@@ -24,7 +26,7 @@ namespace GoogleCloud_TTS
             SynthesisInput input = new SynthesisInput
             {
                 //Text = "Hello, World!"
-                Text = "3Dプリンタが停止している可能性があります。ご確認ください。"
+                Text = text
             };
 
             // Build the voice request, select the language code ("en-US"),
@@ -53,7 +55,7 @@ namespace GoogleCloud_TTS
             });
 
             // Write the binary AudioContent of the response to an MP3 file.
-            using (Stream output = File.Create(DateTime.Now.ToString("MMdd_HHmmss")+".mp3"))
+            using (Stream output = File.Create(file))
             {
                 response.AudioContent.WriteTo(output);
                 Console.WriteLine($"Audio content written to file 'sample.mp3'");

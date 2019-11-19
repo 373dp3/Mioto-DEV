@@ -32,14 +32,18 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.2")]
-[assembly: AssemblyFileVersion("1.2.2")]
+[assembly: AssemblyVersion("1.2.3")]
+[assembly: AssemblyFileVersion("1.2.3")]
 
 /*
+ * 2019.11.7    1.2.3
+ * ・mp3ファイル複数再生対応。 http:// -- /sound/filename.mp3/file2.mp3
+ * ・TWE-CTが2525と誤判定される問題の対応
+ * 
  * 2019.10.8    1.2.2
  * ・mp3ファイル再生対応。 http:// -- /sound/filename.mp3/hogehoge...
-
- *  * 2019.10.8    1.2.1
+ * 
+ * 2019.10.8    1.2.1
  * ・初めてインストールするPCにて、ポート初期選択がNULLになることに起因するエラーの対策
  * ・日付変更によるバックアップ処理を+5分の遅延実行に変更
  * 

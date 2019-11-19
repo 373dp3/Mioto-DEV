@@ -54,6 +54,7 @@ namespace MiotoServer
         {
             var ofsBackup = ofs;
             var logicDevId = read1Byte(msg, ref ofs);
+            if (logicDevId != 0x78) { goto FALSE; }
             var cmd = read1Byte(msg, ref ofs);
             if(cmd!= 0x81) { goto FALSE; }
             var packetId = read1Byte(msg, ref ofs);

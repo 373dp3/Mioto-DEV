@@ -125,17 +125,28 @@ namespace MiotoServer
                 var soundPath = soundDir + "\\" + file;
                 if (System.IO.File.Exists(soundPath))
                 {
-                    Program.d("sound play: " + file);
-                    var player = new WindowsMediaPlayer();
-                    player.URL = soundPath;
-                    player.controls.play();
-                    while (player.playState == WMPPlayState.wmppsTransitioning)
+                    for(int i=0; i<3; i++)
                     {
-                        Thread.Sleep(200);
-                    }
-                    while (player.playState == WMPPlayState.wmppsPlaying)
-                    {
-                        Thread.Sleep(200);
+                        try
+                        {
+                            Program.d("sound play: " + file);
+                            var player = new WindowsMediaPlayer();
+                            player.URL = soundPath;
+                            player.controls.play();
+                            while (player.playState == WMPPlayState.wmppsTransitioning)
+                            {
+                                Thread.Sleep(200);
+                            }
+                            while (player.playState == WMPPlayState.wmppsPlaying)
+                            {
+                                Thread.Sleep(200);
+                            }
+                            break;
+                        }
+                        catch (Exception se)
+                        {
+                            Program.d(se.ToString());
+                        }
                     }
                 }
                 else

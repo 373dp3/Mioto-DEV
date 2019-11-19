@@ -181,19 +181,18 @@ namespace MiotoServer
             if (url.Contains("\\")) { return false; }//\を含むURLは処理しない。
             var ary = context.Request.RawUrl.Split('/');
 
-            var soundFile = "";
+            var listSoundFile = new List<string>();
             foreach(var node in ary)
             {
                 var m = ptnSoundFile.Match(node);
                 if(m.Success==false) { continue; }
-                soundFile = m.Groups[0].Value;
-                Program.d("sound:" + soundFile);
-                break;
+                listSoundFile.Add(m.Groups[0].Value);
+                Program.d("sound:" + m.Groups[0].Value);
             }
 
             HttpListenerResponse res = context.Response;
 
-            if (soundFile.Length == 0)
+            if (listSoundFile.Count == 0)
             {
                 res.StatusCode = 404;
                 res.Close();
@@ -205,9 +204,12 @@ namespace MiotoServer
                 res.StatusCode = 200;
 
                 var p = DbSoundOrder.getInstance();
-                p.insertOrUpdateFile(soundFile);
+                foreach(var soundFile in listSoundFile)
+                {
+                    p.insertOrUpdateFile(soundFile);
+                }
                 byte[] content = null;
-                content = Encoding.UTF8.GetBytes("file: "+soundFile);
+                content = Encoding.UTF8.GetBytes("file: "+string.Join(", ", listSoundFile));
                 res.OutputStream.Write(content, 0, content.Length);
                 res.Close();
             }
