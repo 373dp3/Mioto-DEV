@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 
 /*
+ * 2019.12.5    1.0.2.0
+ * インストーラのTask登録3日制限問題対応
+ * 
  * 2019.7.1     1.0.1.0
  * 
  *  WiFi切断等のネットワーク変更が生じた場合、それ以降のhttp接続が一切

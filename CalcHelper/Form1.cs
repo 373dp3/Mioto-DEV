@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -171,6 +173,10 @@ namespace CalcHelper
         bool isMinimizedOnce = false;
         private void Form1_Shown(object sender, EventArgs e)
         {
+            //タイトルにバージョン情報を追加
+            var ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            this.Text += " " + ver;
+
             log("form shown");
             if(isBootOpDone) { return; }
             this.checkBoxMultiCalc.Checked = Properties.Settings.Default.isMultiCalc;

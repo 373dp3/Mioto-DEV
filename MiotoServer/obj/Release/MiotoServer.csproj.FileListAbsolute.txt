@@ -84,3 +84,5 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\Grpc.Core.Api.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\Grpc.Core.Api.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\Newtonsoft.Json.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Interactive.Async.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Release\Interop.TaskScheduler.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServer.csproj.ResolveComReference.cache

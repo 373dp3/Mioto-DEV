@@ -128,6 +128,10 @@ namespace MiotoServerW
 
         private void Form1_Shown(object sender, EventArgs e)
         {
+            //タイトルにバージョン情報を追加
+            var ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            this.Text += " "+ver;
+
             //COMポート初期値更新
             buttonUpdateComList_Click(null, null);
 

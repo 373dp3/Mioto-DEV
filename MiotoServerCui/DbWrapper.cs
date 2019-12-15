@@ -318,8 +318,8 @@ namespace MiotoServer
                 //処理を終了する。
                 if (to == ulong.MaxValue)
                 {
-                    if (isHeader) sb.Append(endDt.ToString("M/dd HH:mm:ss") + "\r\n");
-                    if (isHeader) sb.Append(startDt.ToString("M/dd HH:mm:ss") + "\r\n");
+                    if (isHeader) sb.Append(endDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
+                    if (isHeader) sb.Append(startDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
                     return sb.ToString();
                 }
 
@@ -327,12 +327,12 @@ namespace MiotoServer
                 //処理を終了する。
                 if (to == ulong.MaxValue)
                 {
-                    if (isHeader) sb.Append(endDt.ToString("M/dd HH:mm:ss") + "\r\n");
-                    if (isHeader) sb.Append(startDt.ToString("M/dd HH:mm:ss") + "\r\n");
+                    if (isHeader) sb.Append(endDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
+                    if (isHeader) sb.Append(startDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
                     return sb.ToString();
                 }
             }
-            if (isHeader) sb.Append(endDt.ToString("M/dd HH:mm:ss") + "\r\n");
+            if (isHeader) sb.Append(endDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
 
             //CSV情報取得
             using (var readCmd = conn.CreateCommand())
@@ -401,7 +401,7 @@ namespace MiotoServer
                         long i = 0;
                         while (reader.Read())
                         {
-                            sb.Append(new DateTime((long)reader[4]).ToString("M/dd HH:mm:ss"));
+                            sb.Append(new DateTime((long)reader[4]).ToString("yyyy/MM/dd HH:mm:ss"));
                             sb.Append(String.Format(",{0:x},{1:d},{2:F1},{3:d}",
                                 reader[0], reader[1], Convert.ToInt32(reader[2])/10.0, reader[3]) + "\r\n");
                             i++;
@@ -437,7 +437,7 @@ namespace MiotoServer
                     }
                 }
             }
-            if (isHeader) sb.Append(startDt.ToString("M/dd HH:mm:ss") + "\r\n");
+            if (isHeader) sb.Append(startDt.ToString("yyyy/MM/dd HH:mm:ss") + "\r\n");
             return sb.ToString();
         }
 

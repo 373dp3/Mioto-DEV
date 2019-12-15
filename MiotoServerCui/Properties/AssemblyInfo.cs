@@ -32,10 +32,19 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.0.0.4")]
+[assembly: AssemblyFileVersion("1.0.0.4")]
 
 /**
+ * 2019.12.4   1.0.4
+ * ・yyyy化の漏れ対応
+ * 
+ * 2019.11.26   1.0.3
+ * ・seqをdiff化
+ * 
+ * 2019.11.19   1.0.2
+ * ・プレス機向けSingle Edge子機対応(btn 00のみ)
+ * 
  * 2019.2.14 1.0.0.1
  * ・あんどん動作のため秒単位の情報が必要になったためCSV情報を拡張
  * ・AssemblyTitle、AssemblyProductをIoTBasicsからMiotoSeverに更新

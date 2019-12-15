@@ -63,11 +63,21 @@ namespace MiotoServer
                 + " mac:" + Convert.ToString(mac, 16) + " seq:" + seq + " btn:" + btn + " batt:" + batt
                 + " lqi:" + lqi;
         }
-        public string ToCSV()
+        public string ToCSV(int preSeq=0)
         {
             byte ms = (byte)(dt.Millisecond / 100);
+
+            int diffSeq = 0;
+            if(seq >= preSeq)
+            {
+                diffSeq = seq - preSeq;
+            }
+            else
+            {
+                diffSeq = seq + (256 - preSeq);
+            }
             return "" + dt.ToString("yyyy/MM/dd HH:mm:ss")
-                + "," + Convert.ToString(mac, 16) + "," + seq + "," + btn + "," + (batt/1000d).ToString("0.0")
+                + "," + Convert.ToString(mac, 16) + "," + diffSeq + "," + btn + "," + (batt/1000d).ToString("0.0")
                 + "," + lqi;
 
         }

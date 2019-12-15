@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MiotoServer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HP Inc.")]
+[assembly: AssemblyCompany("dp3 Toshiaki MINAMI.")]
 [assembly: AssemblyProduct("MiotoServer")]
-[assembly: AssemblyCopyright("Copyright © HP Inc. 2019")]
+[assembly: AssemblyCopyright("Copyright © dp3 Toshiaki MINAMI. 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,10 +32,23 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.3")]
-[assembly: AssemblyFileVersion("1.2.3")]
+[assembly: AssemblyVersion("1.2.7")]
+[assembly: AssemblyFileVersion("1.2.7")]
 
 /*
+ * 2019.12.4   1.2.7
+ * ・yyyy化の漏れ対応
+ * 
+ * 2019.11.26   1.2.6
+ * ・seqのdiff化
+ * ・タイトルにverを表示
+ * 
+ * 2019.11.25   1.2.5
+ * ・3日でタスクが終了する問題の回避(TaskScheduler 1.1 Type libraryの使用)
+ * 
+ * 2019.11.19   1.2.4
+ * ・プレス機向けSingle Edge子機対応(btn 00のみ)
+ * 
  * 2019.11.7    1.2.3
  * ・mp3ファイル複数再生対応。 http:// -- /sound/filename.mp3/file2.mp3
  * ・TWE-CTが2525と誤判定される問題の対応

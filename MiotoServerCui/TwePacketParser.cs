@@ -124,6 +124,7 @@ namespace MiotoServer
                 {
                     deltaSec = packet.getTimeSpanSec(list[0]).ToString("0.0");
                 }
+                var isInsert = false;
                 for (int i = 0; i < btnBitLength; i++)
                 {
                     string csv = "";
@@ -149,7 +150,6 @@ namespace MiotoServer
                             break;
                         }
                     }
-
                     if ((flip != null) && (again != null))
                     {
                         if (flg)
@@ -161,13 +161,22 @@ namespace MiotoServer
                             csv += "," + packet.getTimeSpanSec(again).ToString("0.0") + ",," + packet.getTimeSpanSec(flip).ToString("0.0") + ",";
                         }
                         //date,mac,seq,btn,bat,lqi,on/off
-                        csv = packet.ToCSV() + csv;
-                        if(i>0) { csv += "," + (i + 1); }
+                        csv = packet.ToCSV(flip.seq) + csv;
+                        if (i>0) { csv += "," + (i + 1); }
                         Program.d("Th:" + System.Threading.Thread.CurrentThread.ManagedThreadId + " " + csv);
                         wrapper.insertCsv(packet, csv);
+                        isInsert = true;
                     }
                 }//flg 0-btnBitLength loop
 
+                //プレス機等、単エッジ信号用の処理 btnは常に0、seqのみ異なる信号
+                if ((isInsert == false) && (list[0].btn == packet.btn) && (packet.btn == 0))
+                {
+                    var csv = "," + packet.getTimeSpanSec(list[0]).ToString("0.0") + ",,,";
+                    csv = packet.ToCSV(list[0].seq) + csv;
+                    Program.d("Th(S):" + System.Threading.Thread.CurrentThread.ManagedThreadId + " " + csv);
+                    wrapper.insertCsv(packet, csv);
+                }
             }
 
             return ofs;
