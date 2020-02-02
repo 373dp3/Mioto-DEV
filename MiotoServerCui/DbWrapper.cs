@@ -96,7 +96,7 @@ namespace MiotoServer
 
                     }
                     tran.Commit();
-                    _updateDate();
+                    updateDateFlg();
                 }
             }
 
@@ -216,7 +216,7 @@ namespace MiotoServer
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
-                _updateDate();
+                updateDateFlg();
             }
         }
 
@@ -236,7 +236,7 @@ namespace MiotoServer
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
-                _updateDate();
+                updateDateFlg();
             }
         }
 
@@ -251,7 +251,7 @@ namespace MiotoServer
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
-                _updateDate();
+                updateDateFlg();
             }
             /*
             using (var tran = conn.BeginTransaction())
@@ -573,7 +573,7 @@ namespace MiotoServer
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
-                _updateDate();
+                updateDateFlg();
             }
             query = "vacuum;";
             using (var cmd = conn.CreateCommand())
@@ -650,7 +650,7 @@ namespace MiotoServer
             {
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
-                _updateDate();
+                updateDateFlg();
             }
         }
 
@@ -684,7 +684,7 @@ namespace MiotoServer
                     {
                         cmd.CommandText = query;
                         cmd.ExecuteNonQuery();
-                        _updateDate();
+                        updateDateFlg();
                     }
                 }
                 tr.Commit();
@@ -692,7 +692,7 @@ namespace MiotoServer
         }
 
         string lastUpdate = DateTime.Now.ToUniversalTime().ToString("r");
-        private void _updateDate()
+        public void updateDateFlg()
         {
             lastUpdate = DateTime.Now.ToUniversalTime().ToString("r");
         }

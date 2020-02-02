@@ -22,3 +22,5 @@ C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.Gener
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.exe
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\Interop.TaskScheduler.dll
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.ResolveComReference.cache

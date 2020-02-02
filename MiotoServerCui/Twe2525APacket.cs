@@ -53,51 +53,57 @@ namespace MiotoServer
         public bool parse(string msg, ref int ofs)
         {
             var ofsBackup = ofs;
-            var logicDevId = read1Byte(msg, ref ofs);
-            if (logicDevId != 0x78) { goto FALSE; }
-            var cmd = read1Byte(msg, ref ofs);
-            if(cmd!= 0x81) { goto FALSE; }
-            var packetId = read1Byte(msg, ref ofs);
-            var protocolVer = read1Byte(msg, ref ofs);
-            if (protocolVer != 0x01) { goto FALSE; }
-            this.lqi = read1Byte(msg, ref ofs);
-            this.mac = read4Byte(msg, ref ofs);
-            var destLogicId = read1Byte(msg, ref ofs);
-            var timeStamp = read2Byte(msg, ref ofs);
-            var relayFlg = read1Byte(msg, ref ofs);
-
-            var tmp = read2Byte(msg, ref ofs);
-            this.batt = (float)tmp / 1000;
-
-            tmp = read1Byte(msg, ref ofs);//未使用
-
-            this.state = read1Byte(msg, ref ofs);//状態ビット
-
-            tmp = read1Byte(msg, ref ofs);//未使用
-
-            var x = read1Byte(msg, ref ofs);
-            var y = read1Byte(msg, ref ofs);
-            var z = read1Byte(msg, ref ofs);
-            tmp = read1Byte(msg, ref ofs);//仕様書不在e4
-
-            var minerbit = read1Byte(msg, ref ofs);//補正値は使用せず
-
-            this.gx = getG(x, minerbit, 0);
-            this.gy = getG(y, minerbit, 2);
-            this.gz = getG(z, minerbit, 4);
-
-
-            //2の補数
-            byte sum = 0;
-            for (var i = ofsBackup; i < ofs;)
+            try
             {
-                sum += read1Byte(msg, ref i);
-            }
-            sum = (byte)(0x100 - sum);
-            var checksum = read1Byte(msg, ref ofs);
-            if (sum != checksum) { goto FALSE; }
+                var logicDevId = read1Byte(msg, ref ofs);
+                if (logicDevId != 0x78) { goto FALSE; }
+                var cmd = read1Byte(msg, ref ofs);
+                if (cmd != 0x81) { goto FALSE; }
+                var packetId = read1Byte(msg, ref ofs);
+                var protocolVer = read1Byte(msg, ref ofs);
+                if (protocolVer != 0x01) { goto FALSE; }
+                this.lqi = read1Byte(msg, ref ofs);
+                this.mac = read4Byte(msg, ref ofs);
+                var destLogicId = read1Byte(msg, ref ofs);
+                var timeStamp = read2Byte(msg, ref ofs);
+                var relayFlg = read1Byte(msg, ref ofs);
 
-            this.dt = DateTime.Now;
+                var tmp = read2Byte(msg, ref ofs);
+                this.batt = (float)tmp / 1000;
+
+                tmp = read1Byte(msg, ref ofs);//未使用
+
+                this.state = read1Byte(msg, ref ofs);//状態ビット
+
+                tmp = read1Byte(msg, ref ofs);//未使用
+
+                var x = read1Byte(msg, ref ofs);
+                var y = read1Byte(msg, ref ofs);
+                var z = read1Byte(msg, ref ofs);
+                tmp = read1Byte(msg, ref ofs);//仕様書不在e4
+
+                var minerbit = read1Byte(msg, ref ofs);//補正値は使用せず
+
+                this.gx = getG(x, minerbit, 0);
+                this.gy = getG(y, minerbit, 2);
+                this.gz = getG(z, minerbit, 4);
+
+
+                //2の補数
+                byte sum = 0;
+                for (var i = ofsBackup; i < ofs;)
+                {
+                    sum += read1Byte(msg, ref i);
+                }
+                sum = (byte)(0x100 - sum);
+                var checksum = read1Byte(msg, ref ofs);
+                if (sum != checksum) { goto FALSE; }
+
+                this.dt = DateTime.Now;
+            }catch(Exception ee)
+            {
+                goto FALSE;
+            }
 
             return true;
 

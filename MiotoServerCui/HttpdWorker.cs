@@ -30,6 +30,7 @@ namespace MiotoServer
             paramFilterList.Add(new ParamDate());
             paramFilterList.Add(new ParamMac());
             paramFilterList.Add(new ParamTypeVolume());
+            paramFilterList.Add(new ParamMemDb());
         }
         public void httpdRestart()
         {
@@ -243,7 +244,16 @@ namespace MiotoServer
 
             Program.d("get csv " + paramStr);
             byte[] content = null;
-            content = Encoding.UTF8.GetBytes(dbWrapper.getCsv(param));
+            switch (param.type)
+            {
+                case Param.TYPE.MEM_DB:
+                    content = Encoding.UTF8.GetBytes(DbComSerial.getInstance().getCsv(param));
+                    break;
+
+                default:
+                    content = Encoding.UTF8.GetBytes(dbWrapper.getCsv(param));
+                    break;
+            }
 
             //ダウンロード対応
             if (param.url.Contains("/download"))

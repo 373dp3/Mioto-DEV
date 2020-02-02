@@ -1,0 +1,6 @@
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\bin\Debug\MiotoServerCuiMono.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\bin\Debug\MiotoServerCuiMono.exe
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\bin\Debug\MiotoServerCuiMono.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.exe
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.pdb

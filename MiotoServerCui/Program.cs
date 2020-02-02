@@ -45,6 +45,9 @@ namespace MiotoServer
 
     public class Program
     {
+#if MONO
+        //有効にする場合は条件付きコンパイル欄を、DEBUG, MONO　に変更
+#else
         // Win32 APIであるSetConsoleCtrlHandler関数の宣言
         [DllImport("Kernel32")]
         static extern bool SetConsoleCtrlHandler(HandlerRoutine Handler, bool Add);
@@ -52,7 +55,6 @@ namespace MiotoServer
         // SetConsoleCtrlHandler関数にメソッド（ハンドラ・ルーチン）を
         // 渡すためのデリゲート型
         delegate bool HandlerRoutine(CtrlTypes CtrlType);
-
         // ハンドラ・ルーチンに渡される定数の定義
         public enum CtrlTypes
         {
@@ -62,9 +64,11 @@ namespace MiotoServer
             CTRL_LOGOFF_EVENT = 5,
             CTRL_SHUTDOWN_EVENT = 6
         }
+        static HandlerRoutine myHandlerDele;
+#endif
+
 
         public static List<SerialPort> serialList = new List<SerialPort>();
-        static HandlerRoutine myHandlerDele;
         static TwePacketParser parser = new TwePacketParser();
 
         public static bool isActive { get; private set; }
@@ -83,8 +87,11 @@ namespace MiotoServer
 
             if (paramCheck(args)) { return; }
 
+#if MONO
+#else
             myHandlerDele = new HandlerRoutine(myHandler);
             SetConsoleCtrlHandler(myHandlerDele, true);
+#endif
 
             //シリアルポート番号のキーが含まれている場合、ポートを開く
             //指定時は引数にて「-p com22 -hm 500」等。
@@ -319,21 +326,24 @@ namespace MiotoServer
                         parser.parse(line);
                         line = serial.ReadLine();
                     }
-                    catch(TimeoutException te) { line = null; }
+                    catch (TimeoutException te) { line = null; }
+                    catch (IndexOutOfRangeException ie) { line = null; }
+                    catch (FormatException fe) { line = null; }
                     catch (Exception ex)
                     {
+                        /*
                         if (config.ContainsKey(DIR_KEY))
                         {
-                            using (var sw = new StreamWriter(config[DIR_KEY]+"/error_log.txt", true))
+                            using (var sw = new StreamWriter(config[DIR_KEY] + "/error_log.txt", true))
                             {
-                                sw.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")+" "+ex.ToString());
+                                sw.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " " + ex.ToString());
                                 sw.WriteLine(" message: " + ex.Message);
                                 sw.WriteLine(" source: " + ex.Source);
                                 sw.WriteLine(" stack: " + ex.StackTrace);
                                 sw.WriteLine("");
                                 sw.Close();
                             }
-                        }
+                        }//*/
                         line = null;
                     }
                 }
@@ -342,6 +352,8 @@ namespace MiotoServer
             finally { }
         }
 
+#if MONO
+#else
         static bool myHandler(CtrlTypes ctrlType)
         {
             isActive = false;
@@ -355,5 +367,6 @@ namespace MiotoServer
             }
             return false;
         }
+#endif
     }
 }

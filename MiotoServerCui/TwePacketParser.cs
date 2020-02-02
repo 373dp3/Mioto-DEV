@@ -47,6 +47,7 @@ namespace MiotoServer
             listPacketFilter = new List<IMonoPacket>();
             listPacketFilter.Add(new TwePalSensePacket());
             listPacketFilter.Add(new Twe2525APacket());
+            listPacketFilter.Add(new TweComSerialPacket());
         }
 
         public void parse(string msg)
@@ -83,8 +84,8 @@ namespace MiotoServer
             //解釈(48文字)
             if (((msg.Length - ofs) != 49) && ((msg.Length - ofs) != 48))
             {
-                Program.d("length no match:" + (msg.Length - ofs) + " " + msg);
-                Program.d("ofs:" + (ofs));
+                //Program.d("length no match:" + (msg.Length - ofs) + " " + msg);
+                //Program.d("ofs:" + (ofs));
             }
             ofs += 2;//DST;
             byte msgType = read1Byte(msg, ref ofs);
