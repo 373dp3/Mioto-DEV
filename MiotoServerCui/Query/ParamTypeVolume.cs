@@ -49,6 +49,18 @@ namespace MiotoServer.Query
                 param.type = Param.TYPE.TWE2525;
                 //間引き処理は行わない
             }
+            if (param.url.Contains("/ah"))
+            {
+                param.type = Param.TYPE.AH;
+                //間引き確認
+                var m = ptnTin.Match(param.url);
+                if (m.Success)
+                {
+                    param.thiningSec = Convert.ToInt32(m.Groups[1].ToString());
+                    Program.d("thinning :" + param.thiningSec);
+                    param.volume = Param.VOLUME.THINING;
+                }
+            }
 
             if (param.url.Contains("/final"))
             {

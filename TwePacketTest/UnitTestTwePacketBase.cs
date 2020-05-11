@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiotoServer;
+using MiotoServer.Query;
 
 namespace TwePacketTest
 {
@@ -23,6 +24,27 @@ namespace TwePacketTest
 
         }
 
+
+        [TestMethod]
+        public void TestOk2()
+        {
+            const string p1 = ":78811501A281021369000120000C4000080F3E3E43622685";//TWE-2525パケット
+            var wrapper = MiotoServerWrapper.getInstance();
+            var parser = new TwePacketParser();
+            parser.parse(p1);
+
+            var db = DbWrapper.getInstance();
+            var param = new Param("http://localhost/t2525");
+            ParamTypeVolume filter = new ParamTypeVolume();
+            filter.update(param);
+            Assert.AreEqual(param.type, Param.TYPE.TWE2525);
+
+            var ans = db.getCsv(param);
+            if (ans.Contains("81021369") == false)
+            {
+                Assert.Fail();
+            }
+        }
 
         #region tool
         public static int searchCollon(string msg, int ofs)

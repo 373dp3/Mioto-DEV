@@ -18,7 +18,7 @@ namespace MiotoServer.Query
             foreach (Match m in mcMac)
             {
                 var mac = Convert.ToUInt32(m.Groups[1].ToString(), 16);
-                if (mac < param.macMin) continue;
+                if ((mac < param.macMin) && (mac>ParamDate.YMD_MIN)) continue;
                 param.macList.Add(mac);
             }
         }

@@ -5,7 +5,7 @@
 ; アプリケーションの削除メニューに表示されるバージョンは、メニューを閉じて再表示すれば更新される。
 ;
 #define MyAppName "MiotoServer"
-#define MyAppVersion "1.2.8"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "dp3"
 #define MyAppURL "https://mioto.dp3.jp"
 #define MyAppExeName "MiotoServerW.exe"
@@ -44,12 +44,19 @@ Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFrame
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Text.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Text.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.dll.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServerW.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.dll.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\iot.ico"; DestDir: "{app}"; Flags: ignoreversion

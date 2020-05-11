@@ -114,6 +114,13 @@ namespace MiotoServer
         private int doTweCtPacket(string msg, int btnBitLength, int ofs)
         {
             TweCtPacket packet = new TweCtPacket(msg, ref ofs);
+            buildAndRegistCtInfo(btnBitLength, packet);
+
+            return ofs;
+        }
+
+        public static void buildAndRegistCtInfo(int btnBitLength, TweCtPacket packet)
+        {
             var wrapper = DbWrapper.getInstance();
             List<TweCtPacket> list = wrapper.getLatestTweCtPacketByMac(packet.mac);
 
@@ -163,7 +170,7 @@ namespace MiotoServer
                         }
                         //date,mac,seq,btn,bat,lqi,on/off
                         csv = packet.ToCSV(flip.seq) + csv;
-                        if (i>0) { csv += "," + (i + 1); }
+                        if (i > 0) { csv += "," + (i + 1); }
                         Program.d("Th:" + System.Threading.Thread.CurrentThread.ManagedThreadId + " " + csv);
                         wrapper.insertCsv(packet, csv);
                         isInsert = true;
@@ -171,7 +178,7 @@ namespace MiotoServer
                 }//flg 0-btnBitLength loop
 
                 //プレス機等、単エッジ信号用の処理 btnは常に0、seqのみ異なる信号
-                if ((isInsert == false) && (list[0].btn == packet.btn) && (packet.btn == 0))
+                if ((isInsert == false) && (list.Count>0) &&(list[0].btn == packet.btn) && (packet.btn == 0))
                 {
                     var csv = "," + packet.getTimeSpanSec(list[0]).ToString("0.0") + ",,,";
                     csv = packet.ToCSV(list[0].seq) + csv;
@@ -179,8 +186,6 @@ namespace MiotoServer
                     wrapper.insertCsv(packet, csv);
                 }
             }
-
-            return ofs;
         }
 
         protected byte read1Byte(string msg, ref int ofs)

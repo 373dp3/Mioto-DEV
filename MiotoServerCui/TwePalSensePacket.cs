@@ -86,7 +86,7 @@ C8	チェックサム2(チェックサム1も含め、2の補数)
             try
             {
                 tmp = read4Byte(msg, ref ofs);
-                if (tmp != 0x80000000L) { goto FALSE; }
+                //中継パケットの場合、中継機のMACが入る。if (tmp != 0x80000000L) { goto FALSE; }
 
                 this.lqi = read1Byte(msg, ref ofs);
                 tmp = read2Byte(msg, ref ofs);      //通し番号

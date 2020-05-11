@@ -1,7 +1,8 @@
-﻿using MiotoServer.Query;
+﻿using MiotoServer.DB;
+using MiotoServer.Query;
+using SQLite;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,52 +15,61 @@ namespace MiotoServer
 
         public static DbComSerial getInstance()
         {
-            if(instance == null)
-            {
-                instance = new DbComSerial();
-            }
+            if (instance == null) { instance = new DbComSerial(); }
             return instance;
         }
 
-        SQLiteConnection conn = null;
+        SQLite.SQLiteConnection conn;
 
         private DbComSerial()
         {
-            var sqlConnectionSb = new SQLiteConnectionStringBuilder
-            {
-                DataSource = ":memory:"
-            };
-            conn = new SQLiteConnection(sqlConnectionSb.ToString());
-            conn.Open();
-
-            using (var tran = conn.BeginTransaction())
-            {
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "CREATE TABLE [cache] ([mac] INTEGER,[key] TEXT, [ticks] INTEGER,[csv] TEXT) ";
-                cmd.ExecuteNonQuery();
-                tran.Commit();
-            }
+            conn = new SQLiteConnection(":memory:");
+            conn.CreateTable<SerialCache>();
+            conn.CreateTable<Mac2Ampere>();
         }
-
-        private void d(string msg)
-        {
-            Program.d(msg);
-        }
-
-        DbWrapper dbWrapper = DbWrapper.getInstance();
+        private void d(string msg) { MiotoServerWrapper.d(msg); }
 
         public void insert(TweComSerialPacket packet)
         {
-            string query = "INSERT INTO cache (mac, key, ticks, csv) " 
-                + $" values ({packet.mac}, '{packet.key}', {DateTime.Now.Ticks}, '{packet.csv}')";
+            string query = "INSERT INTO SerialCache (mac, key, ticks, csv) "
+                + $" values ({packet.mac}, '{packet.key}', {packet.dt.Ticks}, '{packet.csv}')";            
+            conn.Execute(query);
 
-            dbWrapper.updateDateFlg();//ブラウザ取得時のNot modified対策
-
-            using (var cmd = conn.CreateCommand())
+            if (packet.values.Count > 0)
             {
-                cmd.CommandText = query;
-                cmd.ExecuteNonQuery();
+                var val = conn.Table<Mac2Ampere>().Where(v => v.mac == packet.mac).FirstOrDefault();
+                if (val == null)
+                {
+                    val = new Mac2Ampere();
+                    val.mac = packet.mac;
+                    val.ticks = packet.dt.Ticks;
+                    conn.Insert(val);
+                }
+                else
+                {
+                    //時刻またぎ判定
+                    if ((new DateTime(val.ticks)).Hour != packet.dt.Hour)
+                    {
+                        //DBに登録
+                        DbWrapper.getInstance().insertCsv(val);
+                        //クリア
+                        Mac2Ampere.clear(val);
+                    }
+                    Mac2Ampere.update(val, packet);
+                    conn.Update(val);
+                }
             }
+        }
+
+        public List<string> getMac2AmpereList()
+        {
+            var ans = new List<string>();
+
+            foreach(var item in conn.Table<Mac2Ampere>())
+            {
+                ans.Add(Mac2Ampere.ToCSV(item));
+            }
+            return ans;
         }
 
         public string getCsv(Param param)
@@ -69,52 +79,74 @@ namespace MiotoServer
             {
                 sb.Append("datetime,mac,ch1,ch2,ch3,ch4,ch5" + Environment.NewLine);
             }
-            long cnt = 0;
-            using (var readCmd = conn.CreateCommand())
+
+            // finalの指示がある時だけSQL、それ以外はLINQで対応する。
+            if(param.volume == Param.VOLUME.FINAL)
             {
-                readCmd.CommandText = $"select mac, ticks, csv from cache where key='{param.memDbKey}' ";
+                var macListStr = "";
                 if (param.macList.Count > 0)
                 {
-                    var macQuery = " (mac='" + String.Join("' or mac='", param.macList) + "') ";
-                    readCmd.CommandText += " and " + macQuery;
+                    macListStr = " and ( mac = " + string.Join(" or mac = ", param.macList) + " ) ";
                 }
-                readCmd.CommandText += "order by ticks DESC";
-                if (param.fixRow > 0)
+                var queryStr = "select mac, key, max(ticks) as ticks, csv from SerialCache " +
+                    $" where key=\"{param.memDbKey}\" {macListStr}"+
+                    " group by mac";
+                var rs = conn.Query<SerialCache>(queryStr);
+                foreach(var item in rs)
                 {
-                    readCmd.CommandText += $" limit {param.fixRow} ";
+                    var dt = new DateTime(Convert.ToInt64(item.ticks)).ToString("yyyy/MM/dd HH:mm:ss.fff");
+                    sb.Append($"{dt},{item.mac.ToString("X")},{item.csv}" + Environment.NewLine);
                 }
-                using (var reader = readCmd.ExecuteReader())
-                {
-                    for (var i = 0; reader.Read(); i++)
-                    {
-                        cnt++;
-                        if (reader[0].ToString().Length == 0) continue;
-                        var dt = new DateTime(Convert.ToInt64(reader[1])).ToString("yyyy/MM/dd HH:mm:ss.fff");
-                        var mac = Convert.ToUInt64(reader[0].ToString());
-                        sb.Append($"{dt},{mac.ToString("X")},{reader[2].ToString()}" + Environment.NewLine);
-                    }
-                }
+                return sb.ToString();
             }
-            for(long i=cnt; i< param.fixRow; i++)
+
+
+            TableQuery<SerialCache> query = null;
+            int limitRow = int.MaxValue;
+            if(param.fixRow > 0) { limitRow = (int)param.fixRow; }
+            if((param.macList!=null) && (param.macList.Count > 0))
+            {
+                query = conn.Table<SerialCache>()
+                        .Where(q => param.macList.Contains(q.mac))
+                        .Where(q => q.key.Equals(param.memDbKey))
+                        .OrderByDescending(q => q.ticks)
+                        .Take(limitRow);
+            }
+            else
+            {
+                //単独
+                query = conn.Table<SerialCache>()
+                        .Where(q => q.key.Equals(param.memDbKey))
+                        .OrderByDescending(q => q.ticks)
+                        .Take(limitRow);
+            }
+
+            int cnt = 0;
+            foreach(var cache in query)
+            {
+                var dt = new DateTime(Convert.ToInt64(cache.ticks)).ToString("yyyy/MM/dd HH:mm:ss.fff");
+                sb.Append($"{dt},{cache.mac.ToString("X")},{cache.csv}" + Environment.NewLine);
+                cnt++;
+            }
+            for (int i = cnt; i < param.fixRow; i++)
             {
                 sb.Append(Environment.NewLine);
             }
-            if(param.fixRow>0) { sb.Append(" "); }
+
+            if (param.fixRow > 0) { sb.Append(" "); }
+
             return sb.ToString();
+
         }
 
         public void purgeBySec(long sec)
         {
             var ticks = DateTime.Now.AddSeconds(-1 * sec).Ticks;
-            string query = $"delete from cache where ticks < {ticks}";
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = query;
-                cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "vacuum;";
-                cmd.ExecuteNonQuery();
-            }
+            //削除
+            string query = $"delete from SerialCache where ticks < {ticks}";
+            conn.Execute(query);
         }
+
     }
 }

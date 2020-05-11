@@ -11,10 +11,12 @@ namespace MiotoServer
     {
         private Regex ptn = new Regex(@"\[([0-9a-f]{8}):([\d]{1,3})\] ([^*]{1,100})\*([0-9a-f]{2})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public string csv { get; private set; } = "";
+        public string csv { get; internal set; } = "";
 
         public string key { get; private set; } = "";
         public byte seq { get; private set; } = 0;
+
+        public List<float> values = new List<float>(); 
 
         public bool parse(string msg, ref int ofs)
         {
@@ -64,7 +66,21 @@ namespace MiotoServer
             this.csv = this.csv.Remove(0, this.csv.IndexOf(',')+1);//$CT10, の除去
             this.dt = DateTime.Now;
             this.seq = Convert.ToByte(m.Groups[2].ToString());
-            
+
+
+            if (key.CompareTo("ct10") == 0)
+            {
+                //float値の確保と、csv情報をdA(デシアンペア)->A(アンペア)化
+                values.Clear();
+                values.AddRange(this.csv.Split(',').Select(v => Convert.ToInt32(v) / 10.0f));
+                var csvAry = values.Select(v => v.ToString("F1"));
+                this.csv = string.Join(",", csvAry);
+
+                MiotoServerWrapper.config.updateSerialCurrentList(mac);
+                Ct10CtDetector.getInstance().fetch(this);
+                SerialPortWorker.memDbBackup(this.toCsv());
+            }
+
 
             return true;
         }
@@ -78,7 +94,7 @@ namespace MiotoServer
             insertCounter++;
             if (insertCounter > 100)
             {
-                DbComSerial.getInstance().purgeBySec(180);//[TODO]config化
+                DbComSerial.getInstance().purgeBySec(MiotoServerWrapper.config.memoryDbPurgeSec);
                 insertCounter = 0;
                 Program.d("purge CT10 mem db.");
             }

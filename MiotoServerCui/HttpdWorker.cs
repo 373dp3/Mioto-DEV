@@ -24,13 +24,18 @@ namespace MiotoServer
         static HttpListener listener = null;
         static Thread httpTh = null;
         static bool isThreadEnable = false;
+        static int portNumber { get; set; } = 80;
 
-        public HttpdWorker()
+        public HttpdWorker(int portNumber=80)
         {
-            paramFilterList.Add(new ParamDate());
-            paramFilterList.Add(new ParamMac());
-            paramFilterList.Add(new ParamTypeVolume());
-            paramFilterList.Add(new ParamMemDb());
+            HttpdWorker.portNumber = portNumber;
+            if (paramFilterList.Count == 0)
+            {
+                paramFilterList.Add(new ParamDate());
+                paramFilterList.Add(new ParamMac());
+                paramFilterList.Add(new ParamTypeVolume());
+                paramFilterList.Add(new ParamMemDb());
+            }
         }
         public void httpdRestart()
         {
@@ -54,19 +59,33 @@ namespace MiotoServer
         }
         public void Run()
         {
+            throw new NotImplementedException("DLL化に伴い無効になりました");
+        }
+        public void Run(CancellationToken token)
+        {
             try
             {
                 Program.d("Starting httpd");
                 DbWrapper dbWrapper = DbWrapper.getInstance();
-                string httpdPrefix = "http://*:80/";
+                string httpdPrefix = $"http://*:{portNumber}/";
                 listener = new HttpListener();
                 listener.Prefixes.Add(httpdPrefix);
                 listener.Start();
                 isThreadEnable = true;
                 const string IF_MOD_SINCE = "If-Modified-Since";
+
+                //HttpListener停止用
+                Task.Run(() => {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                    listener.Stop();
+                });
+
                 httpTh = new Thread(() => {
                     Program.d("Httpd working ... ");
-                    while (Program.isActive && isThreadEnable)
+                    while ((token.IsCancellationRequested == false) && isThreadEnable)
                     {
                         try
                         {

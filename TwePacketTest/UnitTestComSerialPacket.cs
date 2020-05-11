@@ -2,6 +2,8 @@
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiotoServer;
+using System.Data.SQLite;
+using MiotoServer.Query;
 
 namespace TwePacketTest
 {
@@ -18,8 +20,8 @@ namespace TwePacketTest
             var twe = new TweComSerialPacket();
             Assert.AreEqual(true, twe.parse(packet, ref ofs));
             Assert.AreEqual(0x81003542, twe.mac);
-            Assert.AreEqual("0,3,11,0,0", twe.csv);
-            Assert.AreEqual("CT10", twe.key);
+            Assert.AreEqual("0.0,0.3,1.1,0.0,0.0", twe.csv);
+            Assert.AreEqual("ct10", twe.key);
         }
         [TestMethod]
         public void Test正常系_通常2()
@@ -31,15 +33,18 @@ namespace TwePacketTest
             var twe = new TweComSerialPacket();
             Assert.AreEqual(true, twe.parse(packet, ref ofs));
             Assert.AreEqual(0x81003542, twe.mac);
-            Assert.AreEqual("3,1,32,0,0", twe.csv);
-            Assert.AreEqual("CT10", twe.key);
+            Assert.AreEqual("0.3,0.1,3.2,0.0,0.0", twe.csv);
+            Assert.AreEqual("ct10", twe.key);
         }
 
         [TestMethod]
         public void Test正常系_DB1()
         {
+            DbWrapper.getInstance("TestDb");
             var db = DbComSerial.getInstance();
-            for(int i=0; i<5; i++)
+            var p = MiotoServerWrapper.getInstance(new Config());
+
+            for (int i=0; i<5; i++)
             {
                 string packet = "[81003542:2] $CT10,3,1,32,0,0*b5";
                 int ofs = 0;
@@ -51,13 +56,22 @@ namespace TwePacketTest
             Thread.Sleep(1500);
             for (int i = 0; i < 5; i++)
             {
-                string packet = "[81003542:2] $CT10,3,1,32,0,0*b5";
+                string packet = "[81003524:2] $CT10,3,1,32,0,0*b5";
                 int ofs = 0;
                 ofs = UnitTestTwePacketBase.searchCollon(packet, ofs);
                 var twe = new TweComSerialPacket();
                 twe.parse(packet, ref ofs);
                 db.insert(twe);
             }
+            var param = new Param("");
+            param.memDbKey = "ct10";
+            var ans1 = db.getCsv(param);
+            param.macList = new System.Collections.Generic.List<uint>();
+            param.macList.Add(Convert.ToUInt32("81003542", 16));
+            var ans2 = db.getCsv(param);
+            Assert.AreNotEqual(ans1.Length, ans2.Length);
+            Assert.AreNotEqual(0, ans1.Length);
+            Assert.AreNotEqual(0, ans2.Length);
             /*
             var ans1 = db.getCsv();
             Assert.IsNotNull(ans1);

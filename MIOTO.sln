@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EspClientDHT11", "EspClient
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EspClientCt", "EspClientCt\EspClientCt.vcxproj", "{2E0500EF-BF93-48DA-94C7-59CA93DEB3B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoServerCui", "MiotoServerCui\MiotoServerCui.csproj", "{5DA7A270-774C-4755-9638-12C33F5E641D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoServerDLL", "MiotoServerCui\MiotoServerDLL.csproj", "{5DA7A270-774C-4755-9638-12C33F5E641D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoServer", "MiotoServer\MiotoServer.csproj", "{4CCA0A31-6FC0-4E9F-B9E6-E2B29C1581C3}"
 EndProject
@@ -24,6 +24,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleCloud_TTS", "GoogleCloud_TTS\GoogleCloud_TTS.csproj", "{BFFA83F1-C165-4927-BA9B-0C530FFE14F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoServerCuiMono", "MiotoServerCuiMono\MiotoServerCuiMono.csproj", "{55CDB02D-177C-403E-9174-72364A7CCC00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloJsonClient", "YoloJsonClient\YoloJsonClient.csproj", "{D92E2519-AD76-4EEA-A084-A1C8B7534754}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "YoloJsonClientPy", "YoloJsonClientPy\YoloJsonClientPy.pyproj", "{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +117,18 @@ Global
 		{55CDB02D-177C-403E-9174-72364A7CCC00}.Release|Any CPU.Build.0 = Release|Any CPU
 		{55CDB02D-177C-403E-9174-72364A7CCC00}.Release|x86.ActiveCfg = Release|Any CPU
 		{55CDB02D-177C-403E-9174-72364A7CCC00}.Release|x86.Build.0 = Release|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Debug|x86.Build.0 = Debug|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Release|x86.ActiveCfg = Release|Any CPU
+		{D92E2519-AD76-4EEA-A084-A1C8B7534754}.Release|x86.Build.0 = Release|Any CPU
+		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,10 +32,26 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.8")]
-[assembly: AssemblyFileVersion("1.2.8")]
+[assembly: AssemblyVersion("1.3.3")]
+[assembly: AssemblyFileVersion("1.3.3")]
 
 /*
+ * 2020.5.11
+ * ・停止・再開時にfinal、tNNNs指定ができない問題の対応
+ * ・電流センサ向け「1」から始まるMACアドレス対応
+ * ・mem:CT10へfinal、macフィルタ対応
+ * ・バックアップフォルダ変更時にテキストボックスが反映されない問題への対応
+ * 
+ * 2020.3.19   1.3.2
+ * ・sw is null 対応
+ * ・Ah対応 http://localhost/ah/
+ * 
+ * 2020.3.10   1.3.1
+ * ・OutOfRangeException対応
+ * 
+ * 2020.2.18   1.3.0
+ * ・電流センサからの稼働情報対応、一部sqlite-net対応
+ * 
  * 2020.1.9   1.2.8
  * ・Serial、電流センサ、メモリDB対応
  * 

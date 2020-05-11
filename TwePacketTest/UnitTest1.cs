@@ -128,6 +128,62 @@ namespace TwePacketTest
             Assert.AreEqual(5, hitCnt);
         }
 
+
+        [TestMethod]
+        public void TestOkRelayPAL()
+        {
+            const string p1 = ":81005E42BD0252810C68A701808205113008020A5A1130010203360501000209310102000213A302030004000001953230";
+            int ofs = 0;
+            ofs = searchCollon(p1, ofs);
+
+            var pal = new TwePalSensePacket();
+
+            Assert.AreEqual(true, pal.parse(p1, ref ofs));
+            Assert.AreEqual(189, pal.lqi);
+            Assert.AreEqual(0x810C68A7, pal.mac);
+
+            var ts = pal.dt - DateTime.Now;
+            Assert.AreEqual(true, (Math.Abs(ts.TotalSeconds) < 10));
+
+            var list = pal.toCsvList();
+            Assert.AreEqual(5, list.Count);
+            var hitCnt = 0;
+            foreach (var csv in list)
+            {
+                if (csv.Contains(string.Format("{0:F1},{1:D},{2:D}", 3020 / 1000, 0x30, 0x08))) hitCnt++;
+                if (csv.Contains(string.Format("{0:F1},{1:D},{2:D}", (0x03AC) / 1000, 0x30, 0x01))) hitCnt++;
+                if (csv.Contains(string.Format("{0:F1},{1:D}", (0x0BA7) / 100, 0x01))) hitCnt++;
+                if (csv.Contains(string.Format("{0:F1},{1:D}", (0x1C7F) / 100, 0x02))) hitCnt++;
+                if (csv.Contains(string.Format("{0:D},{1:D}", 0x00000001, 0x03))) hitCnt++;
+                Assert.AreEqual(true, csv.Contains("810c68a7".ToLower()));
+            }
+
+            Assert.AreEqual(1, hitCnt);
+        }
+
+        [TestMethod]
+        public void TestOk2()
+        {
+            const string p1 = ":7FD30101AB8100763A008021000C650200004211250B4BEE";//TWE-CTパケット
+            var wrapper = MiotoServerWrapper.getInstance();
+            var parser = new TwePacketParser();
+            parser.parse(p1);
+            parser.parse(":7FD30101998100763A008031000C650301003C0F25090C37");
+            parser.parse(":7FD30101A88100763A008041000C65040000451128099383");
+
+            var db = DbWrapper.getInstance();
+            var param = new Param("http://localhost/");
+            ParamTypeVolume filter = new ParamTypeVolume();
+            filter.update(param);
+            Assert.AreEqual(param.type, Param.TYPE.CT);
+
+            var ans = db.getCsv(param);
+            if (ans.Contains("8100763a") == false)
+            {
+                Assert.Fail();
+            }
+        }
+
         [TestMethod]
         public void TestOkNegativeValue()
         {
@@ -203,10 +259,7 @@ namespace TwePacketTest
             Assert.AreEqual(5, hitCnt);
 
             var tmpDbPath = "TestDb";
-            if (Directory.Exists(tmpDbPath))
-            {
-                Directory.Delete(tmpDbPath, true);
-            }
+
             var p = DbWrapper.getInstance(tmpDbPath);
             var param = new Param("http://localhost/pal");
             ParamTypeVolume filter = new ParamTypeVolume();
@@ -215,15 +268,70 @@ namespace TwePacketTest
 
             pal.registDb(p);
 
-            Program.config = new System.Collections.Generic.Dictionary<string, string>();
-            Program.config[Program.HM_KEY] = "800";
-            DbChecker.getInstance(Program.config[Program.HM_KEY]);
+            /*
+            //Program.config = new System.Collections.Generic.Dictionary<string, string>();
+            //Program.config[Program.HM_KEY] = "800";
+            DbChecker.getInstance("800");
             var ans = p.getCsv(param);
             var lines = Regex.Split(ans, @"[\r\n]{1,2}", RegexOptions.Multiline);
             Assert.AreEqual(5, lines.Length);
+            //*/
 
         }
 
+        [TestMethod]
+        public void TestCtPacketDbInsert()
+        {
+            MiotoServerWrapper.getInstance(new Config());
+            var packet = new TweCtPacket(1, 2, 3, 4, 5, new DateTime(2020, 1, 21, 9, 0, 0).Ticks);
+            var tmpDbPath = "TestDb";
+            if (Directory.Exists(tmpDbPath))
+            {
+                Directory.Delete(tmpDbPath, true);
+            }
+            var p = DbWrapper.getInstance(tmpDbPath);
+            DbChecker.getInstance("500");
+
+            p.insertCsv(packet, "csv_test");
+
+            var param = new Param("http://localhost/");
+            ParamTypeVolume filter = new ParamTypeVolume();
+            filter.update(param);
+            Assert.AreEqual(param.type, Param.TYPE.CT);
+
+            var ans = p.getCsv(param);
+            if (ans.Contains("csv_test") == false)
+            {
+                Assert.Fail("DBに値が反映されませんでした");
+            }
+        }
+        [TestMethod]
+        public void TestTwePacketDbInsert()
+        {
+            MiotoServerWrapper.getInstance(new Config());
+            const string p1 = ":7881150163810040FA781AC3000A531E0001FFFFFFFFFF07";
+            int ofs = 0;
+            ofs = searchCollon(p1, ofs);
+
+
+            var packet = new TwePacket(p1, ref ofs);
+            var tmpDbPath = "TestDb";
+            var p = DbWrapper.getInstance(tmpDbPath);
+            DbChecker.getInstance("500");
+
+            p.insertCsv(packet, "csv_test");
+
+            var param = new Param("http://localhost/");
+            ParamTypeVolume filter = new ParamTypeVolume();
+            filter.update(param);
+            Assert.AreEqual(param.type, Param.TYPE.CT);
+
+            var ans = p.getCsv(param);
+            if (ans.Contains("csv_test") == false)
+            {
+                Assert.Fail("DBに値が反映されませんでした");
+            }
+        }
 
         [TestMethod]
         public void TestErrorCheckSum()
@@ -250,7 +358,7 @@ namespace TwePacketTest
             Assert.AreEqual(backupOfs, ofs);
         }
         [TestMethod]
-        public void TestErrorRouter()
+        public void TestOkRouter()
         {
             string msg = ":80010000240005810C490D01808205113008020BCC1130010203AC050100020BA7010200021C7F02030004000000012B";
             msg += buildCheckSum(msg);
@@ -259,8 +367,8 @@ namespace TwePacketTest
 
             var pal = new TwePalSensePacket();
             int backupOfs = ofs;
-            Assert.AreEqual(false, pal.parse(msg, ref ofs));
-            Assert.AreEqual(backupOfs, ofs);
+            Assert.AreEqual(true, pal.parse(msg, ref ofs));
+            Assert.AreEqual(99, ofs);
         }
         [TestMethod]
         public void TestErrorSensorNumOver()

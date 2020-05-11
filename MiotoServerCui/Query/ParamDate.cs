@@ -12,6 +12,7 @@ namespace MiotoServer.Query
         static Regex ptnDate = new Regex("/(\\d{8})", RegexOptions.Compiled);
         static Regex ptnDiffDate = new Regex("/-(\\d{1,10})d", RegexOptions.Compiled);
         static Regex ptnToday = new Regex("/today", RegexOptions.Compiled);
+        public const uint YMD_MIN = 0x20171028;
         public override void update(Param param)
         {
             //日付の解釈
@@ -28,7 +29,7 @@ namespace MiotoServer.Query
                 //数字のみMACを除外する
                 var tmpYmd = Convert.ToUInt32(m.Groups[1].ToString(), 16);//MACアドレスとの切り分け用
                 if (tmpYmd > param.macMin) { continue; }
-
+                if(tmpYmd < YMD_MIN) { continue; }//2017年よりも古い指定ならMACと判断
                 param.dateList.Add(Convert.ToUInt32(m.Groups[1].ToString()));
             }
             var dt = DateTime.Now;

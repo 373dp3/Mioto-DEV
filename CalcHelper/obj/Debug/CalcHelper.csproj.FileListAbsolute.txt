@@ -16,11 +16,11 @@ C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Debug\System.Data.SQLite.dll
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Debug\System.Data.SQLite.xml
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\bin\Debug\System.Data.SQLite.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\Interop.TaskScheduler.dll
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.ResolveComReference.cache
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.Form1.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.Properties.Resources.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.GenerateResource.cache
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.exe
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\Interop.TaskScheduler.dll
-C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.ResolveComReference.cache

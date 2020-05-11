@@ -46,7 +46,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\Grpc.Core.Api.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\Grpc.Core.Api.xml
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\Newtonsoft.Json.xml
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\System.Interactive.Async.xml
-C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csprojAssemblyReference.cache
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.exe
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csprojAssemblyReference.cache

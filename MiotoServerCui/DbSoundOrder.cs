@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MiotoServer.DB;
+using SQLite;
+using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Media;
 using System.Text;
@@ -28,6 +30,7 @@ namespace MiotoServer
             soundDir = path.Replace('/','\\');
             soundDir = string.Join("\\", soundDir.Split('\\'));
             soundDir +=  "\\alarm_mp3";
+            soundDir = soundDir.Replace('\\', Path.DirectorySeparatorChar);
             if (System.IO.Directory.Exists(soundDir) == false)
             {
                 System.IO.Directory.CreateDirectory(soundDir);
@@ -39,67 +42,38 @@ namespace MiotoServer
 
         private DbSoundOrder()
         {
-            var sqlConnectionSb = new SQLiteConnectionStringBuilder
-            {
-                DataSource = ":memory:"
-            };
-            conn = new SQLiteConnection(sqlConnectionSb.ToString());
-            conn.Open();
-
-            using (var tran = conn.BeginTransaction())
-            {
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "CREATE TABLE [soundTbl] ([file] TEXT, [ticks] INTEGER, PRIMARY KEY(file)) ";
-                cmd.ExecuteNonQuery();
-                tran.Commit();
-            }
+            conn = new SQLiteConnection(":memory:");
+            conn.CreateTable<SoundTbl>();
         }
+
         public void insertOrUpdateFile(string soundFile)
         {
-            string query = "INSERT OR REPLACE INTO soundTbl (file, ticks) "
+            string query = "INSERT OR REPLACE INTO SoundTbl (file, ticks) "
                 + $" values ('{soundFile}', {DateTime.Now.Ticks})";
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = query;
-                cmd.ExecuteNonQuery();
-            }
+            conn.Execute(query);
         }
 
         public long getTick(string soundFile)
         {
-            long tick = 0;
-            using (var readCmd = conn.CreateCommand())
+            try
             {
-                readCmd.CommandText = $"select ticks from soundTbl where file='{soundFile}'";
-                using (var reader = readCmd.ExecuteReader())
-                {
-                    for (var i = 0; reader.Read(); i++)
-                    {
-                        if (reader[0].ToString().Length == 0) continue;
-                        tick = Convert.ToInt64(reader[0]);
-                        break;
-                    }
-                }
+                return conn.ExecuteScalar<long>("select ticks from SoundTbl where file='{soundFile}'");
+
+            }catch(Exception e)
+            {
+                return 0;
             }
-            return tick;
         }
 
         public List<string> getSoundFiles(long prevTick)
         {
+            var rs = conn.Table<SoundTbl>().Where(v => v.ticks >= prevTick);
             List<string> list = new List<string>();
-            using (var readCmd = conn.CreateCommand())
+            foreach(var item in rs)
             {
-                readCmd.CommandText = $"select file from soundTbl where ticks>='{prevTick}'";
-                using (var reader = readCmd.ExecuteReader())
-                {
-                    for (var i = 0; reader.Read(); i++)
-                    {
-                        if (reader[0].ToString().Length == 0) continue;
-                        list.Add(reader[0].ToString());
-                    }
-                }
+                if (item.file.Length == 0) { continue; }
+                list.Add(item.file);
             }
-
             return list;
         }
 
@@ -122,7 +96,7 @@ namespace MiotoServer
                     Thread.Sleep(3000);
                     isAlarmPlay = true;
                 }
-                var soundPath = soundDir + "\\" + file;
+                var soundPath = soundDir + Path.DirectorySeparatorChar + file;
                 if (System.IO.File.Exists(soundPath))
                 {
                     for(int i=0; i<3; i++)

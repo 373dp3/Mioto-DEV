@@ -32,10 +32,15 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.4")]
-[assembly: AssemblyFileVersion("1.0.0.4")]
+[assembly: AssemblyVersion("1.0.0.5")]
+[assembly: AssemblyFileVersion("1.0.0.5")]
 
 /**
+ * 2020.5.11
+ * ・停止・再開時にfinal、tNNNs指定ができない問題の対応
+ * ・電流センサ向け「1」から始まるMACアドレス対応
+ * ・mem:CT10へfinal、macフィルタ対応
+ * 
  * 2019.12.4   1.0.4
  * ・yyyy化の漏れ対応
  * 

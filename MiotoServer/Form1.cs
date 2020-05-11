@@ -1,4 +1,6 @@
-﻿using MiotoServerW.Properties;
+﻿using MiotoServer;
+using MiotoServer.CfgOption;
+using MiotoServerW.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,13 +22,35 @@ namespace MiotoServerW
 {
     public partial class Form1 : Form
     {
-        const string PORT_NO_USE_KEY = "使用しない";
-        private int dMsgCnt = 0;
+        public static Config config { get; private set; } = null;
+        private string jsonFile = getBaseDir() + Path.DirectorySeparatorChar + "config.json";
 
         public Form1()
         {
             InitializeComponent();
+            if (File.Exists(jsonFile))
+            {
+                try
+                {
+                    using (var sr = new StreamReader(jsonFile))
+                    {
+                        config = Config.formJSON(sr.ReadToEnd());
+                        sr.Close();
+                    }
+                }
+                catch (Exception e) { }
+            }
+            if(config==null)
+            {
+                config = new Config() { dbdir = getBaseDir() };
+                config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
+                config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
+            }
         }
+
+        #region 共通関連
+        const string PORT_NO_USE_KEY = Config.PORT_NO_USE_KEY;
+        private int dMsgCnt = 0;
 
         public void d(string msg)
         {
@@ -41,6 +66,7 @@ namespace MiotoServerW
                     var hhmm = DateTime.Now.ToString("HH:mm:ss ");
                     this.textBoxStatus.AppendText(hhmm + msg + Environment.NewLine);
                     dMsgCnt++;
+
                 }
             }
             catch (Exception e) { e.ToString(); }
@@ -48,40 +74,44 @@ namespace MiotoServerW
 
         private void buttonUpdateComList_Click(object sender, EventArgs e)
         {
+            var preSelectAry = new string[] { PORT_NO_USE_KEY, PORT_NO_USE_KEY };
+            var comboBoxComAry = new ComboBox[] { comboBoxComList, comboBoxComList2 };
 
-            string preSelect = Settings.Default.comport;
-            string preSelect2 = Settings.Default.comport2;
-            if (preSelect.Length == 0) { preSelect = PORT_NO_USE_KEY; }
-            if (preSelect2.Length == 0) { preSelect2 = PORT_NO_USE_KEY; }
-            this.comboBoxComList.Items.Clear();
-            this.comboBoxComList2.Items.Clear();
-
-            setComboItemAndUpdateSelected(comboBoxComList, PORT_NO_USE_KEY, preSelect);
-            setComboItemAndUpdateSelected(comboBoxComList2, PORT_NO_USE_KEY, preSelect2);
+            for(var i=0; i< preSelectAry.Length; i++)
+            {
+                if (i < config.listComPort.Count)
+                {
+                    preSelectAry[i] = config.listComPort[i].portName;
+                }
+                comboBoxComAry[i].Items.Clear();
+                setComboItemAndUpdateSelected(comboBoxComAry[i], PORT_NO_USE_KEY, preSelectAry[i]);
+            }
 
             var portlist = new List<string>();
             portlist.AddRange(SerialPort.GetPortNames());
             portlist.Sort();
-            foreach (var port in portlist)
+
+            for (var i = 0; i < preSelectAry.Length; i++)
             {
-                setComboItemAndUpdateSelected(comboBoxComList, port, preSelect);
-            }
-            foreach (var port in portlist)
-            {
-                setComboItemAndUpdateSelected(comboBoxComList2, port, preSelect2);
+                foreach(var port in portlist)
+                {
+                    setComboItemAndUpdateSelected(comboBoxComAry[i], port, preSelectAry[i]);
+                }
             }
 
             //前回使用したポートは必ず残す
-            setComboItemAndUpdateSelected(comboBoxComList, preSelect, preSelect);
-            setComboItemAndUpdateSelected(comboBoxComList2, preSelect2, preSelect2);
-
-            if (comboBoxComList.SelectedItem == null)
+            for(var i=0; i< preSelectAry.Length; i++)
             {
-                comboBoxComList.SelectedItem = PORT_NO_USE_KEY;
+                setComboItemAndUpdateSelected(comboBoxComAry[i], preSelectAry[i], preSelectAry[i]);
             }
-            if (comboBoxComList2.SelectedItem == null)
+
+            // nullなら未選択項目を指定
+            for (var i = 0; i < preSelectAry.Length; i++)
             {
-                comboBoxComList2.SelectedItem = PORT_NO_USE_KEY;
+                if(comboBoxComAry[i] == null)
+                {
+                    comboBoxComAry[i].SelectedItem = PORT_NO_USE_KEY;
+                }
             }
         }
 
@@ -95,6 +125,24 @@ namespace MiotoServerW
             box.SelectedItem = item;
         }
 
+        private void saveConfigJson()
+        {
+            var json = config.toJSON();
+            try
+            {
+                using (var sw = new StreamWriter(jsonFile, false))
+                {
+                    sw.Write(json);
+                    sw.Close();
+                }
+            }
+            catch(DirectoryNotFoundException dne) { }
+            catch (Exception e)
+            {
+
+            }
+        }
+
         private void comboBoxComList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if(!(sender is ComboBox)) { return; }
@@ -102,28 +150,39 @@ namespace MiotoServerW
 
             if (box.Name.CompareTo(comboBoxComList.Name) == 0)
             {
-                Settings.Default.comport = box.SelectedItem.ToString();
+                config.listComPort[0].portName = box.SelectedItem.ToString();
                 if(comboBoxComList2.SelectedIndex == box.SelectedIndex)
                 {
                     comboBoxComList2.SelectedIndex = 0;
                 }
-                if (Settings.Default.comport.CompareTo(PORT_NO_USE_KEY) != 0)
+                if (config.listComPort[0].portName.CompareTo(PORT_NO_USE_KEY) != 0)
                 {
-                    Settings.Default.Save();
+                    saveConfigJson();
                 }
             }
             if (box.Name.CompareTo(comboBoxComList2.Name) == 0)
             {
-                Settings.Default.comport2 = box.SelectedItem.ToString();
+                config.listComPort[1].portName = box.SelectedItem.ToString();
                 if (comboBoxComList.SelectedIndex == box.SelectedIndex)
                 {
                     comboBoxComList.SelectedIndex = 0;
                 }
-                if (Settings.Default.comport2.CompareTo(PORT_NO_USE_KEY) != 0)
+                if (config.listComPort[1].portName.CompareTo(PORT_NO_USE_KEY) != 0)
                 {
-                    Settings.Default.Save();
+                    saveConfigJson();
                 }
             }
+        }
+
+        private static string getBaseDir()
+        {
+            var oldBase = Environment.GetFolderPath(Environment.SpecialFolder.Personal)
+                + Path.DirectorySeparatorChar + "MitoServerDb";
+
+            if(Directory.Exists(oldBase)) { return oldBase; }
+
+            return Environment.GetFolderPath(Environment.SpecialFolder.Personal)
+                    + Path.DirectorySeparatorChar + "MiotoServerDb";
         }
 
         private void Form1_Shown(object sender, EventArgs e)
@@ -135,30 +194,36 @@ namespace MiotoServerW
             //COMポート初期値更新
             buttonUpdateComList_Click(null, null);
 
-            //bps初期値更新
-            comboBoxBps.SelectedItem = Settings.Default.bps;
-            comboBoxBps2.SelectedItem = Settings.Default.bps2;
+            //bps初期値更新            
+            comboBoxBps.SelectedItem = config.listComPort[0].portBps;
+            comboBoxBps2.SelectedItem = config.listComPort[1].portBps;
+
+            //Server port number
+            numericServerPortNumber.Value = config.serverPortNumber;
 
             //DBフォルダ
-            if ((Settings.Default.dbDir == null)
-                || (Settings.Default.dbDir.Length == 0))
+            if ((config.dbdir == null)
+                || (config.dbdir.Length == 0))
             {
-                Settings.Default.dbDir =
-                    Environment.GetFolderPath(Environment.SpecialFolder.Personal)
-                    + "\\MitoServerDb";
-                Settings.Default.Save();
+                config.dbdir = getBaseDir();
+                saveConfigJson();
             }
-            textBoxDbDir.Text = Settings.Default.dbDir;
+            textBoxDbDir.Text = config.dbdir;
 
             //Backupフォルダ
-            textBoxBackupDir.Text = Settings.Default.backDir;
+            textBoxBackupDir.Text = config.backupDir;
 
             //timepicker更新
-            var hhmm = Settings.Default.HHMM;
-            dateTimePickerHHMM.Value = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd")+" "+hhmm+":00");
+            var hhmm = config.hhmm;
+            var hh = (int)(hhmm / 100);
+            var mm = (hhmm - 100 * hh);
+            var hhmmStr = string.Format("{0:D2}:{1:D2}", hh, mm);
+            dateTimePickerHHMM.Value = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd")+" "+hhmmStr+":00");
 
             //サービス開始
             buttonStart_Click(null, null);
+
+            d("config: " + jsonFile);
         }
 
         private Process p = null;
@@ -168,61 +233,41 @@ namespace MiotoServerW
         {
             //timepicker情報をpropに更新
             var hhmm = dateTimePickerHHMM.Value.ToString("HH:mm");
-            Settings.Default.HHMM = hhmm;
-            Settings.Default.Save();
             hhmm = hhmm.Replace(":", "");
+            config.hhmm = Convert.ToInt32(hhmm);
 
-            //引数の整理
-            var dir = Directory.GetParent(Assembly.GetEntryAssembly().Location).FullName;
-            var exe = dir + "\\MiotoServer.exe";
-            var arg = "-hm "+hhmm;//-hm 500 -p COM5
-            var portList = new List<string>();
-            var bpsList = new List<string>();
-            var boxComList = new List<ComboBox> { comboBoxComList, comboBoxComList2 };
-            var boxBpsList = new List<ComboBox> { comboBoxBps, comboBoxBps2 };
-
-            for(var i=0; i< boxComList.Count; i++)
+            //ポート設定更新確認
+            config.serverPortNumber = (int)numericServerPortNumber.Value;
+            if (config.serverPortNumber != config.serverPortNumberPre)
             {
-                var port = boxComList[i].SelectedItem.ToString();
-                if (port.CompareTo(PORT_NO_USE_KEY) == 0) { continue; }
-                portList.Add(port);
-                bpsList.Add(boxBpsList[i].SelectedItem.ToString());
+                try
+                {
+                    Installer.updateFirewall(config.serverPortNumber);
+                    config.serverPortNumberPre = config.serverPortNumber;
+                }
+                catch(Exception ex)
+                {
+                    d("エラー: "+ex.Message);
+                    return;
+                }
             }
 
-            if (portList.Count > 0)
-            {
-                arg += " -p " + String.Join(",", portList);
-                arg += " -bps " + String.Join(",", bpsList);
-            }
-
-            arg += " -d \"" + textBoxDbDir.Text+"\" "; 
-
-            d(exe);
-            d(arg);
-
-            //プロセス準備
-            p = new Process();
-            p.StartInfo.FileName = exe;
-            p.StartInfo.Arguments = arg;
-
-            //  出力をストリームに書き出し
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.CreateNoWindow = true;//ウィンドウ非表示
-            //  onDataRecievedハンドラ追加
-            p.OutputDataReceived += P_OutputDataReceived;
-
-            //  プロセス起動
-            p.Start();
-            p.BeginOutputReadLine();//非同期読み取り開始
-
-            //バックアップ用スレッド起動
-            thPoling = new Thread(doBackupThreadLoop);
-            thPoling.Start();
+            //設定の保存
+            saveConfigJson();
 
             updateButtonCtrl(true);
 
+            tokenSource = new CancellationTokenSource();
+
+            config.func = d;
+            config.dbdir = textBoxDbDir.Text;
+
+            var wrapper = MiotoServerWrapper.getInstance(config);
+            Task.Run(() => wrapper.start(tokenSource.Token)).ConfigureAwait(false);
+
         }
+
+        CancellationTokenSource tokenSource = null;
 
         private void doBackupThreadLoop()
         {
@@ -232,7 +277,7 @@ namespace MiotoServerW
                 var preHHMM = getHHMM(DateTime.Now);
                 while (thPoling.IsAlive)
                 {
-                    //[TODO]時間経過を判定した後にバックアップ処理の呼出
+                    //時間経過を判定した後にバックアップ処理の呼出
                     var hhmm = getHHMM(DateTime.Now);
                     if ((preHHMM < thHHMM) && (hhmm >= thHHMM))
                     {
@@ -261,6 +306,10 @@ namespace MiotoServerW
             d(e.Data);
         }
 
+        /// <summary>
+        /// ボタン状態を更新する
+        /// </summary>
+        /// <param name="isStart"></param>
         private void updateButtonCtrl(bool isStart)
         {
             this.comboBoxComList.Enabled = !isStart;
@@ -274,6 +323,8 @@ namespace MiotoServerW
             this.buttonDbDir.Enabled = !isStart;
             this.textBoxBackupDir.Enabled = !isStart;
             this.buttonBackupDir.Enabled = !isStart;
+            this.checkBoxMemBackup.Enabled = !isStart;
+            this.numericServerPortNumber.Enabled = !isStart;
 
             this.buttonStop.Enabled = isStart;
             this.buttonDoBackup.Enabled = isStart;
@@ -285,35 +336,28 @@ namespace MiotoServerW
             updateButtonCtrl(false);
         }
 
-        private void stopServiceIfExist()
+        private void stopServiceIfExist(bool isExit = false)
         {
-            if (p != null)
+            if (tokenSource != null)
             {
-                try
+                tokenSource.Cancel();
+            }
+            if(isExit) Task.Run(() => {
+                //シリアルポート処理の終了待機
+                while (MiotoServerWrapper.getInstance().isSerialPortStop == false)
                 {
-                    d("サービスを終了しています");
-                    p.Kill();
-                    p.WaitForExit(5000);
-                    p.Close();
-                    p = null;
-                    d("サービスを終了しました");
-
+                    Thread.Sleep(100);
                 }
-                catch (Exception ee) { d(ee.ToString()); }
-            }
-            if(thPoling != null)
-            {
-                try
-                {
-                    thPoling.Abort();
-                    thPoling = null;
-                }catch(Exception ex) { d(ex.ToString()); }
-            }
+                Application.Exit();
+            });
+            tokenSource = null;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            stopServiceIfExist();
+            //SerialPortを確実に終了させないとObjectDisposedExceptionが発生するため
+            if (tokenSource != null) { e.Cancel = true; }
+            stopServiceIfExist(true);
         }
 
         private void comboBoxBps_SelectedIndexChanged(object sender, EventArgs e)
@@ -324,13 +368,13 @@ namespace MiotoServerW
             var box = (ComboBox)sender;
             if (box.Name.CompareTo(comboBoxBps.Name) == 0)
             {
-                Settings.Default.bps = box.SelectedItem.ToString();
-                Settings.Default.Save();
+                config.listComPort[0].portBps = box.SelectedItem.ToString();
+                saveConfigJson();
             }
             if (box.Name.CompareTo(comboBoxBps2.Name) == 0)
             {
-                Settings.Default.bps2 = box.SelectedItem.ToString();
-                Settings.Default.Save();
+                config.listComPort[1].portBps = box.SelectedItem.ToString();
+                saveConfigJson();
             }
         }
 
@@ -343,9 +387,8 @@ namespace MiotoServerW
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 this.textBoxDbDir.Text = dlg.SelectedPath;
-                Settings.Default.dbDir = dlg.SelectedPath;
-                Settings.Default.Save();
-                Settings.Default.Save();
+                config.dbdir = dlg.SelectedPath;
+                saveConfigJson();
             }
         }
 
@@ -357,10 +400,9 @@ namespace MiotoServerW
             dlg.ShowNewFolderButton = true;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                this.textBoxBackupDir.Text = dlg.SelectedPath;
-                Settings.Default.backDir = dlg.SelectedPath;
-                Settings.Default.Save();
-                Settings.Default.Save();
+                config.backupDir = dlg.SelectedPath;
+                this.textBoxBackupDir.Text = config.backupDir;
+                saveConfigJson();
             }
         }
 
@@ -371,7 +413,7 @@ namespace MiotoServerW
             var filePrefix = "mioto_backup";
             foreach (var key in keys)
             {
-                var targetFile = this.textBoxBackupDir.Text + "\\" + filePrefix + "_";
+                var targetFile = this.textBoxBackupDir.Text + Path.DirectorySeparatorChar + filePrefix + "_";
                 if (key.Length == 0)
                 {
                     targetFile += "ct.csv";
@@ -398,37 +440,111 @@ namespace MiotoServerW
                 if (sender != null) d("バックアップ先フォルダが存在しないためバックアップを中断しました。");
                 return;
             }
-            using(var wc = new WebClient())
-            {
-                var dt = DateTime.Parse("2016/1/1 0:00:00");
-                var files = getBackupFileDict();
-                foreach (var file in files.Values)
+            Task.Run(() => {
+                using (var wc = new WebClient())
                 {
-                    if (File.Exists(file))
+                    var dt = DateTime.Parse("2016/1/1 0:00:00");
+                    var files = getBackupFileDict();
+                    foreach (var file in files.Values)
                     {
-                        var fileDt = File.GetLastWriteTime(file);
-                        if (dt < fileDt) { dt = fileDt; }
-                    }
-                }
-                foreach (var key in files.Keys)
-                {
-                    var targetFile = files[key];
-
-                    var url = "http://localhost/" + key + "/backup/-1d/";
-                    url += dt.ToString("yyyyMMdd");
-
-                    var contents = wc.DownloadString(url);
-                    if ((contents.Length > 5) || (File.Exists(targetFile)==false))
-                    {
-                        d("backup file:" + targetFile);
-                        d("url:" + url);
-                        using (var sw = new StreamWriter(targetFile, true, Encoding.ASCII))
+                        if (File.Exists(file))
                         {
-                            sw.Write(contents);
+                            var fileDt = File.GetLastWriteTime(file);
+                            if (dt < fileDt) { dt = fileDt; }
+                        }
+                    }
+                    foreach (var key in files.Keys)
+                    {
+                        var targetFile = files[key];
+
+                        var url = "http://localhost/" + key + "/backup/-1d/";
+                        url += dt.ToString("yyyyMMdd");
+
+                        var contents = wc.DownloadString(url);
+                        if ((contents.Length > 5) || (File.Exists(targetFile) == false))
+                        {
+                            d("backup file:" + targetFile);
+                            d("url:" + url);
+                            using (var sw = new StreamWriter(targetFile, true, Encoding.ASCII))
+                            {
+                                sw.Write(contents);
+                            }
                         }
                     }
                 }
-            }
+            }).ConfigureAwait(false);
+
         }
+        #endregion //--共通関連
+
+        #region 電流関連
+
+        private void tabPage2_Enter(object sender, EventArgs e)
+        {
+            updateSerialCurrentView();
+        }
+
+        /// <summary>
+        /// タブグループの電流欄を更新
+        /// </summary>
+        private void updateSerialCurrentView()
+        {
+            var c = MiotoServerWrapper.config;
+            var flg = buttonRegSeriCurrentCfg.Enabled;
+            if (this.comboBoxSerialCurrent.Items != null) {
+                this.comboBoxSerialCurrent.Items.Clear();
+            }
+            foreach(var item in c.listSerialCurrent)
+            {
+                this.comboBoxSerialCurrent.Items.Add(item.name + " (" + item.mac.ToString("X") + ")");
+                comboBoxSerialCurrent.SelectedIndex = 0;
+            }
+            buttonRegSeriCurrentCfg.Enabled = flg;
+            this.checkBoxMemBackup.Checked = c.isMemoryDbBackup;
+        }
+
+        private void comboBoxSerialCurrent_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var c = MiotoServerWrapper.config;
+            var item = c.listSerialCurrent.ElementAt(comboBoxSerialCurrent.SelectedIndex);
+            textBoxSerialCurrentUnitName.Text = item.name;
+            dataGridViewSerialCurrent.DataSource = item.listChInfo;
+        }
+
+        private void buttonUpdateSerialCurrentView_Click(object sender, EventArgs e)
+        {
+            updateSerialCurrentView();
+        }
+
+        private void buttonRegSeriCurrentCfg_Click(object sender, EventArgs e)
+        {
+            var c = MiotoServerWrapper.config;
+            var item = c.listSerialCurrent.ElementAt<SerialCurrent>(this.comboBoxSerialCurrent.SelectedIndex);
+            item.name = this.textBoxSerialCurrentUnitName.Text;
+            saveConfigJson();
+            buttonRegSeriCurrentCfg.Enabled = false;
+        }
+
+
+        private void dataGridViewSerialCurrent_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            buttonRegSeriCurrentCfg.Enabled = true;
+        }
+
+        private void textBoxSerialCurrentUnitName_TextChanged(object sender, EventArgs e)
+        {
+            buttonRegSeriCurrentCfg.Enabled = true;
+        }
+
+        private void checkBoxMemBackup_CheckedChanged(object sender, EventArgs e)
+        {
+            MiotoServerWrapper.config.isMemoryDbBackup = this.checkBoxMemBackup.Checked;
+            config.isMemoryDbBackup = MiotoServerWrapper.config.isMemoryDbBackup;
+            saveConfigJson();
+        }
+
+        #endregion //-- 電流関連
+
+
     }
 }

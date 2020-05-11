@@ -10,18 +10,18 @@ namespace MiotoServer.Query
     {
         public enum VOLUME { NORMAL, THINING, FINAL };
         public enum OPTION { NORMAL, BACKUP };
-        public enum TYPE { CT, TWE, PAL, TWE2525, MEM_DB=101 };
-        public VOLUME volume { get; internal set; }
-        public OPTION option { get; internal set; }
+        public enum TYPE { CT, TWE, PAL, TWE2525, AH, MEM_DB=101 };
+        public VOLUME volume { get; set; }
+        public OPTION option { get; set; }
         public TYPE type { get; internal set; }
         public int thiningSec { get; internal set; }
-        public List<UInt32> macList { get; internal set; }
-        public List<UInt32> dateList { get; internal set; }
+        public List<UInt32> macList { get; set; }
+        public List<UInt32> dateList { get; set; }
         public string url { get; internal set; }
         public const long FIX_ROW_NOOP = 0;
         public long fixRow { get; internal set; }//CSV情報取得時の最大行数
 
-        public string memDbKey { get; internal set; } = "";
+        public string memDbKey { get; set; } = "";
 
         //macもymdもともに8桁の為、2120年以降をMACと判断。ESPは0x81, TWEは0x7fから始まっているので大丈夫かと
         public long macMin { get; internal set; }

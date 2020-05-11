@@ -17,8 +17,12 @@ namespace GoogleCloud_TTS
 
         static void Main(string[] args)
         {
-            var text = "冷蔵庫２。";
-            var file = "kei_rei2.mp3";
+            if(args.Length!=2)
+            {
+                Console.WriteLine("GoogleCloud_TTS.exe \"読み上げたい文字列\" \"出力ファイル名.mp3\"");
+            }
+            var text = args[0];
+            var file = args[1];
             // Instantiate a client
             TextToSpeechClient client = TextToSpeechClient.Create();
 
