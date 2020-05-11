@@ -3,3 +3,15 @@
 ################################################################################
 
 /.vs
+*.zip
+*.7z
+/MiotoServer/bin/
+/MiotoServer/Installer/
+/MiotoServerCui/bin/
+/MiotoServerCuiMono/bin/
+/CalcHelper/bin/
+/CalcHelper/Installer/
+/GoogleCloud_TTS/bin/
+/packages/
+/TestResults/
+/TwePacketTest/
