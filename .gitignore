@@ -5,6 +5,9 @@
 /.vs
 *.zip
 *.7z
+*.lnk
+*.csv
+*.xlsx
 /MiotoServer/bin/
 /MiotoServer/Installer/
 /MiotoServerCui/bin/
