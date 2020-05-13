@@ -7,3 +7,8 @@ C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.Properties
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csproj.GenerateResource.cache
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.exe
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\MathNet.Numerics.dll
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\System.ValueTuple.dll
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\MathNet.Numerics.xml
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\System.ValueTuple.xml
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csproj.CopyComplete

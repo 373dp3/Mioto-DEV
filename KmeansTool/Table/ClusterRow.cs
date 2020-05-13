@@ -10,5 +10,7 @@ namespace KmeansTool.Table
     {
         public int idx { get; set; } = 0;
         public int value { get; set; } = 0;
+
+        public long ticks { get; set; } = 0;
     }
 }
