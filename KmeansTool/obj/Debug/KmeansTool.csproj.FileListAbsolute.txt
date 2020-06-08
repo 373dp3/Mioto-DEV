@@ -12,3 +12,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Debug\System.ValueTuple.xml
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Debug\KmeansTool.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Debug\MathNet.Numerics.dll
 C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Debug\MathNet.Numerics.xml
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Debug\KmeansTool.csproj.CoreCompileInputs.cache

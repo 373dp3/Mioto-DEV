@@ -153,3 +153,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Xml.XPath.XDocu
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.ValueTuple.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Buffers.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.ValueTuple.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csproj.CoreCompileInputs.cache

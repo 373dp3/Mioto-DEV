@@ -24,6 +24,9 @@ namespace MiotoServer
         static HttpListener listener = null;
         static Thread httpTh = null;
         static bool isThreadEnable = false;
+        static HttpStaticFileWorker statickFileWorker = new HttpStaticFileWorker();
+        static HttpWebsocketWorker wcWorker = new HttpWebsocketWorker();
+
         static int portNumber { get; set; } = 80;
 
         public HttpdWorker(int portNumber=80)
@@ -61,6 +64,7 @@ namespace MiotoServer
         {
             throw new NotImplementedException("DLL化に伴い無効になりました");
         }
+        const string IF_MOD_SINCE = "If-Modified-Since";
         public void Run(CancellationToken token)
         {
             try
@@ -72,7 +76,6 @@ namespace MiotoServer
                 listener.Prefixes.Add(httpdPrefix);
                 listener.Start();
                 isThreadEnable = true;
-                const string IF_MOD_SINCE = "If-Modified-Since";
 
                 //HttpListener停止用
                 Task.Run(() => {
@@ -83,82 +86,15 @@ namespace MiotoServer
                     listener.Stop();
                 });
 
-                httpTh = new Thread(() => {
+                httpTh = new Thread(async () => {
                     Program.d("Httpd working ... ");
                     while ((token.IsCancellationRequested == false) && isThreadEnable)
                     {
                         try
                         {
-                            HttpListenerContext context = listener.GetContext();
-                            HttpListenerResponse res = context.Response;
-                            var reqHeaders = context.Request.Headers;
-                            if (context.Request.RawUrl.Contains(".ico"))
-                            {
-                                res.StatusCode = 404;
-                                res.Close();
-                                continue;
-                            }
-                            res.StatusCode = 200;
-
-                            //Last-Modifiedヘッダの適用
-                            var headers = res.Headers;
-                            headers.Add(HttpResponseHeader.LastModified,
-                                dbWrapper.getLastUpdateHttpdFormat());
-
-                            //音声再生リクエストの判定と処理
-                            if (isSoundRequest(context)) { continue; }
-
-                            //Not Modifiedレスポンス処理
-                            if (reqHeaders.AllKeys.Contains(IF_MOD_SINCE)
-                                && (!dbWrapper.isModified(reqHeaders.Get(IF_MOD_SINCE))))
-                            {
-                                res.StatusCode = 304;
-                                res.Close();
-                                Program.d("304 Not modified");
-                                continue;
-                            }
-
-                            /*/ //各種リクエストヘッダをコンソールに出力する場合には内部を有効化
-                            foreach (var key in reqHeaders.AllKeys)
-                            {
-                                Program.d("\t" + key + "\t" + reqHeaders.Get(key));
-                            }
-                            //*/
-
-                            //Excel等では最初にHEADメソッドを実行するため
-                            if (context.Request.HttpMethod.CompareTo("HEAD") == 0)
-                            {
-
-                                res.Close();
-                                Program.d("http head");
-                                continue;
-                            }
-
-                            //POSTはESPからの情報アップロード
-                            if (context.Request.HttpMethod.CompareTo("POST") == 0)
-                            {
-                                Program.d("Method post");
-                                using (var postBody = new StreamReader(context.Request.InputStream))
-                                {
-                                    var body = postBody.ReadToEnd();
-                                    Program.d(body);
-                                    //Serialと共通の解析処理へ転送
-                                    parser.parse(body, 8);//ESPの場合、8ビット目まで入力と判定
-                                }
-                                res.Close();
-                                continue;
-                            }
-
-                            //DB参照リクエスト
-                            byte[] content = getContents(dbWrapper, context);
-                            if(content == null)
-                            {
-                                res.StatusCode = 400;
-                            }else
-                            {
-                                res.OutputStream.Write(content, 0, content.Length);
-                            }
-                            res.Close();
+                            //HttpListenerContext context = listener.GetContext();
+                            var context = await listener.GetContextAsync();
+                            await Task.Factory.StartNew(() => ProcessRequestAsync(context));
                         }
                         catch (ProtocolViolationException pe)
                         {
@@ -184,7 +120,97 @@ namespace MiotoServer
             }
 
         }
+        private static async Task ProcessRequestAsync(HttpListenerContext context)
+        {
+            HttpListenerResponse res = context.Response;
 
+            //音声再生リクエストの判定と処理
+            if (isSoundRequest(context)) { return; }
+
+            //静的ファイル(/html)へのリクエスト判定とその提供処理
+            if (statickFileWorker.doOperateIfStaticFileRequest(context, res)) { return; }
+
+            //Websocketに対する処理
+            if (await wcWorker.doOperateIfWebsocketRequestAsync(context, res)) { return; }
+
+            //通常のDB参照処理
+            if(doOperateIfHttpDbRequest(context, res)) { return; }
+
+        }
+
+        private static bool doOperateIfHttpDbRequest(HttpListenerContext context, HttpListenerResponse res)
+        {
+            DbWrapper dbWrapper = DbWrapper.getInstance();
+
+            //Last-Modifiedヘッダの適用
+            var headers = res.Headers;
+            headers.Add(HttpResponseHeader.LastModified,
+                dbWrapper.getLastUpdateHttpdFormat());
+
+
+            var reqHeaders = context.Request.Headers;
+            if (context.Request.RawUrl.Contains(".ico"))
+            {
+                res.StatusCode = 404;
+                res.Close();
+                return true;
+            }
+            res.StatusCode = 200;
+            
+            //Not Modifiedレスポンス処理
+            if (reqHeaders.AllKeys.Contains(IF_MOD_SINCE)
+                && (!dbWrapper.isModified(reqHeaders.Get(IF_MOD_SINCE))))
+            {
+                res.StatusCode = 304;
+                res.Close();
+                Program.d("304 Not modified");
+                return true;
+            }
+
+            /*/ //各種リクエストヘッダをコンソールに出力する場合には内部を有効化
+            foreach (var key in reqHeaders.AllKeys)
+            {
+                Program.d("\t" + key + "\t" + reqHeaders.Get(key));
+            }
+            //*/
+
+            //Excel等では最初にHEADメソッドを実行するため
+            if (context.Request.HttpMethod.CompareTo("HEAD") == 0)
+            {
+
+                res.Close();
+                Program.d("http head");
+                return true;
+            }
+
+            //POSTはESPからの情報アップロード
+            if (context.Request.HttpMethod.CompareTo("POST") == 0)
+            {
+                Program.d("Method post");
+                using (var postBody = new StreamReader(context.Request.InputStream))
+                {
+                    var body = postBody.ReadToEnd();
+                    Program.d(body);
+                    //Serialと共通の解析処理へ転送
+                    parser.parse(body, 8);//ESPの場合、8ビット目まで入力と判定
+                }
+                res.Close();
+                return true;
+            }
+
+            //DB参照リクエスト
+            byte[] content = getContents(dbWrapper, context);
+            if (content == null)
+            {
+                res.StatusCode = 400;
+            }
+            else
+            {
+                res.OutputStream.Write(content, 0, content.Length);
+            }
+            res.Close();
+            return true;
+        }
 
         private static BlockingCollection<ParamFilter> paramFilterList = new BlockingCollection<ParamFilter>();
 

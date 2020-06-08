@@ -13,5 +13,6 @@ namespace MiotoServer.DB
         public long ticks { get; set; }
         public string csv { get; set; }
         public int flg { get; set; }
+
     }
 }

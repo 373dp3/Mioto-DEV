@@ -50,3 +50,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.cs
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.exe
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csproj.CoreCompileInputs.cache

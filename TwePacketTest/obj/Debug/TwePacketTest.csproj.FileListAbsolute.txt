@@ -44,3 +44,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Debug\System.Numerics.Vect
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Debug\TwePacketTest.csproj.CoreCompileInputs.cache

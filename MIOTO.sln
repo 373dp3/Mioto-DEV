@@ -29,7 +29,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloJsonClient", "YoloJsonC
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "YoloJsonClientPy", "YoloJsonClientPy\YoloJsonClientPy.pyproj", "{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KmeansTool", "KmeansTool\KmeansTool.csproj", "{2118BF5D-895C-49C1-B906-E53B489EF4C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KmeansTool", "KmeansTool\KmeansTool.csproj", "{A94DF807-B568-4EF9-B2C7-91641CA58BF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoBlazorClient", "MiotoBlazorClient\MiotoBlazorClient.csproj", "{4E8121C0-20C6-4828-BB7C-7422247A4199}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,14 +133,22 @@ Global
 		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E333B8C1-D694-4CA0-B4A5-DE959B0B959D}.Release|x86.ActiveCfg = Release|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Debug|x86.Build.0 = Debug|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Release|x86.ActiveCfg = Release|Any CPU
-		{2118BF5D-895C-49C1-B906-E53B489EF4C1}.Release|x86.Build.0 = Release|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Debug|x86.Build.0 = Debug|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Release|x86.ActiveCfg = Release|Any CPU
+		{A94DF807-B568-4EF9-B2C7-91641CA58BF7}.Release|x86.Build.0 = Release|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Debug|x86.Build.0 = Debug|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Release|x86.ActiveCfg = Release|Any CPU
+		{4E8121C0-20C6-4828-BB7C-7422247A4199}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

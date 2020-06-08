@@ -18,3 +18,6 @@
 /packages/
 /TestResults/
 /TwePacketTest/
+/MiotoBlazorClient/bin/
+/MiotoBlazorClient/obj/
+/KmeansTool/bin/

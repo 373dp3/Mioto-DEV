@@ -9,7 +9,7 @@ namespace MiotoServer.Query
 {
     public class ParamDate : ParamFilter
     {
-        static Regex ptnDate = new Regex("/(\\d{8})", RegexOptions.Compiled);
+        static Regex ptnDate = new Regex("/(2\\d[1-9]\\d{5})", RegexOptions.Compiled);
         static Regex ptnDiffDate = new Regex("/-(\\d{1,10})d", RegexOptions.Compiled);
         static Regex ptnToday = new Regex("/today", RegexOptions.Compiled);
         public const uint YMD_MIN = 0x20171028;

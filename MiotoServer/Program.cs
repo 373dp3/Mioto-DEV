@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -24,6 +26,8 @@ namespace MiotoServerW
                 Console.WriteLine(cmd);
                 if (cmd.CompareTo("/i") == 0) { flg = OPT.INSTALL; }
                 if (cmd.CompareTo("/u") == 0) { flg = OPT.UNINSTALL; }
+                if (cmd.CompareTo("/b") == 0) { flg = OPT.BLAZOR; }
+                
             }
             switch (flg)
             {
@@ -34,6 +38,15 @@ namespace MiotoServerW
                     Installer.Uninstall();
                     break;
                 case OPT.NOMAL:
+                case OPT.BLAZOR:
+                    if (flg == OPT.BLAZOR)
+                    {
+                        new Thread(() =>
+                        {
+                            Thread.Sleep(3000);
+                            Process.Start("http://localhost/html/");
+                        }).Start();
+                    }
                     var path = Application.ExecutablePath;
                     var fi = new FileInfo(path);
                     var dir = fi.DirectoryName;
@@ -48,6 +61,6 @@ namespace MiotoServerW
 
         }
 
-        enum OPT { NOMAL, INSTALL, UNINSTALL };
+        enum OPT { NOMAL, INSTALL, UNINSTALL, BLAZOR };
     }
 }

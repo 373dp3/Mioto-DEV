@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MiotoServer
 {
@@ -67,6 +68,7 @@ namespace MiotoServer
             conn.CreateTable<date2row>();
             conn.CreateTable<LastInfo>();
             conn.CreateTable<latest2525>();
+            conn.CreateTable<ConfigTbl>();
 
             //DBフィールドを確認し必要であれば移行する。
             //migrateDbIfNeed();
@@ -176,6 +178,7 @@ namespace MiotoServer
             //*/
 
         }
+        private Mutex wcMutex = new Mutex();
 
         public void insertCsv(TweCtPacket packet, string csv)
         {
@@ -186,6 +189,20 @@ namespace MiotoServer
                 + packet.dt.Ticks + ", '" + data + "')";
             conn.Execute(query);
             updateDateFlg();
+            new Thread(async () => {
+                wcMutex.WaitOne();
+                try
+                {
+                    foreach (var worker in HttpWebsocketWorker.collectionWebSocketWorker)
+                    {
+                        await worker.TxCsvCtData(csv);
+                    }
+                }
+                finally
+                {
+                    wcMutex.ReleaseMutex();
+                }
+            }).Start();
         }
 
         const int FLG_TWE = 2;
@@ -607,6 +624,27 @@ namespace MiotoServer
 
         }
 
+        public List<LastInfo> getLastInfoList()
+        {
+            return conn.Table<LastInfo>().OrderByDescending(q=>q.id).ToList();
+        }
+
+        public string getConfig(string key)
+        {
+            try
+            {
+                //[注意] SQLite-netにおける文字列比較はCompareToではなく==にて
+                return conn.Table<ConfigTbl>().Where(q => q.key == key).Select(q => q.json).First();
+            }catch(Exception e)
+            {
+                return "";
+            }
+        }
+        public void setConfig(string key, string json)
+        {
+            var cfg = new ConfigTbl() { key = key, json = json };
+            conn.InsertOrReplace(cfg);
+        }
 
     }
 

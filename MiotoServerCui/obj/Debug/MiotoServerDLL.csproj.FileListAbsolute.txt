@@ -124,3 +124,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.cspr
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.CoreCompileInputs.cache

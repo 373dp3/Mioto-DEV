@@ -119,3 +119,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.exe.
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.exe
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csproj.CoreCompileInputs.cache

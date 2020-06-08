@@ -1,0 +1,320 @@
+﻿@page "/"
+@page "/andon/"
+@page "/andon/{panelIndexStr}/{panelNameOrder}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+@implements IDisposable
+<!--
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+-->
+
+@if (listPanelModel.Count == 0)
+{
+    <h3>表示パネル情報一覧</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>パネル名称</th>
+                <th>子機数</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        @if ((config == null) || (config.listCtPanel2Index.Count == 0))
+        {
+            <tbody>
+                <tr>
+                    <td>
+                        @if (config == null)
+                        {
+                            <span>設定情報の取得中・・・</span>
+                        }
+                        else
+                        {
+                            <span>表示パネル設定のがありません</span>
+                        }
+                    </td>
+                    <td> </td>
+                    <td> </td>
+                </tr>
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                @foreach (var panel in config.listCtPanel2Index)
+                {
+                    <tr>
+                        <td>@(panel.panel.name)</td>
+                        <td>@(panel.panel.listMac2Index.Count)台</td>
+                        <td>
+                            <button type="button" class="btn btn-primary"
+                                    @onclick="()=> { changePanel(panel.index); }">
+                                表示
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        }
+    </table>
+}
+else
+{
+    <div class="container-fluid">
+        <h3>@panelNameOrder</h3>
+        <div class="row">
+            @foreach (var item in listPanelModel)
+            {
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <div class="card">
+                        @if (item.status == PanelModel.RunOrStop.RUN)
+                        {
+                            <div class="card-header bg-primary">
+                                <div class="text-truncate text-white">@(item.title)</div>
+                            </div>
+                        }
+                        else if (item.status == PanelModel.RunOrStop.STOP)
+                        {
+                            <div class="card-header bg-danger">
+                                <div class="text-truncate text-white">@(item.title)</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-header">
+                                <small>@(item.title)</small>
+                            </div>
+                        }
+                        <table class="table mb-0">
+                            <tr>
+                                <td><small>出来高</small></td>
+                                <td class="text-right"><span>@(item.dekidaka)</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>MT率</small></td>
+                                <td class="text-right"><span>@(item.getBekidouStr())</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>停止</small></td>
+                                <td class="text-right"><span>@(item.getStopSecStr())</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>稼働</small></td>
+                                <td class="text-right"><span>@(item.getRunSecStr())</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            }
+        </div>
+        <div class="mt-3"><button type="button" class="btn btn-secondary" @onclick="BackToPanelList">一覧へ戻る</button></div>
+    </div><!-- container-fluid -->
+}
+<p>@debugMsg</p>
+@code{
+    [Parameter]
+    public string panelNameOrder { get; set; } = null;
+    [Parameter]
+    public string panelIndexStr { get; set; } = null;
+    public long panelIndex { get; set; }
+
+    private List<IDisposable> listDispose = new List<IDisposable>();
+    private Config config { get; set; } = null;
+    private ConfigCtPanel panel { get; set; } = null;
+    private List<PanelModel> listPanelModel = new List<PanelModel>();
+    private string debugMsg = "";
+    private CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var cf = new SocketWorker(NavMgr, "config");
+        await cf.connectAsync<Config>(c =>
+        {
+            config = c;
+            updateSelectPanel();
+            this.StateHasChanged();
+            Task.WhenAll(
+                changePanel(0),
+                DisposeConfigSocket(cf));
+            this.StateHasChanged();
+        });
+
+    }
+    private async Task DisposeConfigSocket(SocketWorker cf)
+    {
+        await Task.Yield();
+        cf.Dispose();
+    }
+    private async Task tick()
+    {
+        var token = tokenSource.Token;
+        await Task.Run(async () => {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(1000);
+                this.StateHasChanged();
+            }
+        });
+    }
+    private void OnCycleAry(CycleTime[] ctAry)
+    {
+        if (ctAry==null) { return; }
+        foreach (var cycle in ctAry)
+        {
+            var panel = listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
+            if (panel.mac == 0) { continue; }
+            panel.updateCycleTime(cycle);
+        }
+        this.StateHasChanged();
+    }
+    private void OnCycleAry(CycleTime cycle)
+    {
+        if (cycle == null) return;
+        var panel = listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
+        //呼び出し元で保証 if (panel.mac == 0) { return; }
+        panel.updateCycleTime(cycle);
+    }
+
+    protected async Task changePanel(long panelIndexOrder)
+    {
+        this.StateHasChanged();
+        //変化なしなら何もしない
+        try
+        {
+            if ((panelIndexStr!=null) && (panelIndexStr.Length > 0))
+            {
+                panelIndexOrder = Convert.ToInt64(panelIndexStr);
+            }
+            panelIndexStr = "";
+        }
+        catch (Exception e) { }
+        if (panelIndex == panelIndexOrder) { return; }
+
+        await Task.Yield();
+
+        if (config == null)
+        {
+            debugMsg = "config is null";
+            this.StateHasChanged();
+            return;
+        }
+
+        var panel2idx = config.listCtPanel2Index
+                    .Where(q => q.index == panelIndexOrder)
+                    .FirstOrDefault();
+        if (panel2idx==null)
+        {
+            debugMsg = "panel2idx is null";
+            this.StateHasChanged();
+            return;
+        }
+        panelNameOrder = panel2idx.panel.name;
+
+        updateSelectPanel();
+        panelIndex = panelIndexOrder;
+        var nav = $"andon/{panelIndex}/{Uri.EscapeUriString(panelNameOrder)}/";
+        try
+        {
+            NavMgr.NavigateTo(nav);
+        }
+        catch (Exception e) { }
+
+        await Task.Yield();
+        var macListStr = String.Join('/', listPanelModel.Select(q => q.mac.ToString("x8")).ToArray());
+        var url = $"http://{new Uri(NavMgr.Uri).Host}/{macListStr}/backup";
+        using (var stream = await Http.GetStreamAsync(url))
+        using(var sr = new System.IO.StreamReader(stream))
+        {
+            while (sr.EndOfStream == false)
+            {
+                var line = sr.ReadLine();
+                if(line==null) { break; }
+                try
+                {
+                    var cycle = CycleTime.Parse(line);
+                    if (cycle == null) { continue; }
+                    OnCycleAry(cycle);
+                }
+                catch (Exception e) { }
+            }
+        }
+        this.StateHasChanged();
+        await Task.Yield();
+
+        if (listDispose.Count == 0)
+        {
+            var csvSocket = new CsvCashSocket(NavMgr);
+            listDispose.Add(csvSocket);
+            try
+            {
+                await Task.WhenAll(
+                    csvSocket.connectAsync(OnCycleAry),
+                    tick());
+            }
+            catch (Exception e)
+            {
+                debugMsg = e.ToString();
+                this.StateHasChanged();
+            }
+        }
+    }
+
+    private void t(string msg)
+    {
+        debugMsg += $"{msg} {DateTime.Now.ToLongTimeString()} //";
+    }
+
+    private void updateSelectPanel()
+    {
+        if (config == null) return;
+        if (panelNameOrder == null) return;
+        var ans = config.listCtPanel2Index
+                    .Where(q => q.panel.name.CompareTo(panelNameOrder) == 0)
+                    .Select(q => q.panel).FirstOrDefault();
+        //変化なしなら何もしない
+        if ((panel != null) && (ans != null) && (panel.name.CompareTo(ans.name) == 0)) { return; }
+        if ((ans == null) && (panel == null)) { return; }
+        panel = ans;
+
+        //パネルが変化し場合はパネル詳細情報の更新
+        listPanelModel.Clear();
+        if (panel == null) { return; }
+
+        var macList = panel.listMac2Index.OrderBy(q => q.index).Select(q => q.mac).ToArray();
+        foreach (var mac in macList)
+        {
+            listPanelModel.Add(new PanelModel()
+            {
+                title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault(),
+                mac = mac
+            });
+        }
+    }
+
+    public void BackToPanelList()
+    {
+        panelNameOrder = "";
+        panelIndex = 0;
+        listPanelModel.Clear();
+        panel = null;
+        NavMgr.NavigateTo($"http://{new Uri(NavMgr.Uri).Host}/html/");
+    }
+    public void Dispose()
+    {
+        tokenSource.Cancel();
+        tokenSource.Dispose();
+        tokenSource = null;
+        foreach (var item in listDispose)
+        {
+            item.Dispose();
+        }
+
+    }
+}
