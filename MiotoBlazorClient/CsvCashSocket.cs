@@ -14,11 +14,10 @@ namespace MiotoBlazorClient
         {
             prepare($"ws://{host}/csvcash/");
         }
-        public CsvCashSocket(NavigationManager mgr)
+        public CsvCashSocket(NavigationManager mgr, string hexMacList)
         {
-            prepare($"ws://{new Uri(mgr.Uri).Host}/csvcash/");
+            prepare($"ws://{new Uri(mgr.Uri).Host}/csvcash/{hexMacList}/");
         }
-
 
         public async Task connectAsync(Action<CycleTime[]> action)
         {

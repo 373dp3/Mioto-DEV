@@ -282,7 +282,7 @@ namespace TwePacketTest
         [TestMethod]
         public void TestCtPacketDbInsert()
         {
-            MiotoServerWrapper.getInstance(new Config());
+            MiotoServerWrapper.getInstance(new AppConfig());
             var packet = new TweCtPacket(1, 2, 3, 4, 5, new DateTime(2020, 1, 21, 9, 0, 0).Ticks);
             var tmpDbPath = "TestDb";
             if (Directory.Exists(tmpDbPath))
@@ -308,7 +308,7 @@ namespace TwePacketTest
         [TestMethod]
         public void TestTwePacketDbInsert()
         {
-            MiotoServerWrapper.getInstance(new Config());
+            MiotoServerWrapper.getInstance(new AppConfig());
             const string p1 = ":7881150163810040FA781AC3000A531E0001FFFFFFFFFF07";
             int ofs = 0;
             ofs = searchCollon(p1, ofs);

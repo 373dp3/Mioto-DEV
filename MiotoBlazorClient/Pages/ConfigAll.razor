@@ -1,7 +1,6 @@
-﻿@page "/fetchdata"
+﻿@page "/config"
 @inject HttpClient Http
 @inject NavigationManager NavMgr
-@implements IDisposable
 
 <h1>各種設定</h1>
 
@@ -28,7 +27,7 @@ else
                     <tr>
                         <td>パネル</td>
                         <td>@(config.listCtPanel2Index.Count)</td>
-                        <td><button type="button" class="btn btn-primary" @onclick="()=> { status = Status.PANEL; }">編集</button></td>
+                        <td><a class="btn btn-primary" href="config/panellist/">編集</a></td>
                     </tr>
                 }
                 @if (config.listTwe != null)
@@ -36,7 +35,7 @@ else
                     <tr>
                         <td>子機</td>
                         <td>@(config.listTwe.Count)</td>
-                        <td><button type="button" class="btn btn-primary" @onclick="()=> { status = Status.TWE_LIST; }">編集</button></td>
+                        <td><a class="btn btn-primary" href="config/twe/">編集</a></td>
                     </tr>
                 }
             </tbody>
@@ -184,7 +183,6 @@ else
 
 @code {
     public string debugMsg { get; set; }
-    private List<IDisposable> listDispose = new List<IDisposable>();
     private Config config;
     enum Status { NOOP, PANEL, PANEL_EDIT, PANEL_DELETE, TWE_LIST, TWE_EDIT }
     private Status status = Status.NOOP;
@@ -212,7 +210,7 @@ else
     {
         if (panel == null)
         {
-            editPanel = new ConfigCtPanel();
+            editPanel = new ConfigCtPanel() { dtFirstTicks = DateTime.Now.Ticks };
         }
         else
         {
@@ -235,7 +233,7 @@ else
     public async Task DeletePanel()
     {
         var ary = config.listCtPanel2Index
-            .Where(q => q.panel.name.CompareTo(editPanel.name) == 0).ToArray();
+            .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks).ToArray();
         foreach(var item in ary)
         {
             config.listCtPanel2Index.Remove(item);
@@ -246,8 +244,9 @@ else
     }
     public async Task SaveEditPanel()
     {
+        //dtFirstTicksでリストに存在するパネルかを判断する
         var count = config.listCtPanel2Index
-            .Where(q => q.panel.name.CompareTo(editPanel.name) == 0)
+            .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks)
             .Count();
         if (count == 0)
         {
@@ -257,19 +256,17 @@ else
                 maxCount = config.listCtPanel2Index.Max(q => q.index);
                 maxCount += 10;
             }
-            config.listCtPanel2Index.Add(new CtPanel2Index() { 
-                index = DateTime.Now.Ticks, 
-                panel = editPanel 
+            config.listCtPanel2Index.Add(new CtPanel2Index() {
+                index = DateTime.Now.Ticks,
+                panel = editPanel
             });
         }
         else
         {
-            foreach (var item in config.listCtPanel2Index)
-            {
-                if (item.panel.name.CompareTo(editPanel.name) != 0) { continue; }
-                item.panel = editPanel;
-                break;
-            }
+            var p2i = config.listCtPanel2Index
+                        .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks)
+                        .FirstOrDefault();
+            p2i.panel = editPanel;
         }
         editPanel = null;
         status = Status.PANEL;
@@ -327,35 +324,15 @@ else
     }
     protected async Task UpdateConfig()
     {
-        if (sw == null) { return; }
-        await sw.SendData(System.Text.Json.JsonSerializer.Serialize(config));
+        await ConfigSingleton.getInstance().update(NavMgr);
     }
 
     protected override async Task OnInitializedAsync()
     {
-        if (listDispose.Count == 0)
+        await ConfigSingleton.getInstance().getConsigAsync(NavMgr, c =>
         {
-            sw = new SocketWorker(NavMgr, "config");
-            listDispose.Add(sw);
-           
-            try
-            {
-                await sw.connectAsync<Config>(c => { 
-                    config = c;
-                    this.StateHasChanged();
-                });
-            }
-            catch (Exception e) {
-                debugMsg = e.ToString();
-            }
-        }
-    }
-
-    public void Dispose()
-    {
-        foreach (var item in listDispose)
-        {
-            item.Dispose();
-        }
+            config = c;
+            this.StateHasChanged();
+        });
     }
 }

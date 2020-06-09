@@ -42,7 +42,7 @@ namespace TwePacketTest
         {
             DbWrapper.getInstance("TestDb");
             var db = DbComSerial.getInstance();
-            var p = MiotoServerWrapper.getInstance(new Config());
+            var p = MiotoServerWrapper.getInstance(new AppConfig());
 
             for (int i=0; i<5; i++)
             {

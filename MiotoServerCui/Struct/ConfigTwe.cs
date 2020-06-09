@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using MiotoServer.DB;
+using System.ComponentModel;
 
 namespace MiotoServer.Struct
 {
@@ -23,5 +24,13 @@ namespace MiotoServer.Struct
             var ans = new ConfigTwe() { mac = info.mac, name = "", Ticks=info.ticks };
             return ans;
         }
+
+        public static void Copy(ConfigTwe from, ConfigTwe to)
+        {
+            to.mac = from.mac;
+            to.name = (string)from.name.Clone();
+            to.Ticks = from.Ticks;
+        }
+            
     }
 }

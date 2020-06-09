@@ -114,6 +114,15 @@ namespace MiotoBlazorClient
 
         public async Task SendData(string msg)
         {
+            if (ws == null)
+            {
+                ws = new ClientWebSocket();
+                await ws.ConnectAsync(uri, System.Threading.CancellationToken.None);
+
+                //接続待機
+                while (ws.State == WebSocketState.Connecting) { Thread.Sleep(200); }
+            }
+
             await ws.SendAsync(
                     new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)),
                     WebSocketMessageType.Text, true,

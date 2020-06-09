@@ -1,0 +1,143 @@
+﻿@page "/config/twe/"
+@page "/config/twe/{mode}/{id}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+
+<h1>各種設定</h1>
+
+<p>@debugMsg</p>
+@if (config == null)
+{
+    <p>設定情報を取得しています・・・</p>
+}
+else
+{
+    @if (status == Status.TWE_LIST)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>MAC</th>
+                    <th>名称</th>
+                    <th>最終信号日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in config.listTwe)
+                {
+                <tr>
+                    <td>@item.mac.ToString("x8") </td>
+                    <td>@item.name </td>
+                    <td>@(new DateTime(item.Ticks).ToString("MM/dd HH:mm")) </td>
+                    <td><a class="btn btn-primary" href="config/twe/@(Status.TWE_EDIT)/@(item.mac)/">編集</a></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        <a class="btn btn-secondary" href="config/">一覧に戻る</a>
+    }
+    else if (status == Status.TWE_EDIT)
+    {
+        @if (editTwe != null)
+        {
+            <EditForm Model="@editTwe" OnValidSubmit="SaveEditTwe">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <InputText id="name" @bind-Value="editTwe.name" />
+
+                <button type="button" class="btn btn-primary" @onclick="SaveEditTwe">保存</button>
+                <a class="btn btn-secondary" href="config/twe/">キャンセル</a>
+            </EditForm>
+        }
+
+    }
+}
+
+@code {
+    [Parameter]
+    public string mode { get; set; }
+    [Parameter]
+    public string id { get; set; }
+
+    public string debugMsg { get; set; }
+    private Config config;
+    enum Status { NOOP, TWE_LIST, TWE_EDIT }
+    private Status status = Status.TWE_LIST;
+    private ConfigTwe editTwe = null;
+    private SocketWorker sw = null;
+
+    public void StartEditTwe(ConfigTwe twe)
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(twe);
+
+
+        editTwe = System.Text.Json.JsonSerializer.Deserialize<ConfigTwe>(json);
+        status = Status.TWE_EDIT;
+    }
+    public async Task SaveEditTwe()
+    {
+        var twe = config.listTwe.Where(q => q.mac == editTwe.mac).FirstOrDefault();
+
+        if (twe.mac != 0)
+        {
+            ConfigTwe.Copy(editTwe, twe);
+        }
+        editTwe = null;
+        status = Status.TWE_LIST;
+        await UpdateConfig();
+        NavMgr.NavigateTo($"config/twe/");
+    }
+
+    protected async Task UpdateConfig()
+    {
+        await ConfigSingleton.getInstance().update(NavMgr);
+    }
+
+
+    public void OnPageChange()
+    {
+        if (id == null) { id = ""; }
+        if (mode == null) { mode = ""; }
+        long idNum = -1;
+        try
+        {
+            idNum = Convert.ToInt64(id);
+        }
+        catch (Exception e) { }
+        if ((mode.CompareTo("") == 0) || (idNum == -1))
+        {
+            status = Status.TWE_LIST;
+            return;
+        }
+        var twe = config.listTwe.Where(q => q.mac == idNum).FirstOrDefault();
+        if((twe==null) || (twe.mac == 0))
+        {
+            status = Status.TWE_LIST;
+            return;
+        }
+        if (mode.CompareTo(Status.TWE_EDIT.ToString()) == 0)
+        {
+            status = Status.TWE_EDIT;
+            StartEditTwe(twe);
+            return;
+        }
+        NavMgr.NavigateTo($"config/twe/");
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        OnPageChange();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConfigSingleton.getInstance().getConsigAsync(NavMgr, c =>
+        {
+            config = c;
+            this.StateHasChanged();
+        });
+    }
+}

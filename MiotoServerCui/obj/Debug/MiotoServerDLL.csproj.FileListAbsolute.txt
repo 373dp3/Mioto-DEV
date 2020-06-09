@@ -118,10 +118,10 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Text.Encodin
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Text.Json.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.ValueTuple.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csprojAssemblyReference.cache
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\Interop.WMPLib.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.ResolveComReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csprojAssemblyReference.cache
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.CoreCompileInputs.cache

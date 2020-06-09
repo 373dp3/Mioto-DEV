@@ -9,7 +9,7 @@ using static MiotoServer.MiotoServerWrapper;
 
 namespace MiotoServer
 {
-    public class Config
+    public class AppConfig
     {
         [JsonIgnore]
         public StatusMsgFunc func { get; set; } = null;
@@ -36,7 +36,7 @@ namespace MiotoServer
         public bool isMemoryDbBackup { get; set; } = true;
         public List<SerialCurrent> listSerialCurrent { get; set; }
 
-        public Config()
+        public AppConfig()
         {
             listSerialCurrent = new List<SerialCurrent>();
         }
@@ -57,16 +57,16 @@ namespace MiotoServer
         }
         #endregion
 
-        public static Config formJSON(string json)
+        public static AppConfig formJSON(string json)
         {
             try
             {
                 d(json);
-                return JsonSerializer.Deserialize<Config>(json);
+                return JsonSerializer.Deserialize<AppConfig>(json);
             }
             catch (Exception e)
             {
-                return new Config();
+                return new AppConfig();
             }
         }
 

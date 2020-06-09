@@ -13,12 +13,12 @@ namespace MiotoServer
         public static MiotoServerWrapper instance { get; private set; }
         private MiotoServerWrapper()
         {
-            MiotoServerWrapper.config = new Config();
+            MiotoServerWrapper.config = new AppConfig();
         }
 
-        public static Config config { get; private set; } = null;
+        public static AppConfig config { get; private set; } = null;
 
-        public static MiotoServerWrapper getInstance(Config config = null)
+        public static MiotoServerWrapper getInstance(AppConfig config = null)
         {
             if ((instance == null) && (config == null))
             {

@@ -9,6 +9,11 @@ namespace MiotoServer.Struct
 {
     public class Config
     {
+        /// <summary>
+        /// 日付変更時刻
+        /// </summary>
+        public int dateLineHHMM { get; set; } = 500;
+
         public List<CtPanel2Index> listCtPanel2Index { get; set; } = new List<CtPanel2Index>();
         public List<ConfigTwe> listTwe { get; set; } = new List<ConfigTwe>();
 

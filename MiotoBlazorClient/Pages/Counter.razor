@@ -18,6 +18,9 @@
     protected override Task OnInitializedAsync()
     {
         //exception = $"Uri:{NavMgr.Uri}, BaseUri:{NavMgr.BaseUri}, Host:{new Uri(NavMgr.Uri).Host}";
+        var p = ConfigSingleton.getInstance();
+        p.cnt++;
+        debugMsg = p.cnt.ToString();
 
         return base.OnInitializedAsync();
     }

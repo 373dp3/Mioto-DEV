@@ -89,7 +89,7 @@
   <ItemGroup>
     <Compile Include="CfgOption\ComPort.cs" />
     <Compile Include="CfgOption\SerialCurrent.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="AppConfig.cs" />
     <Compile Include="Ct10CtDetector.cs" />
     <Compile Include="DbChecker.cs" />
     <Compile Include="DbComSerial.cs" />

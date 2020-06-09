@@ -1,0 +1,86 @@
+﻿@page "/andon/"
+@page "/andon/{panelIndexStr}/{panelNameOrder}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+@implements IDisposable
+@inherits MiotoSockPage
+
+@if (listPanelModel.Count > 0)
+{
+    <div class="container-fluid">
+        <h3>@panelNameOrder</h3>
+        <div class="row">
+            @foreach (var item in listPanelModel)
+            {
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <div class="card">
+                        @if (item.status == PanelModel.RunOrStop.RUN)
+                        {
+                            <div class="card-header bg-primary">
+                                <div class="text-truncate text-white">@(item.title)</div>
+                            </div>
+                        }
+                        else if (item.status == PanelModel.RunOrStop.STOP)
+                        {
+                            <div class="card-header bg-danger">
+                                <div class="text-truncate text-white">@(item.title)</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-header">
+                                <small>@(item.title)</small>
+                            </div>
+                        }
+                        <table class="table mb-0">
+                            <tr>
+                                <td><small>出来高</small></td>
+                                <td class="text-right"><span>@(item.dekidaka)</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>MT率</small></td>
+                                <td class="text-right"><span>@(item.getBekidouStr())</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>停止</small></td>
+                                <td class="text-right"><span>@(item.getStopSecStr())</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>稼働</small></td>
+                                <td class="text-right"><span>@(item.getRunSecStr())</span></td>
+                            </tr>
+                        </table>
+                        <small>@(item.mac)</small>
+                    </div>
+                </div>
+
+            }
+        </div>
+        <div class="mt-3"><a class="btn btn-secondary" href="">一覧へ戻る</a></div>
+    </div><!-- container-fluid -->
+}
+<p>@debugMsg</p>
+
+@code{
+    [Parameter]
+    public string panelNameOrder { get; set; } = null;
+    [Parameter]
+    public string panelIndexStr { get; set; } = null;
+
+
+    /// <summary>
+    /// 全ての処理の起点
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await init(NavMgr, Http, panelIndexStr, Mode.PANEL_LIST);
+        //await init(NavMgr, Http, "2164291130", Mode.SINGLE);
+    }
+
+
+
+
+
+}

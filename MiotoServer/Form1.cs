@@ -1,5 +1,6 @@
 ﻿using MiotoServer;
 using MiotoServer.CfgOption;
+using MiotoServer.Struct;
 using MiotoServerW.Properties;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace MiotoServerW
 {
     public partial class Form1 : Form
     {
-        public static Config config { get; private set; } = null;
+        public static AppConfig config { get; private set; } = null;
         private string jsonFile = getBaseDir() + Path.DirectorySeparatorChar + "config.json";
 
         public Form1()
@@ -34,22 +35,36 @@ namespace MiotoServerW
                 {
                     using (var sr = new StreamReader(jsonFile))
                     {
-                        config = Config.formJSON(sr.ReadToEnd());
+                        config = AppConfig.formJSON(sr.ReadToEnd());
                         sr.Close();
                     }
+                    UpdateBlazorConfig();
                 }
                 catch (Exception e) { }
             }
             if(config==null)
             {
-                config = new Config() { dbdir = getBaseDir() };
+                config = new AppConfig() { dbdir = getBaseDir() };
                 config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
                 config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
             }
         }
+        /// <summary>
+        /// Blazor WebassemblyとLocal Appと共用の設定をSQLiteDBに更新する。
+        /// </summary>
+        public static void UpdateBlazorConfig()
+        {
+            //Blazor用の日付変更設定保持
+            var p = DbWrapper.getInstance();
+            var msg = p.getConfig(WebSocketWorker.CONFIG_DB_KEY);
+            var cfg = JsonSerializer.Deserialize<Config>(msg);
+            cfg.dateLineHHMM = config.hhmm;
+            msg = JsonSerializer.Serialize<Config>(cfg);
+            DbWrapper.getInstance().setConfig(WebSocketWorker.CONFIG_DB_KEY, msg);
+        }
 
         #region 共通関連
-        const string PORT_NO_USE_KEY = Config.PORT_NO_USE_KEY;
+        const string PORT_NO_USE_KEY = AppConfig.PORT_NO_USE_KEY;
         private int dMsgCnt = 0;
 
         public void d(string msg)
@@ -135,6 +150,7 @@ namespace MiotoServerW
                     sw.Write(json);
                     sw.Close();
                 }
+                UpdateBlazorConfig();
             }
             catch(DirectoryNotFoundException dne) { }
             catch (Exception e)

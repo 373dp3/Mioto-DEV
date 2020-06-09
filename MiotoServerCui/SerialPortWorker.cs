@@ -19,7 +19,7 @@ namespace MiotoServer
             //Open
             foreach(var port in configPortList)
             {
-                if (port.portName.CompareTo(Config.PORT_NO_USE_KEY) == 0) { continue; }
+                if (port.portName.CompareTo(AppConfig.PORT_NO_USE_KEY) == 0) { continue; }
                 var serial = new SerialPort(port.portName, Convert.ToInt32(port.portBps));
                 comPortList.Add(serial);
 #if MONO
