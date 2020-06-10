@@ -48,11 +48,18 @@ namespace MiotoBlazorClient
             }
             await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c => {
                 config = c;
-                func(id);
+                func(id);//func呼び出し完了でlistPanelModelが実体化済み
 
                 _ = loadCsvByHttp(() => new ProductionFactor(),
-                        q => { tmp += ((ProductionFactor)q).ToCSV() + " // "; },
+                        q => {
+                        var factor = (ProductionFactor)q;
+                            tmp += ((ProductionFactor)q).ToCSV() + " // ";
+                            listPanelModel.Where(q => q.mac == factor.mac)
+                                .FirstOrDefault()
+                                .SetProductionFactor(factor);
+                        },
                         $"{ProductionFactor.KEY}/");
+
                 _ = loadCsvByHttp(() => new CycleTime(), q => OnCycle((CycleTime)q));
                 _ = socketListener();
             });

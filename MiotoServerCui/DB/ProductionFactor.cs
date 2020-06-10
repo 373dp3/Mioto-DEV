@@ -22,6 +22,9 @@ namespace MiotoServer.DB
         public long stTicks { get; set; } = SET_TICKS_AT_SERVER;
 
         public const double CT_NOOP = 0;
+        /// <summary>
+        /// 標準サイクルタイム(秒)
+        /// </summary>
         public double ct { get; set; } = CT_NOOP;
 
         public enum Status
@@ -94,5 +97,63 @@ namespace MiotoServer.DB
         }
 
         public const string KEY = "production_factor";
+
+        #region DBに登録しない生産分析用の変数・メソッド群
+        [Ignore]
+        public long endTicks { get; set; } = long.MaxValue;
+        [Ignore]
+        public double totalCt00 { get; set; } = 0;
+        [Ignore]
+        public long dekidaka { get; set; } = 0;
+        [Ignore]
+        public long lastCycleTicks { get; set; } = 0;
+        [Ignore]
+        public double aveCt { get; set; } = 0;
+ 
+        public void updateByCycle(CycleTime cycle)
+        {
+            //生産中以外の場合は処理しない
+            if(status != Status.START_PRODUCTION) { return; }
+            //マシン稼働が終了したときが積算対象
+            if (cycle.ct00 == 0) { return; }
+            //稼働開始前なら無視
+            if(cycle.dt.Ticks<stTicks) { return; }
+            //稼働終了後も無視
+            if(cycle.dt.Ticks>endTicks) { return; }
+
+            totalCt00 += cycle.ct00;
+            dekidaka++;
+            aveCt = (aveCt * (dekidaka - 1) + cycle.ct00) / dekidaka;
+            lastCycleTicks = cycle.dt.Ticks;
+        }
+
+        /// <summary>
+        /// 可動率(%ではなく0～1の比率)
+        /// </summary>
+        /// <returns></returns>
+        public double GetKadouritsu()
+        {
+            if(dekidaka==0) { return 0; }
+            long bunbo;
+            if (endTicks == long.MaxValue)
+            {
+                //次の余韻が登録されていない場合、最終信号時刻が
+                //計算対象の母数となる。
+                bunbo = lastCycleTicks - stTicks;
+            }
+            else
+            {
+                //次の要因が登録された場合、その設定時刻が
+                //計算対象の母数となる
+                bunbo = endTicks - stTicks;
+            }
+            if(bunbo<=0) { return 0; }
+
+            var span = new TimeSpan(bunbo);
+
+            return (ct * dekidaka) / span.TotalSeconds;
+
+        }
+        #endregion
     }
 }

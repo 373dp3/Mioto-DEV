@@ -125,6 +125,7 @@
     <Compile Include="Struct\Config.cs" />
     <Compile Include="Struct\ConfigCtPanel.cs" />
     <Compile Include="Struct\ConfigTwe.cs" />
+    <Compile Include="Struct\CycleTime.cs" />
     <Compile Include="Struct\IParseable.cs" />
     <Compile Include="Twe2525APacket.cs" />
     <Compile Include="TweComSerialPacket.cs" />

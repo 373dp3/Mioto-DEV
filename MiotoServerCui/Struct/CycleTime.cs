@@ -1,10 +1,10 @@
-﻿using MiotoServer.Struct;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace MiotoBlazorClient
+namespace MiotoServer.Struct
 {
     public class CycleTime : IParseable
     {
@@ -29,7 +29,8 @@ namespace MiotoBlazorClient
             try
             {
                 ans.ParseInto(msg);
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return null;
             }
@@ -40,7 +41,8 @@ namespace MiotoBlazorClient
             try
             {
                 return Convert.ToDouble(csvAry[i]);
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return CT_NODATA;
             }
@@ -54,7 +56,7 @@ namespace MiotoBlazorClient
         public string ToString(int vector = 0)
         {
             var masc = (byte)(0x01 << vector);
-            if((btn & masc) > 0)
+            if ((btn & masc) > 0)
             {
                 return $"{mac.ToString("x8")},ON,{ctMsg(ct01)},{ctMsg(ct11)}";
             }

@@ -31,30 +31,38 @@
                                 <small>@(item.title)</small>
                             </div>
                         }
-                        <table class="table mb-0">
+                    <table class="table mb-0">
+                        <tr>
+                            <td><small>出来高</small></td>
+                            <td class="text-right"><span>@(item.dekidaka)</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>信号数</small></td>
+                            <td class="text-right"><span>@(item.signalNum)</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>可動率</small></td>
+                            <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>MT率</small></td>
+                            <td class="text-right"><span>@(item.getBekidouStr())</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>停止</small></td>
+                            <td class="text-right"><span>@(item.getStopSecStr())</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>稼働</small></td>
+                            <td class="text-right"><span>@(item.getRunSecStr())</span></td>
+                        </tr>
+                        @foreach (var cycle in item.listSmallStop)
+                        {
                             <tr>
-                                <td><small>出来高</small></td>
-                                <td class="text-right"><span>@(item.dekidaka)</span></td>
+                                <td colspan="2">@(cycle.dt.ToShortTimeString()) / @((cycle.ct01/60.0).ToString("F1"))分</td>
                             </tr>
-                            <tr>
-                                <td><small>MT率</small></td>
-                                <td class="text-right"><span>@(item.getBekidouStr())</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>停止</small></td>
-                                <td class="text-right"><span>@(item.getStopSecStr())</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>稼働</small></td>
-                                <td class="text-right"><span>@(item.getRunSecStr())</span></td>
-                            </tr>
-                            @foreach(var cycle in item.listSmallStop)
-                            {
-                                <tr>
-                                    <td colspan="2">@(cycle.dt.ToShortTimeString()) / @((cycle.ct01/60.0).ToString("F1"))分</td>
-                                </tr>
-                            }
-                        </table>
+                        }
+                    </table>
                         <button type="button" class="btn btn-primary" 
                                 @onclick="async ()=> { await SetProductionFactor(item, ProductionFactor.Status.START_PRODUCTION); }">生産開始</button>
                     </div>
