@@ -1,5 +1,4 @@
-﻿@page "/andon/"
-@page "/andon/{panelIndexStr}/{panelNameOrder}"
+﻿@page "/sensor/{idStr}/"
 @inject HttpClient Http
 @inject NavigationManager NavMgr
 @implements IDisposable
@@ -8,12 +7,12 @@
 @if (listPanelModel.Count > 0)
 {
     <div class="container-fluid">
-        <h3>@panelNameOrder</h3>
         <div class="row">
-            @foreach (var item in listPanelModel)
+            @foreach (var itemBase in listPanelModel)
             {
+                var item = (PanelModelSmallStop)itemBase;
                 <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <a class="card" href="sensor/@(item.mac)/">
+                    <div class="card">
                         @if (item.status == PanelModel.RunOrStop.RUN)
                         {
                             <div class="card-header bg-primary">
@@ -49,8 +48,16 @@
                                 <td><small>稼働</small></td>
                                 <td class="text-right"><span>@(item.getRunSecStr())</span></td>
                             </tr>
+                            @foreach(var cycle in item.listSmallStop)
+                            {
+                                <tr>
+                                    <td colspan="2">@(cycle.dt.ToShortTimeString()) / @((cycle.ct01/60.0).ToString("F1"))分</td>
+                                </tr>
+                            }
                         </table>
-                    </a>
+                        <button type="button" class="btn btn-primary" 
+                                @onclick="async ()=> { await SetProductionFactor(item, ProductionFactor.Status.START_PRODUCTION); }">生産開始</button>
+                    </div>
                 </div>
 
             }
@@ -59,13 +66,11 @@
     </div><!-- container-fluid -->
 }
 <p>@debugMsg</p>
+<p>@tmp</p>
 
 @code{
     [Parameter]
-    public string panelNameOrder { get; set; } = null;
-    [Parameter]
-    public string panelIndexStr { get; set; } = null;
-
+    public string idStr { get; set; } = null;
 
     /// <summary>
     /// 全ての処理の起点
@@ -74,7 +79,11 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await init(NavMgr, Http, panelIndexStr, Mode.PANEL_LIST, PanelModel.Create);
+        await init(NavMgr, Http, idStr, Mode.SINGLE, PanelModelSmallStop.Create);
     }
 
+    public async Task SetProductionFactor(PanelModel item, ProductionFactor.Status status)
+    {
+        await this.Send(new ProductionFactor() { status = status, mac=item.mac, ct=20.0 });
+    }
 }

@@ -294,7 +294,9 @@ namespace MiotoServer
                 case Param.TYPE.MEM_DB:
                     content = Encoding.UTF8.GetBytes(DbComSerial.getInstance().getCsv(param));
                     break;
-
+                case Param.TYPE.PRODUCTION_FACTOR:
+                    content = Encoding.UTF8.GetBytes(dbWrapper.GetProductionFactorCsv(param));
+                    break;
                 default:
                     content = Encoding.UTF8.GetBytes(dbWrapper.getCsv(param));
                     break;

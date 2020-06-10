@@ -17,7 +17,7 @@ namespace MiotoBlazorClient
             if (instance == null) instance = new ConfigSingleton();
             return instance;
         }
-        public async Task getConsigAsync(NavigationManager NavMgr, Action<Config> action, bool forceNew=false)
+        public async Task getConfigAsync(NavigationManager NavMgr, Action<Config> action, bool forceNew=false)
         {
             await Task.Yield();
             if((config != null) && (forceNew==false)) { 

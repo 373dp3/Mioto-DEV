@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MiotoServer.Struct;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MiotoBlazorClient
 {
-    public class CycleTime
+    public class CycleTime : IParseable
     {
         //date time,mac,seq,btn,batt,lqi,0_00,0_01,0_10,0_11,DI
         public DateTime dt { get; set; }
@@ -25,24 +26,13 @@ namespace MiotoBlazorClient
         public static CycleTime Parse(string msg)
         {
             var ans = new CycleTime();
-            ans.createDt = DateTime.Now;
-            var csvAry = msg.Split(',');
-            if(csvAry.Length<9) { return null; }
-            int i = 0;
-            ans.dt = DateTime.Parse(csvAry[i]); i++;
-            ans.mac = Convert.ToInt64(csvAry[i],16); i++;
-            ans.seq = Convert.ToByte(csvAry[i]); i++;
-            ans.btn = Convert.ToByte(csvAry[i]); i++;
-            ans.batt = (float)Convert.ToDouble(csvAry[i]); i++;
-            ans.lqi = Convert.ToByte(csvAry[i]); i++;
-            ans.ct00 = checkAndSetCt(csvAry, i); i++;
-            ans.ct01 = checkAndSetCt(csvAry, i); i++;
-            ans.ct10 = checkAndSetCt(csvAry, i); i++;
-            ans.ct11 = checkAndSetCt(csvAry, i); i++;
             try
             {
-                ans.DI = Convert.ToByte(csvAry[i]); i++;
-            }catch(Exception e) { i++; }
+                ans.ParseInto(msg);
+            }catch(Exception e)
+            {
+                return null;
+            }
             return ans;
         }
         private static double checkAndSetCt(string[] csvAry, int i)
@@ -72,6 +62,29 @@ namespace MiotoBlazorClient
             {
                 return $"{mac.ToString("x8")},OFF,{ctMsg(ct10)},{ctMsg(ct00)}";
             }
+        }
+
+        public void ParseInto(string msg)
+        {
+            createDt = DateTime.Now;
+            var csvAry = msg.Split(',');
+            if (csvAry.Length < 9) throw new FormatException();
+            int i = 0;
+            dt = DateTime.Parse(csvAry[i]); i++;
+            mac = Convert.ToInt64(csvAry[i], 16); i++;
+            seq = Convert.ToByte(csvAry[i]); i++;
+            btn = Convert.ToByte(csvAry[i]); i++;
+            batt = (float)Convert.ToDouble(csvAry[i]); i++;
+            lqi = Convert.ToByte(csvAry[i]); i++;
+            ct00 = checkAndSetCt(csvAry, i); i++;
+            ct01 = checkAndSetCt(csvAry, i); i++;
+            ct10 = checkAndSetCt(csvAry, i); i++;
+            ct11 = checkAndSetCt(csvAry, i); i++;
+            try
+            {
+                DI = Convert.ToByte(csvAry[i]); i++;
+            }
+            catch (Exception e) { i++; }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiotoServer.DB;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -72,6 +73,24 @@ namespace MiotoServer
                         DbWrapper.getInstance().setConfig(CONFIG_DB_KEY, msg);
                     }
                     catch (Exception e) { d("受信した設定情報が破損しています。"); }
+                    break;
+                case OperationType.CSV:
+                    //生産要因の登録
+                    try
+                    {
+                        var factor = JsonSerializer.Deserialize<ProductionFactor>(msg);
+                        //日時指定がない場合は受信時刻を設定する
+                        if(factor.stTicks == ProductionFactor.SET_TICKS_AT_SERVER)
+                        {
+                            factor.stTicks = DateTime.Now.Ticks;
+                        }
+                        DbWrapper.getInstance().conn.Insert(factor);
+
+                        //Echo back
+                        _ = TxDataAsync($"!{ProductionFactor.KEY},{factor.ToCSV()}");
+                        Program.d("set factor");
+                    }
+                    catch (Exception e) { }
                     break;
                 default:
                     break;

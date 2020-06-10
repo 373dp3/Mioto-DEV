@@ -62,6 +62,11 @@ namespace MiotoServer.Query
                 }
             }
 
+            if (param.url.Contains("/production_factor"))
+            {
+                param.type = Param.TYPE.PRODUCTION_FACTOR;
+            }
+
             if (param.url.Contains("/final"))
             {
                 if(param.volume!= Param.VOLUME.NORMAL)

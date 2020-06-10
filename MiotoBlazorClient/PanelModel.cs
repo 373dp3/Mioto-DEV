@@ -51,7 +51,7 @@ namespace MiotoBlazorClient
         public CycleTime lastCycleTime { get; private set; } = null;
         public long mac { get; set; } = 0;
 
-        public void updateCycleTime(CycleTime ct)
+        public virtual void updateCycleTime(CycleTime ct)
         {
             var preStatus = status;
             if (ct == null)
@@ -91,6 +91,11 @@ namespace MiotoBlazorClient
             var sum = stopSec + runSec;
             if (sum == 0) { return "-"; }
             return (100.0d * runSec / sum).ToString("F1") + " %";
+        }
+
+        public static PanelModel Create()
+        {
+            return new PanelModel();
         }
     }
 }

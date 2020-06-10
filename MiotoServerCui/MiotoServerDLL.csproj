@@ -102,6 +102,7 @@
     <Compile Include="DB\latest2525.cs" />
     <Compile Include="DB\Mac2Ampere.cs" />
     <Compile Include="DB\MemMac2Ah.cs" />
+    <Compile Include="DB\ProductionFactor.cs" />
     <Compile Include="DB\SoundTbl.cs" />
     <Compile Include="HttpdWorker.cs" />
     <Compile Include="HttpStaticFileWorker.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Struct\Config.cs" />
     <Compile Include="Struct\ConfigCtPanel.cs" />
     <Compile Include="Struct\ConfigTwe.cs" />
+    <Compile Include="Struct\IParseable.cs" />
     <Compile Include="Twe2525APacket.cs" />
     <Compile Include="TweComSerialPacket.cs" />
     <Compile Include="TweCtPacket.cs" />

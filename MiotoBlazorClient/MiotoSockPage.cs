@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MiotoServer.DB;
 using MiotoServer.Struct;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,8 +13,6 @@ namespace MiotoBlazorClient
 {
     public class MiotoSockPage : ComponentBase, IDisposable
     {
-
-
         public Config config { get; set; } = null;
         public List<PanelModel> listPanelModel = new List<PanelModel>();
         public string debugMsg = "";
@@ -23,15 +23,19 @@ namespace MiotoBlazorClient
         private List<long> targetMacList;
         public enum Mode { SINGLE, PANEL_LIST}
 
+        Func<PanelModel> factory = null;
+        private SocketWorker wsWorker { get; set; } = null;
+
         /// <summary>
         /// razorページからロードすべき情報の指示を受ける
         /// </summary>
         /// <param name="mgr"></param>
         /// <param name="client"></param>
-        public async Task init(NavigationManager mgr, HttpClient client, string id, Mode mode)
+        public async Task init(NavigationManager mgr, HttpClient client, string id, Mode mode, Func<PanelModel> factory)
         {
             NavMgr = mgr;
             Http = client;
+            this.factory = factory;
             Action<string> func = null;
             switch (mode)
             {
@@ -42,51 +46,48 @@ namespace MiotoBlazorClient
                     func = loadPanelListDefinition;
                     break;
             }
-            await ConfigSingleton.getInstance().getConsigAsync(NavMgr, c => {
+            await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c => {
                 config = c;
                 func(id);
-                Task.WhenAll(loadCsvByHttp());
-                Task.WhenAll(socketListener());
+
+                _ = loadCsvByHttp(() => new ProductionFactor(),
+                        q => { tmp += ((ProductionFactor)q).ToCSV() + " // "; },
+                        $"{ProductionFactor.KEY}/");
+                _ = loadCsvByHttp(() => new CycleTime(), q => OnCycle((CycleTime)q));
+                _ = socketListener();
             });
         }
 
-        /// <summary>
-        /// http受信したCSV情報の解釈
-        /// </summary>
-        /// <param name="ctAry"></param>
-        public void OnCycleAry(CycleTime[] ctAry)
-        {
-            if (ctAry == null) { return; }
-            foreach (var cycle in ctAry)
-            {
-                var panel = listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
-                if (panel.mac == 0) { continue; }
-                panel.updateCycleTime(cycle);
-            }
-            this.StateHasChanged();
-        }
+        public string tmp { get; set; } = "";
 
         /// <summary>
-        /// WebSocketで受信した単一CSV情報の解釈
+        /// 受信したCycle情報解釈
         /// </summary>
         /// <param name="cycle"></param>
-        public void OnCycleAry(CycleTime cycle)
+        public void OnCycle(CycleTime cycle)
         {
             if (cycle == null) return;
             var panel = listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
-            //呼び出し元で保証 if (panel.mac == 0) { return; }
             panel.updateCycleTime(cycle);
         }
 
+        public void OnProductionFactor(ProductionFactor factor)
+        {
+            debugMsg += $"// (OnProductionFactor) {factor.ToCSV()} ";
+        }
+
         /// <summary>
-        /// http経由でCSV情報を一括取得
+        /// CSV情報の一括取得
         /// </summary>
+        /// <param name="createFunc">新規インスタンス取得用のメソッド</param>
+        /// <param name="callback">変換後に受け取る関数</param>
+        /// <param name="uriPathWithEndSlash">URLに含めるオプション末尾に/をつけること</param>
         /// <returns></returns>
-        public async Task loadCsvByHttp()
+        public async Task loadCsvByHttp(Func<IParseable> createFunc, Action<IParseable> callback, string uriPathWithEndSlash="")
         {
             //CSV情報の一括取得
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
-            var url = $"http://{new Uri(NavMgr.Uri).Host}/{macListStr}/backup/_{DateTime.Now.Ticks}";
+            var url = $"http://{new Uri(NavMgr.Uri).Host}/{uriPathWithEndSlash}{macListStr}/backup/_{DateTime.Now.Ticks}";
             using (var stream = await Http.GetStreamAsync(url))
             using (var sr = new System.IO.StreamReader(stream))
             {
@@ -97,9 +98,13 @@ namespace MiotoBlazorClient
                     if (line == null) { break; }
                     try
                     {
-                        var cycle = CycleTime.Parse(line);
-                        if (cycle == null) { continue; }
-                        OnCycleAry(cycle);
+                        var item = createFunc();
+                        try
+                        {
+                            item.ParseInto(line);
+                        }catch(Exception e) { continue; }
+                        callback(item);
+
                         if (DateTime.Now > dt)
                         {
                             dt = DateTime.Now.AddSeconds(1);
@@ -123,14 +128,28 @@ namespace MiotoBlazorClient
         protected async Task socketListener()
         {
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
-            using (var csvSocket = new CsvCashSocket(NavMgr, macListStr))
+            using (wsWorker = new SocketWorker($"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/"))
             {
                 try
                 {
                     //tickAndDisposeTriggerで処理を抜けるためWhenAnyを用いる
                     //WhenAllだとソケット待機が終わらないため
                     await Task.WhenAny(
-                            csvSocket.connectAsync(OnCycleAry),
+                            wsWorker.connectAsync(msg => {
+                                if (msg[0] != '!')//Cycle情報は従来どおり
+                                {
+                                    OnCycle(CycleTime.Parse(msg));
+                                    return;
+                                }
+                                //サイクル情報以外は先頭に!と識別情報をつける
+                                //!OnProductionFactor,4,1,81.....
+                                if (msg.Contains($"!{ProductionFactor.KEY}"))
+                                {
+                                    var factor = new ProductionFactor();
+                                    factor.ParseInto(msg.Replace($"!{ProductionFactor.KEY},", ""));
+                                    OnProductionFactor(factor);
+                                }
+                            }),
                             tickAndDisposeTrigger()
                         );
                 }
@@ -140,6 +159,14 @@ namespace MiotoBlazorClient
                     this.StateHasChanged();
                 }
             }
+        }
+
+        protected async Task Send(ProductionFactor factor)
+        {
+            if (wsWorker == null) { return; }
+            if (wsWorker.state != System.Net.WebSockets.WebSocketState.Open) { return; }
+            var json = JsonSerializer.Serialize(factor);
+            await wsWorker.SendData(json);
         }
 
         /// <summary>
@@ -221,22 +248,12 @@ namespace MiotoBlazorClient
             //パネル内の子機表示順序でmac一覧を作成
             foreach (var mac in targetMacList)
             {
+                var panel = factory();
+                panel.title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault();
+                panel.mac = mac;
                 //子機情報を構成する小パネルを作成
-                listPanelModel.Add(new PanelModel()
-                {
-                    title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault(),
-                    mac = mac
-                });
+                listPanelModel.Add(panel);
             }
-        }
-
-        /// <summary>
-        /// デバッグ用情報設定支援
-        /// </summary>
-        /// <param name="msg"></param>
-        private void t(string msg)
-        {
-            debugMsg += $"{msg} {DateTime.Now.ToLongTimeString()} //";
         }
 
         /// <summary>

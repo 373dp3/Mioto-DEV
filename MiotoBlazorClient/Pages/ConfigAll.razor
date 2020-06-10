@@ -329,7 +329,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await ConfigSingleton.getInstance().getConsigAsync(NavMgr, c =>
+        await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c =>
         {
             config = c;
             this.StateHasChanged();
