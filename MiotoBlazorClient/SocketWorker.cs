@@ -52,7 +52,8 @@ namespace MiotoBlazorClient
         }
 
         Action<string> callback = null;
-        private byte[] buffer = new byte[1024 * 1024];
+        public const int WebSocketBufferSize = 1024 * 1024;
+        private byte[] buffer = new byte[WebSocketBufferSize];
         bool isActive = false;
 
         public async Task connectAsync<T>(Action<T> action)
@@ -61,7 +62,6 @@ namespace MiotoBlazorClient
                 action(JsonSerializer.Deserialize<T>(msg));
             });
         }
-
         public async Task connectAsync(Action<string> func)
         {
             callback = func;
@@ -72,7 +72,7 @@ namespace MiotoBlazorClient
             //接続待機
             while (ws.State == WebSocketState.Connecting) { Thread.Sleep(200); }
 
-            var buffer = new byte[1024 * 1024];
+            var buffer = new byte[WebSocketBufferSize];
             CancellationToken token = tokenSource.Token;
             token.ThrowIfCancellationRequested();
             isActive = true;

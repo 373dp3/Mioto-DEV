@@ -15,7 +15,12 @@ namespace MiotoBlazorClient
         {
             base.updateCycleTime(ct);
 
-            if(ct.ct01 > smallStopLowerLimitSec)
+            if (
+                (ct.ct01 > smallStopLowerLimitSec) &&
+                (this.listProductionFactor
+                    .Where(q=>q.status == MiotoServer.DB.ProductionFactor.Status.START_PRODUCTION)
+                    .Where(q => q.isInnerTimeRange(ct) == true).Count() > 0)
+                )
             {
                 listSmallStop.Add(ct);
                 listSmallStop = listSmallStop

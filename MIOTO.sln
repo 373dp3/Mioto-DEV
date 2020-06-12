@@ -31,7 +31,7 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "YoloJsonClientPy", "YoloJso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KmeansTool", "KmeansTool\KmeansTool.csproj", "{A94DF807-B568-4EF9-B2C7-91641CA58BF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiotoBlazorClient", "MiotoBlazorClient\MiotoBlazorClient.csproj", "{4E8121C0-20C6-4828-BB7C-7422247A4199}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiotoBlazorClient", "MiotoBlazorClient\MiotoBlazorClient.csproj", "{4E8121C0-20C6-4828-BB7C-7422247A4199}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

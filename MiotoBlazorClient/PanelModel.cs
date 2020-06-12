@@ -28,10 +28,11 @@ namespace MiotoBlazorClient
         }
         public double runSec { get; set; } = 0;
 
-        public string getRunSecStr()
+        public string getRunSecStr(ProductionFactor factor = null)
         {
             var offset = 0.0d;
-            if ((lastCycleTime != null) && (status == RunOrStop.RUN))
+            if ((lastCycleTime != null) && (status == RunOrStop.RUN)
+                && (factor!=null) && (factor.status == ProductionFactor.Status.START_PRODUCTION))
             {
                 offset = (DateTime.Now - lastCycleTime.createDt).TotalSeconds;
             }
@@ -49,10 +50,11 @@ namespace MiotoBlazorClient
         }
 
         public double stopSec { get; set; } = 0;
-        public string getStopSecStr()
+        public string getStopSecStr(ProductionFactor factor = null)
         {
             var offset = 0.0d;
-            if ((lastCycleTime != null) && (status == RunOrStop.STOP))
+            if ((lastCycleTime != null) && (status == RunOrStop.STOP)
+                && (factor != null) && (factor.status == ProductionFactor.Status.START_PRODUCTION))
             {
                 offset = (DateTime.Now - lastCycleTime.createDt).TotalSeconds;
             }
@@ -66,6 +68,11 @@ namespace MiotoBlazorClient
         public double bekidou
         {
             get {
+                if(productionHelper.list.Select(q => q.dekidaka).Sum() == 0)
+                {
+                    return 0;
+                }
+                //各生産要因ごとの加重平均
                 return productionHelper.list.Select(q => q.GetKadouritsu() * q.dekidaka).Sum()
                     / productionHelper.list.Select(q => q.dekidaka).Sum();
             }
@@ -112,7 +119,7 @@ namespace MiotoBlazorClient
             //サイクルタイム、可動率計算
             productionHelper.update(ct);
         }
-        public string getBekidouStr()
+        public string GetMtRatio()
         {
             var sum = stopSec + runSec;
             if (sum == 0) { return "-"; }
@@ -146,15 +153,21 @@ namespace MiotoBlazorClient
             productionHelper.SortAndSetEndTicks();
         }
 
-
+        public IReadOnlyList<ProductionFactor> listProductionFactor { 
+            get
+            {
+                return productionHelper.list;
+            } 
+        }
+        
         private class ProductionFactorHelper
         {
             public List<ProductionFactor> list { get; set; } = new List<ProductionFactor>();
             public void update(CycleTime cycle)
             {
-                foreach(var item in list)
+                foreach(var factor in list)
                 {
-                    item.updateByCycle(cycle);
+                    factor.updateByCycle(cycle);
                 }
             }
 

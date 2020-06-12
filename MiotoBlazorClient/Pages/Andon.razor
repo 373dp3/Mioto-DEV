@@ -7,51 +7,60 @@
 
 @if (listPanelModel.Count > 0)
 {
-    <div class="container-fluid">
+    <div class="container-fluid p-0">
         <h3>@panelNameOrder</h3>
         <div class="row">
             @foreach (var item in listPanelModel)
             {
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <a class="card" href="sensor/@(item.mac)/">
-                        @if (item.status == PanelModel.RunOrStop.RUN)
-                        {
-                            <div class="card-header bg-primary">
-                                <div class="text-truncate text-white">@(item.title)</div>
-                            </div>
-                        }
-                        else if (item.status == PanelModel.RunOrStop.STOP)
-                        {
-                            <div class="card-header bg-danger">
-                                <div class="text-truncate text-white">@(item.title)</div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="card-header">
-                                <small>@(item.title)</small>
-                            </div>
-                        }
-                        <table class="table mb-0">
-                            <tr>
-                                <td><small>出来高</small></td>
-                                <td class="text-right"><span>@(item.dekidaka)</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>MT率</small></td>
-                                <td class="text-right"><span>@(item.getBekidouStr())</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>停止</small></td>
-                                <td class="text-right"><span>@(item.getStopSecStr())</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>稼働</small></td>
-                                <td class="text-right"><span>@(item.getRunSecStr())</span></td>
-                            </tr>
-                        </table>
-                    </a>
-                </div>
+                var factor = item.listProductionFactor.OrderByDescending(q => q.stTicks).FirstOrDefault();
+                var att = "";
+                var factorName = "生産情報未入力";
+                if (factor != null)
+                {
+                    if (factor.memo.Length > 0)
+                    {
+                        factorName = factor.memo;
+                    }
+                    else
+                    {
+                        factorName = ProductionFactor.GetStatusStr(factor.status, true);
+                    }
+                }
+                else
+                {
+                    factor = new ProductionFactor();
+                }
+                att = "bg" + ButtonAttr.GetBgCode(factor.status) + " " + ButtonAttr.GetTextCode(factor.status);
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 p-1">
+                <a  href="sensor/@(item.mac)/" class="card border@(ButtonAttr.GetBgCode(factor.status)) my-1">
+                    @if ((item.status == PanelModel.RunOrStop.STOP)
+                        && (factor.status == ProductionFactor.Status.START_PRODUCTION))
+                    {
+                        att = " bg-light text-dark";
+                    }
+                    <div class="card-header @att text-center text-truncate pt-1 pb-0">
+                        <div class="@att text-center text-truncate">@(item.title)<br /><small>@factorName</small></div>
+                    </div>
+                    <table class="table mb-0">
+                        <tr>
+                            <td><small>出来高</small></td>
+                            <td class="text-right"><span>@(item.dekidaka)</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>可動率</small></td>
+                            <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>停止</small></td>
+                            <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
+                        </tr>
+                        <tr>
+                            <td><small>稼働</small></td>
+                            <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
+                        </tr>
+                    </table>
+                </a>
+            </div>
 
             }
         </div>

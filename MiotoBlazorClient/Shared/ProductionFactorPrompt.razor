@@ -1,0 +1,89 @@
+﻿<div class="@classStr">
+    <div class="card @borderStr">
+
+        @if (factor.endTicks == long.MaxValue)
+        {
+            if (panel.status == PanelModel.RunOrStop.RUN)
+            {
+        <div class="card-header bg@(ButtonAttr.GetBgCode(factor.status)) @(ButtonAttr.GetTextCode(factor.status)) text-truncate">
+            @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+        </div>
+            }
+            else
+            {
+    <div class="card-header bg-light text-truncate">
+        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+    </div>
+            }
+        }
+        else
+        {
+    <div class="card-header bg@(ButtonAttr.GetBgCode(factor.status)) @(ButtonAttr.GetTextCode(factor.status)) text-truncate">
+        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+    </div>
+        }
+        <table class="table mb-0">
+            <tbody>
+                @if (factor.endTicks == long.MaxValue)
+                {
+                    <tr>
+                        <td><small>開始</small></td>
+                        <td class="text-right">@((new DateTime(factor.stTicks).ToString("HH:mm")))</td>
+                    </tr>
+                    <tr>
+                        <td><small>時間</small></td>
+                        <td class="text-right">@(factor.GetDuration())</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td class="" colspan="2">
+                            @((new DateTime(factor.stTicks).ToString("HH:mm"))) ～ @((new DateTime(factor.endTicks).ToString("HH:mm")))
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><small>時間</small></td>
+                        <td class="text-right">@(factor.GetDuration())</td>
+                    </tr>
+
+                }
+                @if (factor.status == ProductionFactor.Status.START_PRODUCTION)
+                {
+                    <tr>
+                        <td><small>出来高</small></td>
+                        <td class="text-right">@(factor.dekidaka)</td>
+                    </tr>
+                    <tr>
+                        <td><small>可動率</small></td>
+                        <td class="text-right">@((factor.GetKadouritsu() * 100.0).ToString("F1"))%</td>
+                    </tr>
+                    <tr>
+                        <td><small>標準 CT</small></td>
+                        <td class="text-right">@(factor.ct.ToString("F1"))</td>
+                    </tr>
+                    <tr>
+                        <td><small>平均 CT</small></td>
+                        <td class="text-right">@(factor.aveCt.ToString("F1"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div><!--card-->
+</div><!--col-->
+
+
+
+@code {
+    [Parameter]
+    public string classStr { get; set; }
+
+    [Parameter]
+    public string borderStr { get; set; } = "";
+
+    [Parameter]
+    public ProductionFactor factor { get; set; }
+
+    [Parameter]
+    public PanelModel panel { get; set; }
+}

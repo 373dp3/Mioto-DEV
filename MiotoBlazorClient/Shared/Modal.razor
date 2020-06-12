@@ -1,0 +1,109 @@
+﻿
+
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg@(Class)">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @if ((Attr != null) && (Attr.status == ProductionFactor.Status.START_PRODUCTION))
+            {
+                <EditForm Model="@factor" OnValidSubmit="SaveProduction">
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <table class="table m-0 p-0">
+                            <tr>
+                                <td><label>製造指示番号</label></td>
+                                <td><InputText @bind-Value="factor.memo" class="w-100" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>CT(秒)</label></td>
+                                <td><InputNumber @bind-Value="factor.ct" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn@(Class)" @onclick="SaveProduction">@(name)</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">キャンセル</button>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
+                <div class="modal-body">
+                    <p>@Text</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn@(Class)" @onclick="()=> Close(true)">@(name)</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">キャンセル</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+    public ProductionFactor factor { get; set; } = new ProductionFactor() { ct = 20 };
+
+    public string Title { get; set; } = "";
+    public string Text { get; set; } = "";
+    public string Class { get; set; } = "";
+
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+    public enum Result { CLOSE, OK}
+    public Result result { get; set; } = Result.CLOSE;
+    public Func<ButtonAttr, Task> OnClose { get; set; } = null;
+    public string name { get; set; } = "";
+    public ButtonAttr Attr;
+    public void Open(ButtonAttr Attr, Func<ButtonAttr, Task> onclose =null)
+    {
+        this.Attr = Attr;
+        name = Attr.name;
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        OnClose = onclose;
+
+        Title = Attr.name + "の確認";
+        Text = Attr.text;
+        Class = Attr.classStr;
+
+        StateHasChanged();
+    }
+    public void SaveProduction()
+    {
+        _ = Close(true);
+    }
+    public async Task Close(bool isOk=false)
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        if (isOk)
+        {
+            result = Result.OK;
+        }
+        else
+        {
+            result = Result.CLOSE;
+        }
+        if (OnClose != null)
+        {
+            await OnClose(Attr);
+        }
+        StateHasChanged();
+    }
+}

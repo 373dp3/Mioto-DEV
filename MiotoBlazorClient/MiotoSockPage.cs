@@ -80,7 +80,12 @@ namespace MiotoBlazorClient
 
         public void OnProductionFactor(ProductionFactor factor)
         {
-            debugMsg += $"// (OnProductionFactor) {factor.ToCSV()} ";
+            debugMsg += $"/1/ (OnProductionFactor) {factor.ToCSV()} ";
+            if (listPanelModel == null) return;
+            var ans =listPanelModel.Where(q => q.mac == factor.mac).FirstOrDefault();
+            if((ans == null) || (ans.mac == 0)) { return; }
+            ans.SetProductionFactor(factor);
+            this.StateHasChanged();
         }
 
         /// <summary>

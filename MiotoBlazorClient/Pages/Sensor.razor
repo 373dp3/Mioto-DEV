@@ -3,82 +3,233 @@
 @inject NavigationManager NavMgr
 @implements IDisposable
 @inherits MiotoSockPage
+@code{
+    public string classStr = "col-xl-2 col-lg-3 col-md-4 col-sm-6 p-1";
+}
+
+<p>@debugMsg</p>
 
 @if (listPanelModel.Count > 0)
 {
-    <div class="container-fluid">
-        <div class="row">
-            @foreach (var itemBase in listPanelModel)
-            {
-                var item = (PanelModelSmallStop)itemBase;
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <div class="card">
-                        @if (item.status == PanelModel.RunOrStop.RUN)
-                        {
-                            <div class="card-header bg-primary">
-                                <div class="text-truncate text-white">@(item.title)</div>
-                            </div>
-                        }
-                        else if (item.status == PanelModel.RunOrStop.STOP)
-                        {
-                            <div class="card-header bg-danger">
-                                <div class="text-truncate text-white">@(item.title)</div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="card-header">
-                                <small>@(item.title)</small>
-                            </div>
-                        }
-                    <table class="table mb-0">
-                        <tr>
-                            <td><small>出来高</small></td>
-                            <td class="text-right"><span>@(item.dekidaka)</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>信号数</small></td>
-                            <td class="text-right"><span>@(item.signalNum)</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>可動率</small></td>
-                            <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>MT率</small></td>
-                            <td class="text-right"><span>@(item.getBekidouStr())</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>停止</small></td>
-                            <td class="text-right"><span>@(item.getStopSecStr())</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>稼働</small></td>
-                            <td class="text-right"><span>@(item.getRunSecStr())</span></td>
-                        </tr>
-                        @foreach (var cycle in item.listSmallStop)
-                        {
+<div class="container-fluid m-0 p-0">
+    @foreach (var itemBase in listPanelModel)
+    {
+        var item = (PanelModelSmallStop)itemBase;
+        <h3 class="mt-3">現在の生産状況 @(item.title)</h3>
+        <ul>
+            <li>ブラウザの生産開始ボタンが押される前に作業を開始した生産情報は省かれます。</li>
+            <li>可動率、平均CTは生産開始ボタンを押してからの経過時間に対する出来高で求めています。</li>
+            <li>可動率、平均CTの値が異常な場合はパソコンの時刻を合わせて改めてお試しください。</li>
+        </ul>
+        @if (true)
+        {
+            ProductionFactor factor = new ProductionFactor();
+            <div class="row">
+                @if (item.listProductionFactor.Count > 0)
+                {
+                    factor = item.listProductionFactor.OrderByDescending(q => q.stTicks).FirstOrDefault();
+                    <ProductionFactorPrompt classStr="@classStr"
+                                            factor="factor"
+                                            panel="item"
+                                            borderStr="@("border"+ButtonAttr.GetBgCode(factor.status)+" my-1")" />
+                }
+                <div class="@classStr">
+                    <div class="card my-1">
+                        <div class="card-header">
+                            情報登録
+                        </div>
+                        <table class="table mb-0">
+                            <tbody>
+                                @foreach (var btn in GetButtonAttrs(factor.status))
+                                {
+                                    <tr>
+                                        <td>
+                                            <button class="btn btn@(btn.classStr) w-100"
+                                                    @onclick="()=> {
+                                                                        btn.mac= item.mac;
+                                                                        modal.Open(btn, OnCloseModal);
+                                                                      }">
+                                                @(btn.name)
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div><!--row-->
+
+            <h3 class="mt-3">1日分の生産情報</h3>
+            <ul>
+                <li>可動率は標準CTｘ出来高の値を、該当期間の所要時間で割った比率です。</li>
+            </ul>
+            <div class="row">
+                <div class="@classStr">
+                    <div class="card my-1">
+                        <div class="card-header text-truncate">
+                            @(item.title)
+                        </div>
+                        <table class="table mb-0">
                             <tr>
-                                <td colspan="2">@(cycle.dt.ToShortTimeString()) / @((cycle.ct01/60.0).ToString("F1"))分</td>
+                                <td><small>出来高</small></td>
+                                <td class="text-right"><span>@(item.dekidaka)</span></td>
                             </tr>
-                        }
-                    </table>
-                        <button type="button" class="btn btn-primary" 
-                                @onclick="async ()=> { await SetProductionFactor(item, ProductionFactor.Status.START_PRODUCTION); }">生産開始</button>
+                            <tr>
+                                <td><small>信号数</small></td>
+                                <td class="text-right"><span>@(item.signalNum)</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>可動率</small></td>
+                                <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>MT率</small></td>
+                                <td class="text-right"><span>@(item.GetMtRatio())</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>停止</small></td>
+                                <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>稼働</small></td>
+                                <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="@classStr">
+                    <div class="card my-1">
+                        <div class="card-header text-truncate">
+                            停止情報
+                        </div>
+                        <table class="table mb-0">
+                            @if (item.listSmallStop.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center">1分以上の情報はありません。</td>
+                                </tr>
+                            }
+                            @foreach (var cycle in item.listSmallStop)
+                            {
+                                <tr>
+                                    <td>@(cycle.dt.ToShortTimeString())</td>
+                                    <td class="text-right">@((cycle.ct01/60.0).ToString("F1"))分</td>
+                                </tr>
+                            }
+                        </table>
                     </div>
                 </div>
 
-            }
-        </div>
-        <div class="mt-3"><a class="btn btn-secondary" href="">一覧へ戻る</a></div>
-    </div><!-- container-fluid -->
+                @foreach (var factor2 in item.listProductionFactor
+                      .Where(q => q.endTicks != long.MaxValue)
+                      .OrderByDescending(q => q.stTicks))
+                {
+                    <ProductionFactorPrompt classStr="@classStr"
+                                            factor="factor2"
+                                            panel="item"
+                                            borderStr="@("border"+ButtonAttr.GetBgCode(factor2.status)+" my-1")" />
+                }
+            </div><!--row-->
+        }
+
+
+    }
+</div>
+    <div class="my-3"><a class="btn btn-secondary" href="">一覧へ戻る</a></div>
 }
-<p>@debugMsg</p>
-<p>@tmp</p>
+<Modal @ref="modal" /><!--確認表示用-->
+
 
 @code{
     [Parameter]
     public string idStr { get; set; } = null;
+
+    private Modal modal { get; set; }
+
+    /// <summary>
+    /// 生産要因登録ボタンのフロー定義
+    /// </summary>
+    /// <param name="status"></param>
+    /// <returns></returns>
+    public List<ButtonAttr> GetButtonAttrs(ProductionFactor.Status status)
+    {
+        switch (status)
+        {
+            case ProductionFactor.Status.NOOP:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
+                        new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
+                        new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
+                    };
+            case ProductionFactor.Status.START_PRODUCTION:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_REST),
+                        new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
+                        new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
+                        new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
+                    };
+            case ProductionFactor.Status.WAITING_FOR_PARTS:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
+                        new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
+                    };
+
+
+            case ProductionFactor.Status.START_PLANNED_STOP:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_CHANGE_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
+                    };
+            case ProductionFactor.Status.START_CHANGE_PRODUCTION:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.FINISH_CHANGE_PRODUCTION),
+                    };
+            case ProductionFactor.Status.START_BRAKEDOWN_STOP:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
+                        new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
+                    };
+            case ProductionFactor.Status.START_REPAIRING:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.FINISH_REPAIRING),
+                    };
+
+            case ProductionFactor.Status.START_REST:
+            case ProductionFactor.Status.FINISH_REPAIRING:
+            case ProductionFactor.Status.FINISH_CHANGE_PRODUCTION:
+                return new List<ButtonAttr>()
+                    {
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
+                        new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
+                        new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
+                    };
+        }
+
+        /*/
+        //ライン内
+
+            //ライン外
+
+            //非常時
+            START_REPAIRING = 800,
+            FINISH_REPAIRING = 900,
+         //*/
+
+        return new List<ButtonAttr>();
+    }
 
     /// <summary>
     /// 全ての処理の起点
@@ -90,8 +241,29 @@
         await init(NavMgr, Http, idStr, Mode.SINGLE, PanelModelSmallStop.Create);
     }
 
-    public async Task SetProductionFactor(PanelModel item, ProductionFactor.Status status)
+    /// <summary>
+    /// ダイアログボックスが閉じた後の処理
+    /// </summary>
+    /// <param name="btn"></param>
+    /// <returns></returns>
+    public async Task OnCloseModal(ButtonAttr btn)
     {
-        await this.Send(new ProductionFactor() { status = status, mac=item.mac, ct=20.0 });
+        if (modal.result == Modal.Result.OK)
+        {
+            //[TODO] FINISH_CHANGE_PRODUCTION -> START_PLANNED_STOPへの変更処理の必要性を検討すること。
+            var ct = ProductionFactor.CT_NOOP;
+            var memo = "";
+            if(btn.status  == ProductionFactor.Status.START_PRODUCTION)
+            {
+                ct = modal.factor.ct;
+                memo = modal.factor.memo;
+
+            }
+
+            await this.Send(new ProductionFactor() 
+                { status = btn.status, mac = btn.mac, ct = ct, memo = memo }
+            );
+        }
     }
+
 }
