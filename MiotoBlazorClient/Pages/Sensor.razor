@@ -1,4 +1,5 @@
 ﻿@page "/sensor/{idStr}/"
+@page "/sensor/{idStr}/{dateOrder}"
 @inject HttpClient Http
 @inject NavigationManager NavMgr
 @implements IDisposable
@@ -11,141 +12,173 @@
 
 @if (listPanelModel.Count > 0)
 {
-<div class="container-fluid m-0 p-0">
-    @foreach (var itemBase in listPanelModel)
-    {
-        var item = (PanelModelSmallStop)itemBase;
-        <h3 class="mt-3">現在の生産状況 @(item.title)</h3>
-        <ul>
-            <li>ブラウザの生産開始ボタンが押される前に作業を開始した生産情報は省かれます。</li>
-            <li>可動率、平均CTは生産開始ボタンを押してからの経過時間に対する出来高で求めています。</li>
-            <li>可動率、平均CTの値が異常な場合はパソコンの時刻を合わせて改めてお試しください。</li>
-        </ul>
-        @if (true)
+    <div class="container-fluid m-0 p-0">
+        @foreach (var itemBase in listPanelModel)
         {
-            ProductionFactor factor = new ProductionFactor();
-            <div class="row">
-                @if (item.listProductionFactor.Count > 0)
+            var item = (PanelModelSmallStop)itemBase;
+
+            @if (true)
+            {
+                ProductionFactor factor = new ProductionFactor();
+
+                if (dateOrder == null)
                 {
-                    factor = item.listProductionFactor.OrderByDescending(q => q.stTicks).FirstOrDefault();
-                    <ProductionFactorPrompt classStr="@classStr"
-                                            factor="factor"
-                                            panel="item"
-                                            borderStr="@("border"+ButtonAttr.GetBgCode(factor.status)+" my-1")" />
-                }
-                <div class="@classStr">
-                    <div class="card my-1">
-                        <div class="card-header">
-                            情報登録
-                        </div>
-                        <table class="table mb-0">
-                            <tbody>
-                                @foreach (var btn in GetButtonAttrs(factor.status))
-                                {
-                                    <tr>
-                                        <td>
-                                            <button class="btn btn@(btn.classStr) w-100"
-                                                    @onclick="()=> {
+                    <h3 class="mt-3">現在の生産状況 @(item.title)</h3>
+                    <ul>
+                        <li>ブラウザの生産開始ボタンが押される前に作業を開始した生産情報は省かれます。</li>
+                        <li>可動率、平均CTは生産開始ボタンを押してからの経過時間に対する出来高で求めています。</li>
+                        <li>可動率、平均CTの値が異常な場合はパソコンの時刻を合わせて改めてお試しください。</li>
+                    </ul>
+                    <div class="row">
+                        @if (item.listProductionFactor.Count > 0)
+                        {
+                            factor = item.listProductionFactor.OrderByDescending(q => q.stTicks).FirstOrDefault();
+                            <ProductionFactorPrompt classStr="@classStr"
+                                                    factor="factor"
+                                                    panel="item"
+                                                    borderStr="@("border"+ButtonAttr.GetBgCode(factor.status)+" my-1")" />
+                        }
+                        <div class="@classStr">
+                            <div class="card my-1">
+                                <div class="card-header">
+                                    情報登録
+                                </div>
+                                <table class="table mb-0">
+                                    <tbody>
+                                        @foreach (var btn in GetButtonAttrs(factor.status))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <button class="btn btn@(btn.classStr) w-100"
+                                                            @onclick="()=> {
                                                                         btn.mac= item.mac;
                                                                         modal.Open(btn, OnCloseModal);
                                                                       }">
-                                                @(btn.name)
-                                            </button>
-                                        </td>
+                                                        @(btn.name)
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div><!--row-->
+                }
+
+                if (dateOrder == null)
+                {
+                    <h3 class="mt-3">1日分の生産情報</h3>
+                }
+                else
+                {
+                    <h3 class="mt-3">@(currentDate.ToString("yyyy/MM/dd"))の生産情報</h3>
+                }
+                <ul>
+                    <li>可動率は標準CTｘ出来高の値を、該当期間の所要時間で割った比率です。</li>
+                </ul>
+                <div class="row">
+                    <div class="@classStr">
+                        <div class="card my-1">
+                            <div class="card-header text-truncate">
+                                @(item.title)
+                            </div>
+                            <table class="table mb-0">
+                                <tr>
+                                    <td><small>出来高</small></td>
+                                    <td class="text-right"><span>@(item.dekidaka)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><small>信号数</small></td>
+                                    <td class="text-right"><span>@(item.signalNum)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><small>可動率</small></td>
+                                    <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><small>MT率</small></td>
+                                    <td class="text-right"><span>@(item.GetMtRatio())</span></td>
+                                </tr>
+                                <tr>
+                                    <td><small>停止</small></td>
+                                    <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
+                                </tr>
+                                <tr>
+                                    <td><small>稼働</small></td>
+                                    <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="@classStr">
+                        <div class="card my-1">
+                            <div class="card-header text-truncate">
+                                停止情報
+                            </div>
+                            <table class="table mb-0">
+                                @if (item.listSmallStop.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="2" class="text-center">1分以上の情報はありません。</td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div><!--row-->
-
-            <h3 class="mt-3">1日分の生産情報</h3>
-            <ul>
-                <li>可動率は標準CTｘ出来高の値を、該当期間の所要時間で割った比率です。</li>
-            </ul>
-            <div class="row">
-                <div class="@classStr">
-                    <div class="card my-1">
-                        <div class="card-header text-truncate">
-                            @(item.title)
+                                @foreach (var cycle in item.listSmallStop)
+                                {
+                                    <tr>
+                                        <td>@(cycle.dt.ToShortTimeString())</td>
+                                        <td class="text-right">@((cycle.ct01/60.0).ToString("F1"))分</td>
+                                    </tr>
+                                }
+                            </table>
                         </div>
-                        <table class="table mb-0">
-                            <tr>
-                                <td><small>出来高</small></td>
-                                <td class="text-right"><span>@(item.dekidaka)</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>信号数</small></td>
-                                <td class="text-right"><span>@(item.signalNum)</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>可動率</small></td>
-                                <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>MT率</small></td>
-                                <td class="text-right"><span>@(item.GetMtRatio())</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>停止</small></td>
-                                <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
-                            </tr>
-                            <tr>
-                                <td><small>稼働</small></td>
-                                <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
-                            </tr>
-                        </table>
                     </div>
-                </div>
-                <div class="@classStr">
-                    <div class="card my-1">
-                        <div class="card-header text-truncate">
-                            停止情報
-                        </div>
-                        <table class="table mb-0">
-                            @if (item.listSmallStop.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="2" class="text-center">1分以上の情報はありません。</td>
-                                </tr>
-                            }
-                            @foreach (var cycle in item.listSmallStop)
-                            {
-                                <tr>
-                                    <td>@(cycle.dt.ToShortTimeString())</td>
-                                    <td class="text-right">@((cycle.ct01/60.0).ToString("F1"))分</td>
-                                </tr>
-                            }
-                        </table>
-                    </div>
-                </div>
 
-                @foreach (var factor2 in item.listProductionFactor
-                      .Where(q => q.endTicks != long.MaxValue)
-                      .OrderByDescending(q => q.stTicks))
-                {
-                    <ProductionFactorPrompt classStr="@classStr"
-                                            factor="factor2"
-                                            panel="item"
-                                            borderStr="@("border"+ButtonAttr.GetBgCode(factor2.status)+" my-1")" />
-                }
-            </div><!--row-->
+                    @foreach (var factor2 in item.listProductionFactor
+                   .Where(q => q.endTicks != long.MaxValue)
+                   .OrderByDescending(q => q.stTicks))
+                    {
+                        <ProductionFactorPrompt classStr="@classStr"
+                                                factor="factor2"
+                                                panel="item"
+                                                borderStr="@("border"+ButtonAttr.GetBgCode(factor2.status)+" my-1")" />
+                    }
+                </div><!--row-->
+            }
+
+
         }
-
-
-    }
-</div>
+    </div>
     <div class="my-3"><a class="btn btn-secondary" href="">一覧へ戻る</a></div>
 }
 <Modal @ref="modal" /><!--確認表示用-->
 
+<ModalDatePicker @ref="datepicker" CurrentDate="currentDate"></ModalDatePicker>
+<button class="btn btn-primary"
+        @onclick="@(()=> {
+                        datepicker.Open(e=> {
+                            dateOrder = e.ToString("yyyyMMdd");
+                            NavMgr.NavigateTo($"sensor/{idStr}/{dateOrder}");
+                        });
+                    })">
+    日付選択
+</button>
+<button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{idStr}/"); })">
+    本日のデータ
+</button>
+<p>@dateOrder</p>
 
 @code{
     [Parameter]
     public string idStr { get; set; } = null;
+    [Parameter]
+    public string dateOrder { get; set; } = null;
 
     private Modal modal { get; set; }
+
+    public ModalDatePicker datepicker { get; set; } = null;
+    public DateTime currentDate { get; set; } = DateTime.Now;
+
 
     /// <summary>
     /// 生産要因登録ボタンのフロー定義
@@ -158,7 +191,7 @@
         {
             case ProductionFactor.Status.NOOP:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
@@ -166,7 +199,7 @@
                     };
             case ProductionFactor.Status.START_PRODUCTION:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_REST),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
@@ -174,7 +207,7 @@
                     };
             case ProductionFactor.Status.WAITING_FOR_PARTS:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
@@ -183,26 +216,26 @@
 
             case ProductionFactor.Status.START_PLANNED_STOP:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_CHANGE_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
                     };
             case ProductionFactor.Status.START_CHANGE_PRODUCTION:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.FINISH_CHANGE_PRODUCTION),
                     };
             case ProductionFactor.Status.START_BRAKEDOWN_STOP:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
                     };
             case ProductionFactor.Status.START_REPAIRING:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.FINISH_REPAIRING),
                     };
 
@@ -210,23 +243,13 @@
             case ProductionFactor.Status.FINISH_REPAIRING:
             case ProductionFactor.Status.FINISH_CHANGE_PRODUCTION:
                 return new List<ButtonAttr>()
-                    {
+        {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
                         new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
                     };
         }
-
-        /*/
-        //ライン内
-
-            //ライン外
-
-            //非常時
-            START_REPAIRING = 800,
-            FINISH_REPAIRING = 900,
-         //*/
 
         return new List<ButtonAttr>();
     }
@@ -238,7 +261,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await init(NavMgr, Http, idStr, Mode.SINGLE, PanelModelSmallStop.Create);
     }
 
     /// <summary>
@@ -253,17 +275,42 @@
             //[TODO] FINISH_CHANGE_PRODUCTION -> START_PLANNED_STOPへの変更処理の必要性を検討すること。
             var ct = ProductionFactor.CT_NOOP;
             var memo = "";
-            if(btn.status  == ProductionFactor.Status.START_PRODUCTION)
+            if (btn.status == ProductionFactor.Status.START_PRODUCTION)
             {
                 ct = modal.factor.ct;
                 memo = modal.factor.memo;
-
             }
 
-            await this.Send(new ProductionFactor() 
-                { status = btn.status, mac = btn.mac, ct = ct, memo = memo }
+            await this.Send(new ProductionFactor()
+            { status = btn.status, mac = btn.mac, ct = ct, memo = memo }
             );
         }
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((dateOrder != null))
+        {
+            try
+            {
+                currentDate = DateTime.ParseExact(dateOrder, "yyyyMMdd", CultureInfo.InvariantCulture);
+
+                if (dateOrder.CompareTo(DateTime.Now.ToString("yyyyMMdd")) == 0)
+                {
+                    dateOrder = "";
+                }
+
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        else
+        {
+            currentDate = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd"));
+        }
+        await init(NavMgr, Http, idStr, Mode.SINGLE, PanelModelSmallStop.Create, dateOrder);
+
+        await base.OnParametersSetAsync();
+    }
 }

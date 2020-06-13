@@ -11,8 +11,31 @@ namespace MiotoBlazorClient
     public class PanelModel
     {     
         public string title { get; set; }
-        public enum RunOrStop { NOOP, RUN, STOP}
+        public long mac { get; set; } = 0;
+
         public RunOrStop status { get; private set; } = RunOrStop.NOOP;
+        public double runSec { get; set; } = 0;
+        public double stopSec { get; set; } = 0;
+        public long signalNum { get; private set; } = 0;
+        public CycleTime lastCycleTime { get; private set; } = new CycleTime();
+
+        private ProductionFactorHelper productionHelper = new ProductionFactorHelper();
+
+        /// <summary>
+        /// ページ遷移用に以前のページに関わる情報をクリアする
+        /// </summary>
+        public void ClearPrevInfo()
+        {
+            //title, macは保持する
+            status = RunOrStop.NOOP;
+            runSec = 0;
+            stopSec = 0;
+            signalNum = 0;
+            lastCycleTime = null;
+            productionHelper.list.Clear();
+        }
+
+        public enum RunOrStop { NOOP, RUN, STOP }
         public string getStatusString()
         {
             switch (status)
@@ -26,7 +49,6 @@ namespace MiotoBlazorClient
             }
             return "";
         }
-        public double runSec { get; set; } = 0;
 
         public string getRunSecStr(ProductionFactor factor = null)
         {
@@ -49,7 +71,6 @@ namespace MiotoBlazorClient
             return ts.ToString(@"h\:mm\:ss");
         }
 
-        public double stopSec { get; set; } = 0;
         public string getStopSecStr(ProductionFactor factor = null)
         {
             var offset = 0.0d;
@@ -61,7 +82,6 @@ namespace MiotoBlazorClient
             var ts = new TimeSpan(0, 0, (int)(stopSec + offset));
             return getSecString(ts);
         }
-        public long signalNum { get; private set; } = 0;
         public long dekidaka { 
             get { return productionHelper.list.Select(q => q.dekidaka).Sum(); }
         }
@@ -78,8 +98,6 @@ namespace MiotoBlazorClient
             }
         }
 
-        public CycleTime lastCycleTime { get; private set; } = null;
-        public long mac { get; set; } = 0;
 
         public virtual void updateCycleTime(CycleTime ct)
         {
@@ -132,7 +150,6 @@ namespace MiotoBlazorClient
         }
 
         #region 生産要因ごとの情報集計
-        private ProductionFactorHelper productionHelper = new ProductionFactorHelper();       
 
         /// <summary>
         /// 生産要因情報の一括追加(Http経由)

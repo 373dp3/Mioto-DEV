@@ -1,5 +1,7 @@
 ﻿@page "/andon/"
-@page "/andon/{panelIndexStr}/{panelNameOrder}"
+@page "/andon/{panelIndexStr}/"
+@page "/andon/{panelIndexStr}/{panelNameOrder}/"
+@page "/andon/{panelIndexStr}/{panelNameOrder}/{dateOrder}"
 @inject HttpClient Http
 @inject NavigationManager NavMgr
 @implements IDisposable
@@ -9,6 +11,7 @@
 {
     <div class="container-fluid p-0">
         <h3>@panelNameOrder</h3>
+        <p>@(currentDate.ToString("yyyy/MM/dd"))</p>
         <div class="row">
             @foreach (var item in listPanelModel)
             {
@@ -31,36 +34,73 @@
                     factor = new ProductionFactor();
                 }
                 att = "bg" + ButtonAttr.GetBgCode(factor.status) + " " + ButtonAttr.GetTextCode(factor.status);
-            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 p-1">
-                <a  href="sensor/@(item.mac)/" class="card border@(ButtonAttr.GetBgCode(factor.status)) my-1">
-                    @if ((item.status == PanelModel.RunOrStop.STOP)
-                        && (factor.status == ProductionFactor.Status.START_PRODUCTION))
-                    {
-                        att = " bg-light text-dark";
-                    }
-                    <div class="card-header @att text-center text-truncate pt-1 pb-0">
-                        <div class="@att text-center text-truncate">@(item.title)<br /><small>@factorName</small></div>
-                    </div>
-                    <table class="table mb-0">
-                        <tr>
-                            <td><small>出来高</small></td>
-                            <td class="text-right"><span>@(item.dekidaka)</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>可動率</small></td>
-                            <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>停止</small></td>
-                            <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
-                        </tr>
-                        <tr>
-                            <td><small>稼働</small></td>
-                            <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
-                        </tr>
-                    </table>
-                </a>
-            </div>
+                var battAtt = "text-muted";
+                var lqiAtt = "text-muted";
+
+                if (item.lastCycleTime.batt > config.alert.battGreen)
+                {
+                    battAtt = "text-primary";
+                }
+                else if (item.lastCycleTime.batt > config.alert.battRed)
+                {
+                    battAtt = "text-warning";
+                }
+                else if (item.lastCycleTime.batt > 0)
+                {
+                    battAtt = "text-danger";
+                }
+                if (item.lastCycleTime.lqi > config.alert.lqiGreen)
+                {
+                    lqiAtt = "text-primary";
+                }
+                else if (item.lastCycleTime.lqi > config.alert.lqiRed)
+                {
+                    lqiAtt = "text-warning";
+                }
+                else if (item.lastCycleTime.lqi > 0)
+                {
+                    lqiAtt = "text-danger";
+                }
+
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 p-1 ">
+                    <a href="sensor/@(item.mac)/@dateOrder" class="card border@(ButtonAttr.GetBgCode(factor.status)) my-1">
+                        @if ((item.status == PanelModel.RunOrStop.STOP)
+                            && (factor.status == ProductionFactor.Status.START_PRODUCTION))
+                        {
+                            att = " bg-light text-dark";
+                        }
+                        <div class="card-header @att text-center text-truncate pt-1 pb-0">
+                            <div class="@att text-center text-truncate">@(item.title)<br /><small>@factorName</small></div>
+                        </div>
+                        <table class="table mb-0">
+                            <tr>
+                                <td colspan="2" class="m-0 p-0 text-center">
+                                    <small>
+                                        <span class="oi oi-battery-full @battAtt"></span> @(item.lastCycleTime.batt.ToString("F1"))v　
+                                        <span class="oi oi-signal @lqiAtt"></span> @(item.lastCycleTime.lqi)　
+                                        <span class="oi oi-clock"></span> @(item.lastCycleTime.dt.ToString("H:mm"))
+                                    </small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><small>出来高</small></td>
+                                <td class="text-right"><span>@(item.dekidaka)</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>可動率</small></td>
+                                <td class="text-right"><span>@((item.bekidou * 100.0).ToString("F1"))%</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>停止</small></td>
+                                <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>稼働</small></td>
+                                <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
+                            </tr>
+                        </table>
+                    </a>
+                </div>
 
             }
         </div>
@@ -68,13 +108,30 @@
     </div><!-- container-fluid -->
 }
 <p>@debugMsg</p>
+<ModalDatePicker @ref="datepicker" CurrentDate="currentDate"></ModalDatePicker>
+<button class="btn btn-primary"
+        @onclick="@(()=> {
+                        datepicker.Open(e=> {
+                            dateOrder = e.ToString("yyyyMMdd");
+                            NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/{dateOrder}");
+                        });
+                    })">
+    日付選択
+</button>
+<button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/"); })">
+    本日のデータ
+</button>
 
 @code{
     [Parameter]
     public string panelNameOrder { get; set; } = null;
     [Parameter]
     public string panelIndexStr { get; set; } = null;
+    [Parameter]
+    public string dateOrder { get; set; } = null;
 
+    public ModalDatePicker datepicker { get; set; } = null;
+    public DateTime currentDate { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 全ての処理の起点
@@ -83,7 +140,30 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await init(NavMgr, Http, panelIndexStr, Mode.PANEL_LIST, PanelModel.Create);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await init(NavMgr, Http, panelIndexStr, Mode.PANEL_LIST, PanelModel.Create, dateOrder);
+
+        if (dateOrder != null)
+        {
+            try
+            {
+                currentDate = DateTime.ParseExact(dateOrder, "yyyyMMdd", CultureInfo.InvariantCulture);
+            }
+            catch (Exception e) { }
+            if (dateOrder.CompareTo(DateTime.Now.ToString("yyyyMMdd")) == 0)
+            {
+                dateOrder = "";
+            }
+        }
+        else
+        {
+            currentDate = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd"));
+        }
+
+        await base.OnParametersSetAsync();
     }
 
 }

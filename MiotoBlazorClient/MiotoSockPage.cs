@@ -20,7 +20,7 @@ namespace MiotoBlazorClient
         private NavigationManager NavMgr;
         private HttpClient Http;
         //表示順のMACアドレス一覧(loadPanelDefinitionの後に利用可能)
-        private List<long> targetMacList;
+        private List<long> targetMacList = new List<long>();
         public enum Mode { SINGLE, PANEL_LIST}
 
         Func<PanelModel> factory = null;
@@ -31,25 +31,42 @@ namespace MiotoBlazorClient
         /// </summary>
         /// <param name="mgr"></param>
         /// <param name="client"></param>
-        public async Task init(NavigationManager mgr, HttpClient client, string id, Mode mode, Func<PanelModel> factory)
+        public async Task init(NavigationManager mgr, HttpClient client, 
+            string id, Mode mode, Func<PanelModel> factory, string dateOrder=null)
         {
+            //ページ遷移の際に前ページの情報を破棄
+            //listPanelModel.Clear(); => チラツキ防止のため、直前にクリア
+            tokenSource.Cancel();
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+            wsWorker = null;
+            targetMacList.Clear();
+
+
+            //末尾にスラッシュがない場合の補足
+            if((dateOrder!=null) && (dateOrder[dateOrder.Length - 1] != '/')){
+                dateOrder += "/";
+            }
             NavMgr = mgr;
             Http = client;
             this.factory = factory;
-            Action<string> func = null;
+            Action<string> funcLoadPanel = null;
             switch (mode)
             {
                 case Mode.SINGLE:
-                    func = loadPanelSingleDefinition;
+                    funcLoadPanel = loadPanelSingleDefinition;
                     break;
                 case Mode.PANEL_LIST:
-                    func = loadPanelListDefinition;
+                    funcLoadPanel = loadPanelListDefinition;
                     break;
             }
             await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c => {
                 config = c;
-                func(id);//func呼び出し完了でlistPanelModelが実体化済み
 
+                //listPanelModeの実体化
+                funcLoadPanel(id);
+
+                //ProductionFactorの取得
                 _ = loadCsvByHttp(() => new ProductionFactor(),
                         q => {
                         var factor = (ProductionFactor)q;
@@ -58,10 +75,17 @@ namespace MiotoBlazorClient
                                 .FirstOrDefault()
                                 .SetProductionFactor(factor);
                         },
-                        $"{ProductionFactor.KEY}/");
+                        $"{ProductionFactor.KEY}/{dateOrder}");
 
-                _ = loadCsvByHttp(() => new CycleTime(), q => OnCycle((CycleTime)q));
-                _ = socketListener();
+                //サイクルタイム情報の取得
+                _ = loadCsvByHttp(() => new CycleTime(), q => OnCycle((CycleTime)q), dateOrder);
+
+                //今日の日付の場合に変更受信処理の登録
+                if((dateOrder == null) || (dateOrder.Length == 0))
+                {
+                    _ = socketListener();
+                }
+
             });
         }
 
@@ -129,7 +153,6 @@ namespace MiotoBlazorClient
                 }
             }
 
-            debugMsg = "";
             this.StateHasChanged();
         }
 
@@ -221,7 +244,7 @@ namespace MiotoBlazorClient
             }
 
             targetMacList = panel2idx.panel.listMac2Index.OrderBy(q => q.index).Select(q => q.mac).ToList();
-            updatePanel();
+            preparePanel();
         }
 
 
@@ -249,22 +272,32 @@ namespace MiotoBlazorClient
             }
             targetMacList = new List<long>();
             targetMacList.Add(id);
-            updatePanel();
+            preparePanel();
         }
 
         /// <summary>
         /// 子機ごとの表示パネルに子機名称、mac情報を設定
         /// </summary>
-        private void updatePanel()
+        private void preparePanel()
         {
             //パネル内の子機表示順序でmac一覧を作成
-            foreach (var mac in targetMacList)
+            if (listPanelModel.Count == 0)
             {
-                var panel = factory();
-                panel.title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault();
-                panel.mac = mac;
-                //子機情報を構成する小パネルを作成
-                listPanelModel.Add(panel);
+                foreach (var mac in targetMacList)
+                {
+                    var panel = factory();
+                    panel.title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault();
+                    panel.mac = mac;
+                    //子機情報を構成する小パネルを作成
+                    listPanelModel.Add(panel);
+                }
+            }
+            else
+            {
+                foreach(var panel in listPanelModel)
+                {
+                    panel.ClearPrevInfo();
+                }
             }
         }
 

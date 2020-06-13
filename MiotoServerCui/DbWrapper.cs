@@ -375,6 +375,7 @@ namespace MiotoServer
                     }
                     break;
             }
+            d(CommandText);
             if ((param.volume == Param.VOLUME.FINAL) && (param.type == Param.TYPE.TWE2525))
             {
                 var rs = conn.Query<latest2525>(CommandText);
@@ -441,11 +442,13 @@ namespace MiotoServer
             }
 
             //エンド指定が今日もしくはそれよりも未来であればtoを無指定に
-            if ((ymdList.Count == 2)
-                && (ymdList[1] >= Convert.ToUInt32(DateTime.Now.ToString("yyyyMMdd"))))
+            if ((ymdList.Count <= 2)
+                && (ymdList[ymdList.Count-1] >= Convert.ToUInt32(DateTime.Now.ToString("yyyyMMdd"))))
             {
                 to = long.MaxValue - 1;//MaxValueは検索失敗を示す無効値として使用しているの為、-1
             }
+
+
         }
 
         private ulong getMaxRowId()
