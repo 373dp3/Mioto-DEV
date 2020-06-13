@@ -362,7 +362,6 @@ namespace MiotoServer
                     }
                     break;
             }
-            d(CommandText);
             if ((param.volume == Param.VOLUME.FINAL) && (param.type == Param.TYPE.TWE2525))
             {
                 var rs = conn.Query<latest2525>(CommandText);

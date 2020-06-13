@@ -62,8 +62,10 @@
                     lqiAtt = "text-danger";
                 }
 
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 p-1 ">
-                    <a href="sensor/@(item.mac)/@dateOrder" class="card border@(ButtonAttr.GetBgCode(factor.status)) my-1">
+                <button class="btn col-xl-2 col-lg-3 col-md-4 col-sm-6 p-0 m-1 ">
+                    <div class="card border@(ButtonAttr.GetBgCode(factor.status)) m-0 p-0"
+                         @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{item.mac}/{dateOrder}"); })">
+
                         @if ((item.status == PanelModel.RunOrStop.STOP)
                             && (factor.status == ProductionFactor.Status.START_PRODUCTION))
                         {
@@ -99,8 +101,9 @@
                                 <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
                             </tr>
                         </table>
-                    </a>
-                </div>
+                        
+                    </div>
+                </button>
 
             }
         </div>

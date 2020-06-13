@@ -31,7 +31,7 @@ namespace MiotoBlazorClient
             runSec = 0;
             stopSec = 0;
             signalNum = 0;
-            lastCycleTime = null;
+            lastCycleTime = new CycleTime();
             productionHelper.list.Clear();
         }
 

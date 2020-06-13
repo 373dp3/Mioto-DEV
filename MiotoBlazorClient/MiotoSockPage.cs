@@ -44,7 +44,7 @@ namespace MiotoBlazorClient
 
 
             //末尾にスラッシュがない場合の補足
-            if((dateOrder!=null) && (dateOrder[dateOrder.Length - 1] != '/')){
+            if ((dateOrder!=null) && (dateOrder[dateOrder.Length - 1] != '/')){
                 dateOrder += "/";
             }
             NavMgr = mgr;
@@ -165,7 +165,6 @@ namespace MiotoBlazorClient
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
             using (wsWorker = new SocketWorker($"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/"))
             {
-                debugMsg = $"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/";
                 try
                 {
                     //tickAndDisposeTriggerで処理を抜けるためWhenAnyを用いる
