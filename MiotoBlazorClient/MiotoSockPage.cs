@@ -104,7 +104,7 @@ namespace MiotoBlazorClient
 
         public void OnProductionFactor(ProductionFactor factor)
         {
-            debugMsg += $"/1/ (OnProductionFactor) {factor.ToCSV()} ";
+            //debugMsg += $"/1/ (OnProductionFactor) {factor.ToCSV()} ";
             if (listPanelModel == null) return;
             var ans =listPanelModel.Where(q => q.mac == factor.mac).FirstOrDefault();
             if((ans == null) || (ans.mac == 0)) { return; }
@@ -165,6 +165,7 @@ namespace MiotoBlazorClient
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
             using (wsWorker = new SocketWorker($"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/"))
             {
+                debugMsg = $"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/";
                 try
                 {
                     //tickAndDisposeTriggerで処理を抜けるためWhenAnyを用いる

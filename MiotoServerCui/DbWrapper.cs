@@ -179,8 +179,8 @@ namespace MiotoServer
             //*/
 
         }
-        private Mutex wcMutex = new Mutex();
 
+        WebSocketMgr sockMgr = WebSocketMgr.getInstance();
         public void insertCsv(TweCtPacket packet, string csv)
         {
             var data = csv;
@@ -190,21 +190,8 @@ namespace MiotoServer
                 + packet.dt.Ticks + ", '" + data + "')";
             conn.Execute(query);
             updateDateFlg();
-            new Thread(async () => {
-                wcMutex.WaitOne();
-                try
-                {
-                    //[TODO]パラレル化による高速処理を。TCPでロストした時に足を引っ張られる可能性あり
-                    foreach (var worker in HttpWebsocketWorker.collectionWebSocketWorker)
-                    {
-                        await worker.TxCsvCtData(csv);
-                    }
-                }
-                finally
-                {
-                    wcMutex.ReleaseMutex();
-                }
-            }).Start();
+
+            sockMgr.fetchCsv(csv);
         }
 
         const int FLG_TWE = 2;

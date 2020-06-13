@@ -87,7 +87,7 @@ namespace MiotoServer
                         DbWrapper.getInstance().conn.Insert(factor);
 
                         //Echo back
-                        _ = TxDataAsync($"!{ProductionFactor.KEY},{factor.ToCSV()}");
+                        mgr.fetchProFactor($"!{ProductionFactor.KEY},{factor.ToCSV()}");
                         Program.d("set factor");
                     }
                     catch (Exception e) { }
@@ -96,6 +96,8 @@ namespace MiotoServer
                     break;
             }
         }
+
+        WebSocketMgr mgr = WebSocketMgr.getInstance();
 
         public async Task Start()
         {
