@@ -124,11 +124,7 @@ namespace MiotoServer.DB
 
         public string GetDuration()
         {
-            if (endTicks == long.MaxValue)
-            {
-                return getSecString(new TimeSpan(DateTime.Now.Ticks - stTicks));
-            }
-            return getSecString(new TimeSpan(endTicks - stTicks)); ;
+            return getSecString(new TimeSpan(GetDurationTicks()));
         }
         public string getSecString(TimeSpan ts)
         {
@@ -181,14 +177,21 @@ namespace MiotoServer.DB
             lastCycleTicks = cycle.dt.Ticks;
         }
 
-        private long GetBunboTicks()
+        private long GetDurationTicks()
         {
             long bunbo;
+            //次の生産要因が登録されているか？(trueなら未登録)
             if (endTicks == long.MaxValue)
             {
-                //次の要因が登録されていない場合、現在時刻が
-                //計算対象の母数となる。
-                bunbo = DateTime.Now.Ticks - stTicks;
+                //最終信号から1時間以内の場合は現在時刻を優先し、
+                //超過している場合は最終信号を選択する。これは、
+                //生産要因を未登録のまま放置した場合の救済用の措置
+                if ((lastCycleTicks > 0) && ((new TimeSpan(DateTime.Now.Ticks - lastCycleTicks).TotalHours > 1)))
+                {
+                    return lastCycleTicks - stTicks;
+                }
+
+                return DateTime.Now.Ticks - stTicks;
             }
             else
             {
@@ -201,7 +204,7 @@ namespace MiotoServer.DB
         private double GetAveCt()
         {
             if(dekidaka==0) { return 0; }
-            return (new TimeSpan(GetBunboTicks()).TotalSeconds) / dekidaka;
+            return (new TimeSpan(GetDurationTicks()).TotalSeconds) / dekidaka;
         }
 
         /// <summary>
@@ -211,7 +214,7 @@ namespace MiotoServer.DB
         public double GetKadouritsu()
         {
             if(dekidaka==0) { return 0; }
-            long bunbo = GetBunboTicks();
+            long bunbo = GetDurationTicks();
             if (bunbo<=0) { return 0; }
 
             var span = new TimeSpan(bunbo);
