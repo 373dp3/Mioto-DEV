@@ -1,4 +1,5 @@
-﻿using MiotoServer.DB;
+﻿using MiotoBlazorCommon.Struct;
+using MiotoServer.DB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,15 +50,17 @@ namespace MiotoServer
         private async Task SendConfig()
         {
             var wrapper = DbWrapper.getInstance();
-            var cfg = new Struct.Config();
+            var cfg = new Config();
             try
             {
                 var jsonCfg = wrapper.getConfig(CONFIG_DB_KEY);
-                cfg = JsonSerializer.Deserialize<Struct.Config>(jsonCfg);
+                cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
             }
-            catch (Exception e) { d("no blazor cfg exist"); }
-
-            cfg.insertOrUpdateTwe(wrapper.getLastInfoList());
+            catch (Exception e) {
+                cfg.insertOrUpdateTwe(wrapper.getLastInfoList());
+                d("no blazor cfg exist");
+            }
+            cfg.appVer = MiotoServerWrapper.config.appVer;
             var json = JsonSerializer.Serialize(cfg);
             await TxDataAsync(json);
         }
@@ -69,7 +72,7 @@ namespace MiotoServer
                 case OperationType.CONFIG:
                     try
                     {
-                        var cfg = JsonSerializer.Deserialize<Struct.Config>(msg);
+                        var cfg = JsonSerializer.Deserialize<Config>(msg);
                         DbWrapper.getInstance().setConfig(CONFIG_DB_KEY, msg);
                     }
                     catch (Exception e) { d("受信した設定情報が破損しています。"); }

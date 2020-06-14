@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using MiotoServer.Struct;
+using MiotoBlazorClient.Shared;
+using MiotoBlazorCommon.Struct;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,12 +11,17 @@ namespace MiotoBlazorClient
 {
     public class ConfigSingleton
     {
+        public NavMenu navMenu { get; set; } = null;
         private static ConfigSingleton instance = null;
         private ConfigSingleton() { }
         public static ConfigSingleton getInstance()
         {
             if (instance == null) instance = new ConfigSingleton();
             return instance;
+        }
+        public void setNavMenu(NavMenu menu)
+        {
+            this.navMenu = menu;
         }
         public async Task getConfigAsync(NavigationManager NavMgr, Action<Config> action, bool forceNew=false)
         {
@@ -29,6 +35,11 @@ namespace MiotoBlazorClient
             await Task.WhenAny(cf.connectAsync<Config>(c =>
             {
                 config = c;
+                if (navMenu != null)
+                {
+                    navMenu.appVer = config.appVer;
+                    navMenu.Reflesh();
+                }
                 action(c);
                 Task.WhenAll(DisposeConfigSocket(cf));
             }));

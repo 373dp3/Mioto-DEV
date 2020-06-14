@@ -50,3 +50,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Release\GoogleCloud_TTS.
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Release\GoogleCloud_TTS.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Release\GoogleCloud_TTS.exe
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Release\GoogleCloud_TTS.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Release\GoogleCloud_TTS.csproj.CoreCompileInputs.cache

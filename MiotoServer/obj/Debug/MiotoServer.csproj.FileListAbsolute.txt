@@ -154,3 +154,6 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.ValueTuple.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.Buffers.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\System.ValueTuple.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\obj\Debug\MiotoServer.csproj.CoreCompileInputs.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoBlazorCommon.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoBlazorCommon.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Debug\MiotoBlazorCommon.dll.config

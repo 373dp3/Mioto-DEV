@@ -1,5 +1,5 @@
 ﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">弥音<small> 1.3.0</small></a>
+    <a class="navbar-brand" href="">弥音<small> @appVer</small></a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -22,11 +22,22 @@
 
 @code {
     private bool collapseNavMenu = true;
+    public string appVer { get; set; } = "";
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        ConfigSingleton.getInstance().setNavMenu(this);
+        return base.SetParametersAsync(parameters);
+    }
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    public void Reflesh()
+    {
+        this.StateHasChanged();
     }
 }

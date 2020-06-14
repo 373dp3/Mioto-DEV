@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.3.3")]
-[assembly: AssemblyFileVersion("1.3.3")]
+[assembly: AssemblyVersion("1.4.0")]
+[assembly: AssemblyFileVersion("1.4.0")]
 
 /*
+ * 2020.6.14
+ * ・Blazor WebAssembly対応初版
+ * 
  * 2020.5.11
  * ・停止・再開時にfinal、tNNNs指定ができない問題の対応
  * ・電流センサ向け「1」から始まるMACアドレス対応

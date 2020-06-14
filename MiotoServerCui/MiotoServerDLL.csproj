@@ -98,11 +98,9 @@
     <Compile Include="DB\ConfigTbl.cs" />
     <Compile Include="DB\csvcash.cs" />
     <Compile Include="DB\date2row.cs" />
-    <Compile Include="DB\LastInfo.cs" />
     <Compile Include="DB\latest2525.cs" />
     <Compile Include="DB\Mac2Ampere.cs" />
     <Compile Include="DB\MemMac2Ah.cs" />
-    <Compile Include="DB\ProductionFactor.cs" />
     <Compile Include="DB\SoundTbl.cs" />
     <Compile Include="HttpdWorker.cs" />
     <Compile Include="HttpStaticFileWorker.cs" />
@@ -122,11 +120,6 @@
     <Compile Include="SerialPortWorker.cs" />
     <Compile Include="SQLite.cs" />
     <Compile Include="SQLiteAsync.cs" />
-    <Compile Include="Struct\Config.cs" />
-    <Compile Include="Struct\ConfigCtPanel.cs" />
-    <Compile Include="Struct\ConfigTwe.cs" />
-    <Compile Include="Struct\CycleTime.cs" />
-    <Compile Include="Struct\IParseable.cs" />
     <Compile Include="Twe2525APacket.cs" />
     <Compile Include="TweComSerialPacket.cs" />
     <Compile Include="TweCtPacket.cs" />
@@ -154,7 +147,15 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MiotoBlazorCommon\MiotoBlazorCommon.csproj">
+      <Project>{be653476-810f-4dcb-9196-cabe93df94cc}</Project>
+      <Name>MiotoBlazorCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

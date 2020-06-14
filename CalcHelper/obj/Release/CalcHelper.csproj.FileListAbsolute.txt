@@ -24,3 +24,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.exe
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\Interop.TaskScheduler.dll
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.ResolveComReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Release\CalcHelper.csproj.CoreCompileInputs.cache

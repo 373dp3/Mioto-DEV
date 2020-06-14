@@ -1,5 +1,5 @@
-﻿using MiotoServer.DB;
-using MiotoServer.Struct;
+﻿using MiotoBlazorCommon;
+using MiotoBlazorCommon.Struct;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

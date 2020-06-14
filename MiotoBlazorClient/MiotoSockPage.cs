@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using MiotoServer.DB;
-using MiotoServer.Struct;
+using MiotoBlazorCommon;
+using MiotoBlazorCommon.Struct;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,6 +67,7 @@ namespace MiotoBlazorClient
                     funcLoadPanel = loadPanelListDefinition;
                     break;
             }
+            //Configの取得
             await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c => {
                 config = c;
 
@@ -103,10 +104,6 @@ namespace MiotoBlazorClient
 
                         },
                         $"{ProductionFactor.KEY}/{dateOrder}");
-
-
-
-
             });
         }
 

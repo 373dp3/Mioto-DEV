@@ -124,3 +124,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Release\MiotoServerDLL.cs
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Release\MiotoServer.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Release\MiotoServer.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Release\MiotoServerDLL.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Release\MiotoServerDLL.csproj.CoreCompileInputs.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Release\MiotoBlazorCommon.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Release\MiotoBlazorCommon.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Release\MiotoBlazorCommon.dll.config

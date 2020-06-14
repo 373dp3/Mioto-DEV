@@ -10,3 +10,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\bin\Release\OutputServer.pdb
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Release\OutputServer.csprojAssemblyReference.cache
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Release\OutputServer.exe
 C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Release\OutputServer.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\OutputServer\obj\Release\OutputServer.csproj.CoreCompileInputs.cache

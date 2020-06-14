@@ -5,7 +5,7 @@
 ; アプリケーションの削除メニューに表示されるバージョンは、メニューを閉じて再表示すれば更新される。
 ;
 #define MyAppName "MiotoServer"
-#define MyAppVersion "1.3.0"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "dp3"
 #define MyAppURL "https://mioto.dp3.jp"
 #define MyAppExeName "MiotoServerW.exe"
@@ -51,14 +51,7 @@ Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.dll.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServerW.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.dll.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\iot.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

@@ -18,6 +18,8 @@ namespace MiotoServer
 
         public string dbdir { get; set; } = "."+ Path.DirectorySeparatorChar + "db";
 
+        public string appVer { get; set; } = "";
+
         public string backupDir { get; set; } = "";
 
         public int hhmm { get; set; } = 500;

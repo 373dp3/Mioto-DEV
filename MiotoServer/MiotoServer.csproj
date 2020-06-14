@@ -132,6 +132,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MiotoBlazorCommon\MiotoBlazorCommon.csproj">
+      <Project>{be653476-810f-4dcb-9196-cabe93df94cc}</Project>
+      <Name>MiotoBlazorCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MiotoServerCui\MiotoServerDLL.csproj">
       <Project>{5da7a270-774c-4755-9638-12c33f5e641d}</Project>
       <Name>MiotoServerDLL</Name>

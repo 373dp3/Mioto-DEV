@@ -4,6 +4,8 @@ Released under the MIT license
 https://opensource.org/licenses/mit-license.php
  */
 
+using MiotoBlazorCommon.DB;
+using MiotoBlazorCommon.Struct;
 using MiotoServer.DB;
 using MiotoServer.Query;
 using SQLite;

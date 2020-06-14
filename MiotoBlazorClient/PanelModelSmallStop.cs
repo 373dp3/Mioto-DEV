@@ -1,4 +1,5 @@
-﻿using MiotoServer.Struct;
+﻿using MiotoBlazorCommon;
+using MiotoBlazorCommon.Struct;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace MiotoBlazorClient
             if (
                 (ct.ct01 > smallStopLowerLimitSec) &&
                 (this.listProductionFactor
-                    .Where(q=>q.status == MiotoServer.DB.ProductionFactor.Status.START_PRODUCTION)
+                    .Where(q=>q.status == ProductionFactor.Status.START_PRODUCTION)
                     .Where(q => q.isInnerTimeRange(ct, true) == true).Count() > 0)
                 )
             {

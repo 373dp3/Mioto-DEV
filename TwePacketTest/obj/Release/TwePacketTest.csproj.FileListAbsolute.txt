@@ -44,3 +44,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\System.Numerics.Ve
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\System.Threading.Tasks.Extensions.xml
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\Microsoft.Bcl.AsyncInterfaces.xml
 C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\obj\Release\TwePacketTest.csproj.CoreCompileInputs.cache
+C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\MiotoBlazorCommon.dll
+C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\MiotoBlazorCommon.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\TwePacketTest\bin\Release\MiotoBlazorCommon.dll.config

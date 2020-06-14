@@ -1,6 +1,6 @@
-﻿using MiotoServer;
+﻿using MiotoBlazorCommon.Struct;
+using MiotoServer;
 using MiotoServer.CfgOption;
-using MiotoServer.Struct;
 using MiotoServerW.Properties;
 using System;
 using System.Collections.Generic;
@@ -48,6 +48,7 @@ namespace MiotoServerW
                 config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
                 config.listComPort.Add(new ComPort() { portName = PORT_NO_USE_KEY, portBps = "115200" });
             }
+            config.appVer = GetAppVer();
         }
         /// <summary>
         /// Blazor WebassemblyとLocal Appと共用の設定をSQLiteDBに更新する。
@@ -59,6 +60,7 @@ namespace MiotoServerW
             var msg = p.getConfig(WebSocketWorker.CONFIG_DB_KEY);
             var cfg = JsonSerializer.Deserialize<Config>(msg);
             cfg.dateLineHHMM = config.hhmm;
+            cfg.appVer = config.appVer;
             msg = JsonSerializer.Serialize<Config>(cfg);
             DbWrapper.getInstance().setConfig(WebSocketWorker.CONFIG_DB_KEY, msg);
         }
@@ -200,12 +202,14 @@ namespace MiotoServerW
             return Environment.GetFolderPath(Environment.SpecialFolder.Personal)
                     + Path.DirectorySeparatorChar + "MiotoServerDb";
         }
-
+        private string GetAppVer()
+        {
+            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+        }
         private void Form1_Shown(object sender, EventArgs e)
         {
             //タイトルにバージョン情報を追加
-            var ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
-            this.Text += " "+ver;
+            this.Text += " "+ GetAppVer();
 
             //COMポート初期値更新
             buttonUpdateComList_Click(null, null);
@@ -277,6 +281,7 @@ namespace MiotoServerW
 
             config.func = d;
             config.dbdir = textBoxDbDir.Text;
+            config.appVer = GetAppVer();
 
             var wrapper = MiotoServerWrapper.getInstance(config);
             Task.Run(() => wrapper.start(tokenSource.Token)).ConfigureAwait(false);
