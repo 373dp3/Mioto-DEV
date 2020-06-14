@@ -53,6 +53,25 @@ namespace MiotoServer.DB
         [StringLength(500, ErrorMessage = "文字数が超過しています(500バイトまで)")]
         public string memo { get; set; } = "";
 
+        public string ToUserSaveCsv()
+        {
+            if(this.status != Status.START_PRODUCTION)
+            {
+                return $"\"\"," +
+                    new DateTime(stTicks).ToLongTimeString() + "," +
+                        (GetDurationSec() / 60).ToString("F1");
+            }
+
+            return $"\"{memo}\"," +
+                        new DateTime(stTicks).ToLongTimeString() + "," +
+                        (GetDurationSec()/60).ToString("F1") + "," +
+
+                        dekidaka + "," +
+                        (GetKadouritsu() * 100.0).ToString("F1") + "," +
+                        ct.ToString("F1") + "," +
+                        aveCt.ToString("F1") + "," +
+                        "";
+        }
         public string ToCSV()
         {
             return $"{id.ToString("x")}," +
@@ -105,11 +124,6 @@ namespace MiotoServer.DB
         [Ignore]
         public long endTicks { get; set; } = long.MaxValue;
         /// <summary>
-        /// 要因開始前起動を対象外とした積算Ct00
-        /// </summary>
-        [Ignore]
-        public double totalCt00 { get; set; } = 0;
-        /// <summary>
         /// 要因開始前起動を対象外とした出来高
         /// </summary>
         [Ignore]
@@ -121,6 +135,20 @@ namespace MiotoServer.DB
         /// </summary>
         [Ignore]
         public double aveCt { get { return GetAveCt(); } }
+        [Ignore]
+        public double runSec { get; set; } = 0;
+        [Ignore]
+        public double stopSec
+        {
+            get
+            {
+                return new TimeSpan(GetDurationTicks()).TotalSeconds - runSec;
+            }
+        } 
+        [Ignore]
+        public int signalCount { get; set; } = 0;
+        [Ignore]
+        public int lostSignalCount { get; set; } = 0;
 
         public string GetDuration()
         {
@@ -139,22 +167,49 @@ namespace MiotoServer.DB
             return (ts.TotalHours).ToString("F1") + "時間";
         }
 
-        public bool isInnerTimeRange(CycleTime cycle)
+        public bool isInnerTimeRange(CycleTime cycle, bool isCheckSignalOrigin = false)
         {
             //稼働開始前なら無視
             if (cycle.dt.Ticks < stTicks) { return false; }
             //稼働終了後も無視
             if (cycle.dt.Ticks > endTicks) { return false; }
+
+            if (isCheckSignalOrigin)
+            {
+                //停止時間または稼働時間の分だけ始点を戻して評価する
+                if (cycle.dt.AddSeconds(-1 * (cycle.ct01 + cycle.ct10)).Ticks < stTicks)
+                {
+                    return false;
+                }
+            }
             return true;
         }
         public void updateByCycle(CycleTime cycle)
         {
             //生産中以外の場合は処理しない
             if(status != Status.START_PRODUCTION) { return; }
+
+            //範囲外なら処理しない
+            if (isInnerTimeRange(cycle) == false) { return; }
+
+            //信号状況の把握
+            signalCount++;
+            lostSignalCount += Math.Max(cycle.seq - 1, 0);
+
+            //MT状況把握 信号の原点時刻でも要因の時刻範囲内であることを保証する
+            if (cycle.ct10 > 0)
+            {
+                var orgDt = cycle.dt.AddSeconds(-1 * cycle.ct10);
+                if(orgDt.Ticks < stTicks)
+                {
+                    //信号原点から要因開始時刻までの超過分を控除
+                    runSec += (orgDt - new DateTime(stTicks)).TotalSeconds;
+                }
+                runSec += cycle.ct10;
+            }
+
             //マシン稼働が終了したときが積算対象
             if (cycle.ct00 == 0) { return; }
-            //範囲外なら処理しない
-            if(isInnerTimeRange(cycle)==false) { return; }
 
 
             //要因開始時間前に起動した処理は無効とします。
@@ -171,12 +226,15 @@ namespace MiotoServer.DB
             {
                 coundCt = (new TimeSpan(cycle.dt.Ticks - this.stTicks)).TotalSeconds;
             }
+
             dekidaka++;
-            totalCt00 += coundCt;
-            
+
             lastCycleTicks = cycle.dt.Ticks;
         }
-
+        public double GetDurationSec()
+        {
+            return new TimeSpan(GetDurationTicks()).TotalSeconds;
+        }
         private long GetDurationTicks()
         {
             long bunbo;
@@ -190,7 +248,12 @@ namespace MiotoServer.DB
                 {
                     return lastCycleTicks - stTicks;
                 }
-
+                //信号を1度も受信していない状態で、4時間以上経過した場合、
+                //0にする。
+                if ((lastCycleTicks == 0) && ((new TimeSpan(DateTime.Now.Ticks - stTicks).TotalHours > 4)))
+                {
+                    return 0;
+                }
                 return DateTime.Now.Ticks - stTicks;
             }
             else

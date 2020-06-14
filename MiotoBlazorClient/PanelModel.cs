@@ -14,8 +14,6 @@ namespace MiotoBlazorClient
         public long mac { get; set; } = 0;
 
         public RunOrStop status { get; private set; } = RunOrStop.NOOP;
-        public double runSec { get; set; } = 0;
-        public double stopSec { get; set; } = 0;
         public long signalNum { get; private set; } = 0;
         public CycleTime lastCycleTime { get; private set; } = new CycleTime();
 
@@ -24,12 +22,10 @@ namespace MiotoBlazorClient
         /// <summary>
         /// ページ遷移用に以前のページに関わる情報をクリアする
         /// </summary>
-        public void ClearPrevInfo()
+        public virtual void ClearPrevInfo()
         {
             //title, macは保持する
             status = RunOrStop.NOOP;
-            runSec = 0;
-            stopSec = 0;
             signalNum = 0;
             lastCycleTime = new CycleTime();
             productionHelper.list.Clear();
@@ -52,35 +48,30 @@ namespace MiotoBlazorClient
 
         public string getRunSecStr(ProductionFactor factor = null)
         {
-            var offset = 0.0d;
-            if ((lastCycleTime != null) && (status == RunOrStop.RUN)
-                && (factor!=null) && (factor.status == ProductionFactor.Status.START_PRODUCTION))
-            {
-                offset = (DateTime.Now - lastCycleTime.createDt).TotalSeconds;
-            }
-            var ts = new TimeSpan(0, 0, (int)(runSec + offset));
-            return getSecString(ts);
+            var sum = listProductionFactor
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION)
+                .Select(q => q.runSec).Sum();
+            return getSecString(sum);
         }
-
-        public string getSecString(TimeSpan ts)
+        public string getSecString(double sec)
         {
-            if (ts.TotalSeconds < 60)
+            if (sec < 60)
             {
-                return ts.ToString(@"m\:ss");
+                return sec.ToString("F1")+"秒";
             }
-            return ts.ToString(@"h\:mm\:ss");
+            if (sec < 3600)
+            {
+                return (sec / 60).ToString("F1") + "分";
+            }
+            return (sec/3600).ToString("F1")+"時間";
         }
 
         public string getStopSecStr(ProductionFactor factor = null)
         {
-            var offset = 0.0d;
-            if ((lastCycleTime != null) && (status == RunOrStop.STOP)
-                && (factor != null) && (factor.status == ProductionFactor.Status.START_PRODUCTION))
-            {
-                offset = (DateTime.Now - lastCycleTime.createDt).TotalSeconds;
-            }
-            var ts = new TimeSpan(0, 0, (int)(stopSec + offset));
-            return getSecString(ts);
+            var sum = listProductionFactor
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION)
+                .Select(q => q.stopSec).Sum();
+            return getSecString(sum);
         }
         public long dekidaka { 
             get { return productionHelper.list.Select(q => q.dekidaka).Sum(); }
@@ -101,7 +92,6 @@ namespace MiotoBlazorClient
 
         public virtual void updateCycleTime(CycleTime ct)
         {
-            var preStatus = status;
             if (ct == null)
             {
                 lastCycleTime = null;
@@ -116,22 +106,7 @@ namespace MiotoBlazorClient
             {
                 status = RunOrStop.RUN;
             }
-            switch (status)
-            {
-                case RunOrStop.RUN://01,11
-                    stopSec += ct.ct01;
-                    break;
-                case RunOrStop.STOP://10,00
-                    runSec += ct.ct10;
-                    break;
-            }
 
-            //初回の信号は前日からの保持の可能性があるため積算対象から外す
-            if(preStatus== RunOrStop.NOOP)
-            {
-                stopSec = 0;
-                runSec = 0;
-            }
             lastCycleTime = ct;
 
             //サイクルタイム、可動率計算
@@ -139,9 +114,13 @@ namespace MiotoBlazorClient
         }
         public string GetMtRatio()
         {
-            var sum = stopSec + runSec;
-            if (sum == 0) { return "-"; }
-            return (100.0d * runSec / sum).ToString("F1") + " %";
+            var list = this.listProductionFactor
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION);
+            var duration = list.Select(q => q.GetDurationSec()).Sum();
+            if(duration==0) { return "-"; }
+            var runSec = list.Select(q => q.runSec).Sum();
+
+            return (100.0 * runSec / duration).ToString("F1") + "%";
         }
 
         public static PanelModel Create()

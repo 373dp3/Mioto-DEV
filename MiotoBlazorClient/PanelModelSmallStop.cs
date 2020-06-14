@@ -8,8 +8,14 @@ namespace MiotoBlazorClient
 {
     public class PanelModelSmallStop : PanelModel
     {
-        const double smallStopLowerLimitSec = 5*60;
+        const double smallStopLowerLimitSec = 1*60;
         public List<CycleTime> listSmallStop = new List<CycleTime>();
+
+        public override void ClearPrevInfo()
+        {
+            base.ClearPrevInfo();
+            listSmallStop.Clear();
+        }
 
         public override void updateCycleTime(CycleTime ct)
         {
@@ -19,7 +25,7 @@ namespace MiotoBlazorClient
                 (ct.ct01 > smallStopLowerLimitSec) &&
                 (this.listProductionFactor
                     .Where(q=>q.status == MiotoServer.DB.ProductionFactor.Status.START_PRODUCTION)
-                    .Where(q => q.isInnerTimeRange(ct) == true).Count() > 0)
+                    .Where(q => q.isInnerTimeRange(ct, true) == true).Count() > 0)
                 )
             {
                 listSmallStop.Add(ct);

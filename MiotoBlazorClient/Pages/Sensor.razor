@@ -178,6 +178,7 @@
 
     public ModalDatePicker datepicker { get; set; } = null;
     public DateTime currentDate { get; set; } = DateTime.Now;
+    List<PanelModel> listPanelModel = new List<PanelModel>();
 
 
     /// <summary>
@@ -309,7 +310,7 @@
         {
             currentDate = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd"));
         }
-        await init(NavMgr, Http, idStr, Mode.SINGLE, PanelModelSmallStop.Create, dateOrder);
+        await init(NavMgr, Http, listPanelModel, idStr, Mode.SINGLE, PanelModelSmallStop.Create, dateOrder);
 
         await base.OnParametersSetAsync();
     }

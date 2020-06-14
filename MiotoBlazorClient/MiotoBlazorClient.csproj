@@ -16,4 +16,8 @@
     <ProjectReference Include="..\MiotoServerCui\MiotoServerDLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="USEncoder\" />
+  </ItemGroup>
+
 </Project>

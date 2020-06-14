@@ -6,6 +6,7 @@
 @inject NavigationManager NavMgr
 @implements IDisposable
 @inherits MiotoSockPage
+@inject IJSRuntime js
 
 @if (listPanelModel.Count > 0)
 {
@@ -67,7 +68,7 @@
                          @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{item.mac}/{dateOrder}"); })">
 
                         @if ((item.status == PanelModel.RunOrStop.STOP)
-                            && (factor.status == ProductionFactor.Status.START_PRODUCTION))
+                           && (factor.status == ProductionFactor.Status.START_PRODUCTION))
                         {
                             att = " bg-light text-dark";
                         }
@@ -86,22 +87,22 @@
                             </tr>
                             <tr>
                                 <td><small>出来高</small></td>
-                                <td class="text-right"><span>@(item.dekidaka)</span></td>
+                                <td class="text-center"><span>@(item.dekidaka)</span></td>
                             </tr>
                             <tr>
                                 <td><small>可動率</small></td>
-                                <td class="text-right"><span>@((item.bekidou * 100.0).ToString("F1"))%</span></td>
+                                <td class="text-center"><span>@((item.bekidou * 100.0).ToString("F1"))%</span></td>
                             </tr>
                             <tr>
                                 <td><small>停止</small></td>
-                                <td class="text-right"><span>@(item.getStopSecStr(factor))</span></td>
+                                <td class="text-center"><span>@(item.getStopSecStr(factor))</span></td>
                             </tr>
                             <tr>
                                 <td><small>稼働</small></td>
-                                <td class="text-right"><span>@(item.getRunSecStr(factor))</span></td>
+                                <td class="text-center"><span>@(item.getRunSecStr(factor))</span></td>
                             </tr>
                         </table>
-                        
+
                     </div>
                 </button>
 
@@ -125,6 +126,8 @@
     本日のデータ
 </button>
 
+<button class="btn btn-success" @onclick="Save">1週間分をCSV形式で保存</button>
+
 @code{
     [Parameter]
     public string panelNameOrder { get; set; } = null;
@@ -135,6 +138,7 @@
 
     public ModalDatePicker datepicker { get; set; } = null;
     public DateTime currentDate { get; set; } = DateTime.Now;
+    List<PanelModel> listPanelModel = new List<PanelModel>();
 
     /// <summary>
     /// 全ての処理の起点
@@ -147,7 +151,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        await init(NavMgr, Http, panelIndexStr, Mode.PANEL_LIST, PanelModel.Create, dateOrder);
+        await init(NavMgr, Http, listPanelModel, panelIndexStr, Mode.PANEL_LIST, PanelModel.Create, dateOrder);
 
         if (dateOrder != null)
         {
@@ -169,4 +173,58 @@
         await base.OnParametersSetAsync();
     }
 
+    public async Task Save()
+    {
+        var list = new List<string>();
+        var order = this.dateOrder;
+        if ((order == null) || (order.Length==0))
+        {
+            order = DateTime.Now.ToString("yyyyMMdd");
+        }
+        var dt = DateTime.ParseExact(order, "yyyyMMdd", CultureInfo.InvariantCulture);
+        for(var i=-6; i<=0; i++)
+        {
+            list.Add(dt.AddDays(i).ToString("yyyyMMdd"));
+        }
+
+        var sb = new StringBuilder();
+        var flg = true;
+        using (var mgr = new MiotoSockPage())
+        {
+            foreach (var date in list)
+            {
+                debugMsg = $"{date}のロード中・・";
+                StateHasChanged();
+                await mgr.init(NavMgr, Http, new List<PanelModel>(), panelIndexStr,
+                    Mode.PANEL_LIST, PanelModel.Create, date);
+                await mgr.ToCSV(s => sb.Append(s), date, flg);
+                flg = false;
+            }
+        }
+
+        var numList = list.Select(q =>
+        {
+            try
+            {
+                return Convert.ToInt32(q);
+            }catch(Exception e) { return 0; }
+        }).Where(q=>q>0);
+        var min = numList.Min();
+        var max = numList.Max();
+        var fileName = "";
+        if (min == max)
+        {
+            fileName = $"MIOTO-{min}.csv";
+        }
+        else
+        {
+            fileName = $"MIOTO-{min}-{max}.csv";
+        }
+
+
+        var bytes = USEncoder.ToEncoding.ToSJIS(sb.ToString());
+        await Util.SaveAs(js, fileName, bytes);
+        debugMsg = "";
+        StateHasChanged();
+    }
 }

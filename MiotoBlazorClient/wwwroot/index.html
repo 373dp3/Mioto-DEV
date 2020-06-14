@@ -8,6 +8,16 @@
     <base href="/html/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
+    <script type="text/javascript">
+        function saveAsFile(filename, bytesBase64) {
+            var link = document.createElement('a');
+            link.download = filename;
+            link.href = "data:application/octet-stream;base64," + bytesBase64;
+            document.body.appendChild(link); //Firefox
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </head>
 
 <body>

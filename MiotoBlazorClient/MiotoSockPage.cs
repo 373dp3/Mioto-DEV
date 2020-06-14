@@ -3,8 +3,11 @@ using MiotoServer.DB;
 using MiotoServer.Struct;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +17,7 @@ namespace MiotoBlazorClient
     public class MiotoSockPage : ComponentBase, IDisposable
     {
         public Config config { get; set; } = null;
-        public List<PanelModel> listPanelModel = new List<PanelModel>();
+        public List<PanelModel> _listPanelModel = new List<PanelModel>();
         public string debugMsg = "";
         public CancellationTokenSource tokenSource = new CancellationTokenSource();
         private NavigationManager NavMgr;
@@ -26,20 +29,24 @@ namespace MiotoBlazorClient
         Func<PanelModel> factory = null;
         private SocketWorker wsWorker { get; set; } = null;
 
+        private bool isHttpDone = false;
+
         /// <summary>
         /// razorページからロードすべき情報の指示を受ける
         /// </summary>
         /// <param name="mgr"></param>
         /// <param name="client"></param>
-        public async Task init(NavigationManager mgr, HttpClient client, 
+        public async Task init(NavigationManager mgr, HttpClient client, List<PanelModel> listPanelModel,
             string id, Mode mode, Func<PanelModel> factory, string dateOrder=null)
         {
+            this._listPanelModel = listPanelModel;
             //ページ遷移の際に前ページの情報を破棄
             //listPanelModel.Clear(); => チラツキ防止のため、直前にクリア
             tokenSource.Cancel();
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
             wsWorker = null;
+            isHttpDone = false; ;
             targetMacList.Clear();
 
 
@@ -75,16 +82,30 @@ namespace MiotoBlazorClient
                                 .FirstOrDefault()
                                 .SetProductionFactor(factor);
                         },
+                        () => {
+                            //完了後の処理
+                            //サイクルタイム情報の取得
+                            _ = loadCsvByHttp(() => new CycleTime(), q =>
+                            {
+                                OnCycle((CycleTime)q);
+                            },
+                            () => {
+                                isHttpDone = true;
+                                //完了後の処理
+                                //今日の日付の場合に変更受信処理の登録
+                                if ((dateOrder == null) || (dateOrder.Length == 0))
+                                {
+                                    _ = socketListener();
+                                }
+                                StateHasChanged();
+                            },
+                            dateOrder);
+
+                        },
                         $"{ProductionFactor.KEY}/{dateOrder}");
 
-                //サイクルタイム情報の取得
-                _ = loadCsvByHttp(() => new CycleTime(), q => OnCycle((CycleTime)q), dateOrder);
 
-                //今日の日付の場合に変更受信処理の登録
-                if((dateOrder == null) || (dateOrder.Length == 0))
-                {
-                    _ = socketListener();
-                }
+
 
             });
         }
@@ -98,15 +119,15 @@ namespace MiotoBlazorClient
         public void OnCycle(CycleTime cycle)
         {
             if (cycle == null) return;
-            var panel = listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
+            var panel = _listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
             panel.updateCycleTime(cycle);
         }
 
         public void OnProductionFactor(ProductionFactor factor)
         {
             //debugMsg += $"/1/ (OnProductionFactor) {factor.ToCSV()} ";
-            if (listPanelModel == null) return;
-            var ans =listPanelModel.Where(q => q.mac == factor.mac).FirstOrDefault();
+            if (_listPanelModel == null) return;
+            var ans =_listPanelModel.Where(q => q.mac == factor.mac).FirstOrDefault();
             if((ans == null) || (ans.mac == 0)) { return; }
             ans.SetProductionFactor(factor);
             this.StateHasChanged();
@@ -119,7 +140,9 @@ namespace MiotoBlazorClient
         /// <param name="callback">変換後に受け取る関数</param>
         /// <param name="uriPathWithEndSlash">URLに含めるオプション末尾に/をつけること</param>
         /// <returns></returns>
-        public async Task loadCsvByHttp(Func<IParseable> createFunc, Action<IParseable> callback, string uriPathWithEndSlash="")
+        public async Task loadCsvByHttp(Func<IParseable> createFunc, 
+            Action<IParseable> callback, Action funcDone,
+            string uriPathWithEndSlash="")
         {
             //CSV情報の一括取得
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
@@ -152,8 +175,8 @@ namespace MiotoBlazorClient
                     catch (Exception e) { }
                 }
             }
+            if(funcDone!=null) { funcDone(); }
 
-            this.StateHasChanged();
         }
 
         /// <summary>
@@ -281,7 +304,7 @@ namespace MiotoBlazorClient
         private void preparePanel()
         {
             //パネル内の子機表示順序でmac一覧を作成
-            if (listPanelModel.Count == 0)
+            if (_listPanelModel.Count == 0)
             {
                 foreach (var mac in targetMacList)
                 {
@@ -289,12 +312,12 @@ namespace MiotoBlazorClient
                     panel.title = config.listTwe.Where(q => q.mac == mac).Select(q => q.name).FirstOrDefault();
                     panel.mac = mac;
                     //子機情報を構成する小パネルを作成
-                    listPanelModel.Add(panel);
+                    _listPanelModel.Add(panel);
                 }
             }
             else
             {
-                foreach(var panel in listPanelModel)
+                foreach(var panel in _listPanelModel)
                 {
                     panel.ClearPrevInfo();
                 }
@@ -320,6 +343,50 @@ namespace MiotoBlazorClient
                 });
             }
             catch (Exception e) { }
+        }
+
+        public async Task ToCSV(Action<string> func, string idDate, bool isHeader)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            Console.WriteLine($"start {sw.ElapsedMilliseconds}");
+            StringBuilder sb = new StringBuilder();
+            await Task.Yield();
+            var date = DateTime
+                        .ParseExact(idDate, "yyyyMMdd", CultureInfo.InvariantCulture)
+                        .ToString("yyyy/MM/dd");
+            
+            for(var i=0; i<100; i++)
+            {
+                if (isHttpDone)
+                {
+                    Console.WriteLine($"flg true {sw.ElapsedMilliseconds}");
+                    break;
+                }
+                await Task.Delay(100);
+                Console.WriteLine($"delay {sw.ElapsedMilliseconds}");
+            }
+
+            if (isHeader)
+            {
+                sb.AppendLine("日付,子機名,MAC,要因,品番,開始時刻,期間(分),出来高,可動率,標準CT,平均CT");
+            }
+
+            foreach (var item in this._listPanelModel)
+            {
+                Console.WriteLine($"panel {sw.ElapsedMilliseconds}");
+                foreach (var factor in item.listProductionFactor)
+                {
+                    var btn = new ButtonAttr(factor.status);
+                    sb.AppendLine(
+                        $"{date},\"{item.title}\",{item.mac.ToString("x")}," +
+                        btn.name + "," + factor.ToUserSaveCsv());
+                    Console.WriteLine($"append B {sw.ElapsedMilliseconds}");
+                }
+                await Task.Yield();
+            }
+            func(sb.ToString());
+            Console.WriteLine($"done {sw.ElapsedMilliseconds}");
         }
 
         public virtual void Dispose()
