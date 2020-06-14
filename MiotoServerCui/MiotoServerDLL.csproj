@@ -118,8 +118,6 @@
     <Compile Include="Query\ParamTypeVolume.cs" />
     <Compile Include="SerialCache.cs" />
     <Compile Include="SerialPortWorker.cs" />
-    <Compile Include="SQLite.cs" />
-    <Compile Include="SQLiteAsync.cs" />
     <Compile Include="Twe2525APacket.cs" />
     <Compile Include="TweComSerialPacket.cs" />
     <Compile Include="TweCtPacket.cs" />
