@@ -1,10 +1,6 @@
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\MiotoBlazorCommon.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\MiotoBlazorCommon.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\MiotoBlazorCommon.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.csprojAssemblyReference.cache
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.csproj.CoreCompileInputs.cache
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\MiotoBlazorCommon.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\Microsoft.Win32.Primitives.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\netstandard.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\System.AppContext.dll
@@ -118,4 +114,8 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\System.Text.Enco
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\System.Text.Json.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\bin\Debug\System.ValueTuple.xml
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.csproj.CopyComplete
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommon\obj\Debug\MiotoBlazorCommon.pdb

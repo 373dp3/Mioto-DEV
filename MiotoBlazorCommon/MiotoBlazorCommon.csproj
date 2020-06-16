@@ -72,6 +72,8 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="DB\LastInfo.cs" />
+    <Compile Include="PanelModel.cs" />
+    <Compile Include="PanelModelSmallStop.cs" />
     <Compile Include="Struct\ProductionFactor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLite.cs" />

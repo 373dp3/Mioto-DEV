@@ -204,7 +204,10 @@ namespace MiotoServerW
         }
         private string GetAppVer()
         {
-            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            //return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            var assembly = Assembly.GetExecutingAssembly();
+            var ans = (AssemblyInformationalVersionAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyInformationalVersionAttribute));
+            return ans.InformationalVersion;
         }
         private void Form1_Shown(object sender, EventArgs e)
         {

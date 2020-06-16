@@ -83,18 +83,18 @@
                             <div class="card-header text-truncate">
                                 @(item.title)
                             </div>
-                            <table class="table mb-0">
+                            <table class="table mb-0 text-center">
                                 <tr>
                                     <td><small>出来高</small></td>
-                                    <td class="text-right"><span>@(item.dekidaka)</span></td>
+                                    <td><span>@(item.dekidaka)</span></td>
                                 </tr>
                                 <tr>
                                     <td><small>信号数</small></td>
-                                    <td class="text-right"><span>@(item.signalNum)</span></td>
+                                    <td><span>@(item.signalNum)</span></td>
                                 </tr>
                                 <tr>
                                     <td><small>可動率</small></td>
-                                    <td class="text-right"><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
+                                    <td><span>@((item.bekidou*100.0).ToString("F1"))%</span></td>
                                 </tr>
                                 <tr>
                                     <td><small>MT率</small></td>
@@ -136,7 +136,7 @@
 
                     @foreach (var factor2 in item.listProductionFactor
                    .Where(q => q.endTicks != long.MaxValue)
-                   .OrderByDescending(q => q.stTicks))
+                   .OrderBy(q => q.stTicks))
                     {
                         <ProductionFactorPrompt classStr="@classStr"
                                                 factor="factor2"

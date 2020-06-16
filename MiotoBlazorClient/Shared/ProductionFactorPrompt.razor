@@ -22,17 +22,17 @@
         @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
     </div>
         }
-        <table class="table mb-0">
+        <table class="table mb-0 text-center">
             <tbody>
                 @if (factor.endTicks == long.MaxValue)
                 {
                     <tr>
                         <td><small>開始</small></td>
-                        <td class="text-right">@((new DateTime(factor.stTicks).ToString("HH:mm")))</td>
+                        <td >@((new DateTime(factor.stTicks).ToString("HH:mm")))</td>
                     </tr>
                     <tr>
                         <td><small>時間</small></td>
-                        <td class="text-right">@(factor.GetDuration())</td>
+                        <td>@(factor.GetDuration())</td>
                     </tr>
                 }
                 else
@@ -44,7 +44,7 @@
                     </tr>
                     <tr>
                         <td><small>時間</small></td>
-                        <td class="text-right">@(factor.GetDuration())</td>
+                        <td>@(factor.GetDuration())</td>
                     </tr>
 
                 }
@@ -52,19 +52,19 @@
                 {
                     <tr>
                         <td><small>出来高</small></td>
-                        <td class="text-right">@(factor.dekidaka)</td>
+                        <td>@(factor.dekidaka)</td>
                     </tr>
                     <tr>
                         <td><small>可動率</small></td>
-                        <td class="text-right">@((factor.GetKadouritsu() * 100.0).ToString("F1"))%</td>
+                        <td>@((factor.GetKadouritsu() * 100.0).ToString("F1"))%</td>
                     </tr>
                     <tr>
                         <td><small>標準 CT</small></td>
-                        <td class="text-right">@(factor.ct.ToString("F1"))</td>
+                        <td>@(factor.ct.ToString("F1"))</td>
                     </tr>
                     <tr>
                         <td><small>平均 CT</small></td>
-                        <td class="text-right">@(factor.aveCt.ToString("F1"))</td>
+                        <td>@(factor.aveCt.ToString("F1"))</td>
                     </tr>
                 }
             </tbody>

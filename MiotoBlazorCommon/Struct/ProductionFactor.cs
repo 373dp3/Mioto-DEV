@@ -32,9 +32,10 @@ namespace MiotoBlazorCommon.Struct
         public enum Status
         {
             //ライン内
-            NOOP=1,
-            START_PRODUCTION=200,
-            WAITING_FOR_PARTS=210,
+            NOOP=1,                 //無操作で信号が入った場合にもNOOPを活用
+            START_PRODUCTION = 200,
+            START_PRODUCTION_NOCT = 205,
+            WAITING_FOR_PARTS = 210,
             START_REST=220,//復帰は直前の生産要因を参照すること。
             START_PLANNED_STOP=290,
 
@@ -183,19 +184,27 @@ namespace MiotoBlazorCommon.Struct
             }
             return true;
         }
-        public void updateByCycle(CycleTime cycle)
-        {
-            //生産中以外の場合は処理しない
-            if(status != Status.START_PRODUCTION) { return; }
 
+        /// <summary>
+        /// Cycle情報で内部情報を更新する
+        /// </summary>
+        /// <param name="cycle"></param>
+        /// <returns>時刻範囲外:false, 範囲内:true</returns>
+        public bool updateByCycle(CycleTime cycle)
+        {
             //範囲外なら処理しない
-            if (isInnerTimeRange(cycle) == false) { return; }
+            if (isInnerTimeRange(cycle) == false) { return false; }
+
+            //生産中以外の場合は処理しない
+            if ((status != Status.START_PRODUCTION)
+                &&(status != Status.START_PRODUCTION_NOCT)) { return true; }
 
             //信号状況の把握
             signalCount++;
             lostSignalCount += Math.Max(cycle.seq - 1, 0);
+            lastCycleTicks = cycle.dt.Ticks;
 
-            //MT状況把握 信号の原点時刻でも要因の時刻範囲内であることを保証する
+            //MT状況把握 信号の原点時刻も要因の時刻範囲内であることを保証する
             if (cycle.ct10 > 0)
             {
                 var orgDt = cycle.dt.AddSeconds(-1 * cycle.ct10);
@@ -208,27 +217,18 @@ namespace MiotoBlazorCommon.Struct
             }
 
             //マシン稼働が終了したときが積算対象
-            if (cycle.ct00 == 0) { return; }
+            if (cycle.ct00 == 0) { return true; }
 
 
             //要因開始時間前に起動した処理は無効とします。
             //これは前日の扉が閉まる信号を引き継いでしまう問題に
             //対処することが目的です。
             var startDt = cycle.dt.AddSeconds(-1 * cycle.ct10);
-            if (startDt.Ticks <  this.stTicks) { return; }
-
-            //初回のCTは要因開始時刻からの経過時間を使用する
-            //要因開始後に起動->終了した場合でも、CTの算出基準は
-            //要因の開始時刻とする。MTは用いない。
-            double coundCt = cycle.ct00;
-            if (dekidaka == 0)
-            {
-                coundCt = (new TimeSpan(cycle.dt.Ticks - this.stTicks)).TotalSeconds;
-            }
+            if (startDt.Ticks <  this.stTicks) { return true; }
 
             dekidaka++;
 
-            lastCycleTicks = cycle.dt.Ticks;
+            return true;
         }
         public double GetDurationSec()
         {
@@ -237,8 +237,11 @@ namespace MiotoBlazorCommon.Struct
         private long GetDurationTicks()
         {
             long bunbo;
-            //次の生産要因が登録されているか？(trueなら未登録)
-            if (endTicks == long.MaxValue)
+            //より新しい生産要因が存在するか？
+            // endTicksがlong.MaxValuなら要因終了未定義、
+            // endTicksがlastCycleTicksより大きい場合は、次の要因は無いが、
+            // 終了時間が定義された要因
+            if (endTicks > lastCycleTicks)
             {
                 //最終信号から1時間以内の場合は現在時刻を優先し、
                 //超過している場合は最終信号を選択する。これは、
@@ -298,6 +301,9 @@ namespace MiotoBlazorCommon.Struct
                     break;
                 case ProductionFactor.Status.START_PRODUCTION:
                     name = "生産開始";
+                    break;
+                case ProductionFactor.Status.START_PRODUCTION_NOCT:
+                    name = "生産開始(CT無指定)";
                     break;
                 case ProductionFactor.Status.WAITING_FOR_PARTS:
                     name = "手待ち";

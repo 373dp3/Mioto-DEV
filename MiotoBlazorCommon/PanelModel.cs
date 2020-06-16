@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MiotoBlazorClient
+namespace MiotoBlazorCommon
 {
     public class PanelModel
     {     
@@ -49,7 +49,8 @@ namespace MiotoBlazorClient
         public string getRunSecStr(ProductionFactor factor = null)
         {
             var sum = listProductionFactor
-                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION)
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
+                         || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
                 .Select(q => q.runSec).Sum();
             return getSecString(sum);
         }
@@ -69,7 +70,8 @@ namespace MiotoBlazorClient
         public string getStopSecStr(ProductionFactor factor = null)
         {
             var sum = listProductionFactor
-                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION)
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
+                         || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
                 .Select(q => q.stopSec).Sum();
             return getSecString(sum);
         }
@@ -79,13 +81,15 @@ namespace MiotoBlazorClient
         public double bekidou
         {
             get {
-                if(productionHelper.list.Select(q => q.dekidaka).Sum() == 0)
+                var list = productionHelper.list.Where(q => q.status == ProductionFactor.Status.START_PRODUCTION);
+                var bunbo = list.Select(q => q.dekidaka).Sum();
+                if (bunbo == 0)
                 {
                     return 0;
                 }
                 //各生産要因ごとの加重平均
-                return productionHelper.list.Select(q => q.GetKadouritsu() * q.dekidaka).Sum()
-                    / productionHelper.list.Select(q => q.dekidaka).Sum();
+                return list.Select(q => q.GetKadouritsu() * q.dekidaka).Sum()
+                    / bunbo;
             }
         }
 
@@ -161,10 +165,26 @@ namespace MiotoBlazorClient
             public List<ProductionFactor> list { get; set; } = new List<ProductionFactor>();
             public void update(CycleTime cycle)
             {
+                bool isTimeRangeHit = false;
                 foreach(var factor in list)
                 {
-                    factor.updateByCycle(cycle);
+                    var ans = factor.updateByCycle(cycle);
+                    isTimeRangeHit |= ans;
                 }
+                if(isTimeRangeHit) { return; }
+
+                //未操作開始対応のため、CT無しの生産要因を追加する
+                var stDt = cycle.dt.AddSeconds(-1 * (cycle.ct01 + cycle.ct10));
+                var noct = new ProductionFactor()
+                {
+                    mac = cycle.mac,
+                    status = ProductionFactor.Status.START_PRODUCTION_NOCT,
+                    stTicks = stDt.Ticks,
+                    endTicks = DateTime.Parse((stDt.AddHours(1)).ToString("yyyy/MM/dd HH") + ":00:00").Ticks,
+                    isValid = ProductionFactor.Validation.VALID
+                };
+                list.Add(noct);
+                noct.updateByCycle(cycle);
             }
 
             public void SortAndSetEndTicks()
