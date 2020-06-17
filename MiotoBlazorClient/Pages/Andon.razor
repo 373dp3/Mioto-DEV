@@ -68,7 +68,8 @@
                          @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{item.mac}/{dateOrder}"); })">
 
                         @if ((item.status == PanelModel.RunOrStop.STOP)
-                           && (factor.status == ProductionFactor.Status.START_PRODUCTION))
+                          && ((factor.status == ProductionFactor.Status.START_PRODUCTION)
+                          || (factor.status == ProductionFactor.Status.START_PRODUCTION_NOCT)))
                         {
                             att = " bg-light text-dark";
                         }
@@ -80,7 +81,7 @@
                                 <td colspan="2" class="m-0 p-0 text-center">
                                     <small>
                                         <span class="oi oi-battery-full @battAtt"></span> @(item.lastCycleTime.batt.ToString("F1"))v　
-                                        <span class="oi oi-signal @lqiAtt"></span> @(item.lastCycleTime.lqi)　
+                                        <span class="oi oi-signal @lqiAtt"></span> @(item.lastCycleTime.lqi)
                                         <span class="oi oi-clock"></span> @(item.lastCycleTime.dt.ToString("H:mm"))
                                     </small>
                                 </td>
@@ -108,25 +109,62 @@
 
             }
         </div>
-        <div class="mt-3"><a class="btn btn-secondary" href="">一覧へ戻る</a></div>
+
     </div><!-- container-fluid -->
 }
-<p>@debugMsg</p>
 <ModalDatePicker @ref="datepicker" CurrentDate="currentDate"></ModalDatePicker>
-<button class="btn btn-primary"
-        @onclick="@(()=> {
+<div class="mt-3">
+    <a class="btn btn-secondary" href="">一覧へ戻る</a>
+    <button class="btn btn-primary"
+            @onclick="@(()=> {
                         datepicker.Open(e=> {
                             dateOrder = e.ToString("yyyyMMdd");
                             NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/{dateOrder}");
                         });
                     })">
-    日付選択
-</button>
-<button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/"); })">
-    本日のデータ
-</button>
+        日付選択
+    </button>
+    <button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/"); })">
+        本日のデータ
+    </button>
 
-<button class="btn btn-success" @onclick="Save">1週間分をCSV形式で保存</button>
+</div>
+<div class="mt-3">
+    <h4>CSVによる出力</h4>
+    <table class="table w-auto text-center">
+        <tbody>
+            <tr>
+                <td>
+                    <button class="btn btn-outline-dark btn-sm"
+                            @onclick="@(()=> {
+                        datepicker.Open(e=> {
+                            csvDateFrom = e;
+                            UpdateCsvDate();
+                            StateHasChanged();
+                        }, csvDateFrom.Ticks);
+                    })">
+                        @(csvDateFrom.ToShortDateString())
+                    </button>
+                    ～
+                    <button class="btn btn-outline-dark btn-sm"
+                            @onclick="@(()=> {
+                        datepicker.Open(e=> {
+                            csvDateTo = e;
+                            UpdateCsvDate();
+                            StateHasChanged();
+                        }, csvDateTo.Ticks);
+                    })">
+                        @(csvDateTo.ToShortDateString())
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-success btn-sm" @onclick="Save">保存</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>@debugMsg</p>
+</div>
 
 @code{
     [Parameter]
@@ -139,6 +177,9 @@
     public ModalDatePicker datepicker { get; set; } = null;
     public DateTime currentDate { get; set; } = DateTime.Now;
     List<PanelModel> listPanelModel = new List<PanelModel>();
+
+    public DateTime csvDateFrom { get; set; } = DateTime.Now;
+    public DateTime csvDateTo { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 全ての処理の起点
@@ -168,23 +209,32 @@
         else
         {
             currentDate = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd"));
+            dateOrder = "";
         }
-
+        csvDateFrom = currentDate;
+        csvDateTo = currentDate;
         await base.OnParametersSetAsync();
+    }
+
+    public void UpdateCsvDate()
+    {
+        if (csvDateFrom > csvDateTo)
+        {
+            var tmp = csvDateTo.Ticks;
+            csvDateTo = csvDateFrom;
+            csvDateFrom = new DateTime(tmp);
+        }
     }
 
     public async Task Save()
     {
         var list = new List<string>();
-        var order = this.dateOrder;
-        if ((order == null) || (order.Length==0))
+
+        var dt = new DateTime(csvDateFrom.Ticks);
+        while (dt <= csvDateTo)
         {
-            order = DateTime.Now.ToString("yyyyMMdd");
-        }
-        var dt = DateTime.ParseExact(order, "yyyyMMdd", CultureInfo.InvariantCulture);
-        for(var i=-6; i<=0; i++)
-        {
-            list.Add(dt.AddDays(i).ToString("yyyyMMdd"));
+            list.Add(dt.ToString("yyyyMMdd"));
+            dt = dt.AddDays(1);
         }
 
         var sb = new StringBuilder();
@@ -194,6 +244,7 @@
             foreach (var date in list)
             {
                 debugMsg = $"{date}のロード中・・";
+                Console.WriteLine(debugMsg);
                 StateHasChanged();
                 await mgr.init(NavMgr, Http, new List<PanelModel>(), panelIndexStr,
                     Mode.PANEL_LIST, PanelModel.Create, date);
@@ -207,8 +258,9 @@
             try
             {
                 return Convert.ToInt32(q);
-            }catch(Exception e) { return 0; }
-        }).Where(q=>q>0);
+            }
+            catch (Exception e) { return 0; }
+        }).Where(q => q > 0);
         var min = numList.Min();
         var max = numList.Max();
         var fileName = "";

@@ -121,13 +121,17 @@
         pickedDate = dt;
         Close(true);
     }
-    public void Open(Action<DateTime> onclose = null)
+    public void Open(Action<DateTime> onclose = null, long ticks=0)
     {
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;
         OnClose = onclose;
 
+        if (ticks > 0)
+        {
+            CurrentDate = new DateTime(ticks);
+        }
         pickedDate = CurrentDate;
         StateHasChanged();
     }

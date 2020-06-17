@@ -55,7 +55,8 @@ namespace MiotoBlazorCommon.Struct
 
         public string ToUserSaveCsv()
         {
-            if(this.status != Status.START_PRODUCTION)
+            if((this.status != Status.START_PRODUCTION)
+                && (this.status != Status.START_PRODUCTION_NOCT))
             {
                 return $"\"\"," +
                     new DateTime(stTicks).ToLongTimeString() + "," +
@@ -138,17 +139,55 @@ namespace MiotoBlazorCommon.Struct
         [Ignore]
         public double runSec { get; set; } = 0;
         [Ignore]
-        public double stopSec
-        {
-            get
-            {
-                return new TimeSpan(GetDurationTicks()).TotalSeconds - runSec;
-            }
-        } 
-        [Ignore]
         public int signalCount { get; set; } = 0;
         [Ignore]
         public int lostSignalCount { get; set; } = 0;
+
+        [Ignore]
+        public bool isFixed { get; set; } = false;
+
+        public double getRunSec(bool isRunning)
+        {
+            if(isRunning==false) { return runSec; }
+            if(isFixed) { return runSec; }
+
+            //以下、稼働中のrunSec扱い
+
+            //より新しい生産要因が存在するか？
+            // endTicksがlong.MaxValuなら要因終了未定義、
+            // endTicksがlastCycleTicksより大きい場合は、次の要因は無いが、
+            // 終了時間が定義された要因
+            if (endTicks <= lastCycleTicks)
+            {
+                // <<履歴の処理中。次に続く要因が確定済み>>
+                return runSec;
+            }
+
+            // <<現時点でこれより新しい要因は無い>>
+
+            //最終信号から1時間以内の場合は現在時刻を優先し、
+            //超過している場合は最終信号を選択する。これは、
+            //生産要因を未登録のまま放置した場合の救済用の措置
+            if ((lastCycleTicks > 0) && ((new TimeSpan(DateTime.Now.Ticks - lastCycleTicks).TotalHours > 1)))
+            {
+                return runSec;
+            }
+            //信号を1度も受信していない状態で、4時間以上経過した場合、
+            //0にする。
+            if ((lastCycleTicks == 0) && ((new TimeSpan(DateTime.Now.Ticks - stTicks).TotalHours > 4)))
+            {
+                return 0;
+            }
+
+            //lastCycleTicksからの現在の経過時間を加味する
+            var progSec = new TimeSpan(DateTime.Now.Ticks - lastCycleTicks).TotalSeconds;
+            return runSec + progSec;
+        }
+
+        public double getStopSec(bool isRunning)
+        {
+            return new TimeSpan(GetDurationTicks()).TotalSeconds - getRunSec(isRunning);
+        }
 
         public string GetDuration()
         {
@@ -234,14 +273,17 @@ namespace MiotoBlazorCommon.Struct
         {
             return new TimeSpan(GetDurationTicks()).TotalSeconds;
         }
-        private long GetDurationTicks()
+        public long GetDurationTicks()
         {
             long bunbo;
+            if (lastCycleTicks == 0)
+            {
+                //1日の最後に指定して終わりが未定義のものを積算するわけには行かないので0
+                if (endTicks == long.MaxValue) { return 0; }
+            }
+
             //より新しい生産要因が存在するか？
-            // endTicksがlong.MaxValuなら要因終了未定義、
-            // endTicksがlastCycleTicksより大きい場合は、次の要因は無いが、
-            // 終了時間が定義された要因
-            if (endTicks > lastCycleTicks)
+            if (!isFixed)
             {
                 //最終信号から1時間以内の場合は現在時刻を優先し、
                 //超過している場合は最終信号を選択する。これは、
@@ -284,9 +326,16 @@ namespace MiotoBlazorCommon.Struct
 
             var span = new TimeSpan(bunbo);
 
+            //NOCT対応
+            if (ct == 0)
+            {
+                return runSec / span.TotalSeconds;
+            }
+
             return (ct * dekidaka) / span.TotalSeconds;
 
         }
+
         public string GetJson()
         {
             return JsonSerializer.Serialize(this);
@@ -303,7 +352,7 @@ namespace MiotoBlazorCommon.Struct
                     name = "生産開始";
                     break;
                 case ProductionFactor.Status.START_PRODUCTION_NOCT:
-                    name = "生産開始(CT無指定)";
+                    name = "生産(CT無指定)";
                     break;
                 case ProductionFactor.Status.WAITING_FOR_PARTS:
                     name = "手待ち";

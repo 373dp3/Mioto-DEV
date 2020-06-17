@@ -194,11 +194,13 @@
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION_NOCT),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
                         new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
                     };
             case ProductionFactor.Status.START_PRODUCTION:
+            case ProductionFactor.Status.START_PRODUCTION_NOCT:
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_REST),
@@ -210,6 +212,7 @@
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION_NOCT),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
                     };
@@ -219,6 +222,7 @@
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION_NOCT),
                         new ButtonAttr(ProductionFactor.Status.START_CHANGE_PRODUCTION),
                         new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
                     };
@@ -231,6 +235,7 @@
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION_NOCT),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.START_REPAIRING),
                     };
@@ -246,6 +251,7 @@
                 return new List<ButtonAttr>()
         {
                         new ButtonAttr(ProductionFactor.Status.START_PRODUCTION),
+                        new ButtonAttr(ProductionFactor.Status.START_PRODUCTION_NOCT),
                         new ButtonAttr(ProductionFactor.Status.START_PLANNED_STOP),
                         new ButtonAttr(ProductionFactor.Status.WAITING_FOR_PARTS),
                         new ButtonAttr(ProductionFactor.Status.START_BRAKEDOWN_STOP),
@@ -273,7 +279,6 @@
     {
         if (modal.result == Modal.Result.OK)
         {
-            //[TODO] FINISH_CHANGE_PRODUCTION -> START_PLANNED_STOPへの変更処理の必要性を検討すること。
             var ct = ProductionFactor.CT_NOOP;
             var memo = "";
             if (btn.status == ProductionFactor.Status.START_PRODUCTION)

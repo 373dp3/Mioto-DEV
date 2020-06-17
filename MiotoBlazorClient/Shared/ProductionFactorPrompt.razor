@@ -28,7 +28,7 @@
                 {
                     <tr>
                         <td><small>開始</small></td>
-                        <td >@((new DateTime(factor.stTicks).ToString("HH:mm")))</td>
+                        <td>@((new DateTime(factor.stTicks).ToString("HH:mm")))</td>
                     </tr>
                     <tr>
                         <td><small>時間</small></td>
@@ -57,6 +57,25 @@
                     <tr>
                         <td><small>可動率</small></td>
                         <td>@((factor.GetKadouritsu() * 100.0).ToString("F1"))%</td>
+                    </tr>
+                    <tr>
+                        <td><small>標準 CT</small></td>
+                        <td>@(factor.ct.ToString("F1"))</td>
+                    </tr>
+                    <tr>
+                        <td><small>平均 CT</small></td>
+                        <td>@(factor.aveCt.ToString("F1"))</td>
+                    </tr>
+                }
+                else if (factor.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
+                {
+                    <tr>
+                        <td><small>出来高</small></td>
+                        <td>@(factor.dekidaka)</td>
+                    </tr>
+                    <tr>
+                        <td><small>信号数</small></td>
+                        <td>@((factor.signalCount))</td>
                     </tr>
                     <tr>
                         <td><small>標準 CT</small></td>

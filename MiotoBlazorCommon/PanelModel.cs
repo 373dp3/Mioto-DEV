@@ -14,7 +14,7 @@ namespace MiotoBlazorCommon
         public long mac { get; set; } = 0;
 
         public RunOrStop status { get; private set; } = RunOrStop.NOOP;
-        public long signalNum { get; private set; } = 0;
+        public long signalNum { get; set; } = 0;
         public CycleTime lastCycleTime { get; private set; } = new CycleTime();
 
         private ProductionFactorHelper productionHelper = new ProductionFactorHelper();
@@ -45,14 +45,18 @@ namespace MiotoBlazorCommon
             }
             return "";
         }
-
-        public string getRunSecStr(ProductionFactor factor = null)
+        public double getRunSec()
         {
-            var sum = listProductionFactor
+            var isRunning = status == RunOrStop.RUN;
+
+            return listProductionFactor
                 .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
                          || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
-                .Select(q => q.runSec).Sum();
-            return getSecString(sum);
+                .Select(q => q.getRunSec(isRunning)).Sum();
+        }
+        public string getRunSecStr(ProductionFactor factor = null)
+        {
+            return getSecString(getRunSec());
         }
         public string getSecString(double sec)
         {
@@ -67,13 +71,18 @@ namespace MiotoBlazorCommon
             return (sec/3600).ToString("F1")+"時間";
         }
 
-        public string getStopSecStr(ProductionFactor factor = null)
+        public double getStopSec()
         {
-            var sum = listProductionFactor
+            var isRunning = status == RunOrStop.RUN;
+
+            return listProductionFactor
                 .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
                          || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
-                .Select(q => q.stopSec).Sum();
-            return getSecString(sum);
+                .Select(q => q.getStopSec(isRunning)).Sum();
+        }
+        public string getStopSecStr(ProductionFactor factor = null)
+        {
+            return getSecString(getStopSec());
         }
         public long dekidaka { 
             get { return productionHelper.list.Select(q => q.dekidaka).Sum(); }
@@ -81,7 +90,8 @@ namespace MiotoBlazorCommon
         public double bekidou
         {
             get {
-                var list = productionHelper.list.Where(q => q.status == ProductionFactor.Status.START_PRODUCTION);
+                var list = productionHelper.list.Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
+                                    || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT);
                 var bunbo = list.Select(q => q.dekidaka).Sum();
                 if (bunbo == 0)
                 {
@@ -114,7 +124,7 @@ namespace MiotoBlazorCommon
             lastCycleTime = ct;
 
             //サイクルタイム、可動率計算
-            productionHelper.update(ct);
+            productionHelper.update(ct, this);
         }
         public string GetMtRatio()
         {
@@ -163,7 +173,8 @@ namespace MiotoBlazorCommon
         private class ProductionFactorHelper
         {
             public List<ProductionFactor> list { get; set; } = new List<ProductionFactor>();
-            public void update(CycleTime cycle)
+            public const int SummaryDurationHour = 1;
+            public void update(CycleTime cycle, PanelModel panel)
             {
                 bool isTimeRangeHit = false;
                 foreach(var factor in list)
@@ -172,6 +183,17 @@ namespace MiotoBlazorCommon
                     isTimeRangeHit |= ans;
                 }
                 if(isTimeRangeHit) { return; }
+                //集計時間枠より大きな信号は枠毎の出来高計算ができないため、
+                //対象から除外する。また、前日からの継続信号破棄の効果も
+                if ((cycle.ct01 + cycle.ct10) >= SummaryDurationHour * 3600)
+                {
+                    //最終シグナルがon->offなら信号数を減算
+                    if(panel.status== RunOrStop.STOP)
+                    {
+                        panel.signalNum--;
+                    }
+                    return;
+                }
 
                 //未操作開始対応のため、CT無しの生産要因を追加する
                 var stDt = cycle.dt.AddSeconds(-1 * (cycle.ct01 + cycle.ct10));
@@ -180,10 +202,10 @@ namespace MiotoBlazorCommon
                     mac = cycle.mac,
                     status = ProductionFactor.Status.START_PRODUCTION_NOCT,
                     stTicks = stDt.Ticks,
-                    endTicks = DateTime.Parse((stDt.AddHours(1)).ToString("yyyy/MM/dd HH") + ":00:00").Ticks,
+                    endTicks = DateTime.Parse((stDt.AddHours(SummaryDurationHour)).ToString("yyyy/MM/dd HH") + ":00:00").Ticks,
                     isValid = ProductionFactor.Validation.VALID
                 };
-                list.Add(noct);
+                panel.SetProductionFactor(noct);
                 noct.updateByCycle(cycle);
             }
 
@@ -194,7 +216,17 @@ namespace MiotoBlazorCommon
                 //ソート後に次の要因開始時刻を前の要因終了時刻に設定
                 for (var i = 1; i < list.Count; i++)
                 {
-                    list[i - 1].endTicks = list[i].stTicks;
+                    //long.MaxValueの時もしくは、NOCT時でより早い時間に
+                    //休憩に入るなどの処理を行った場合
+                    if(list[i - 1].endTicks > list[i].stTicks)
+                    {
+                        list[i - 1].endTicks = list[i].stTicks;
+                    }
+                }
+                //最後以外は時刻計算を固定
+                for(var i=0; i<list.Count-1; i++)
+                {
+                    list[i].isFixed = true;
                 }
             }
         }

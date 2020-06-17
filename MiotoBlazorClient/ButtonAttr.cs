@@ -38,6 +38,8 @@ namespace MiotoBlazorClient
                     return "-muted ";
                 case ProductionFactor.Status.START_PRODUCTION:
                     return "-primary ";
+                case ProductionFactor.Status.START_PRODUCTION_NOCT:
+                    return "-primary ";
                 case ProductionFactor.Status.WAITING_FOR_PARTS:
                     return "-warning ";
                 case ProductionFactor.Status.START_REST:

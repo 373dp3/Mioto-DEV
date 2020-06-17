@@ -141,6 +141,7 @@ namespace MiotoServer
         private static bool doOperateIfHttpDbRequest(HttpListenerContext context, HttpListenerResponse res)
         {
             DbWrapper dbWrapper = DbWrapper.getInstance();
+            res.AddHeader("Access-Control-Allow-Origin", "*");//複数Mioto結合に備えるため
 
             //Last-Modifiedヘッダの適用
             var headers = res.Headers;

@@ -344,9 +344,6 @@ namespace MiotoBlazorClient
 
         public async Task ToCSV(Action<string> func, string idDate, bool isHeader)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-            Console.WriteLine($"start {sw.ElapsedMilliseconds}");
             StringBuilder sb = new StringBuilder();
             await Task.Yield();
             var date = DateTime
@@ -357,11 +354,9 @@ namespace MiotoBlazorClient
             {
                 if (isHttpDone)
                 {
-                    Console.WriteLine($"flg true {sw.ElapsedMilliseconds}");
                     break;
                 }
                 await Task.Delay(100);
-                Console.WriteLine($"delay {sw.ElapsedMilliseconds}");
             }
 
             if (isHeader)
@@ -371,19 +366,16 @@ namespace MiotoBlazorClient
 
             foreach (var item in this._listPanelModel)
             {
-                Console.WriteLine($"panel {sw.ElapsedMilliseconds}");
                 foreach (var factor in item.listProductionFactor)
                 {
                     var btn = new ButtonAttr(factor.status);
                     sb.AppendLine(
                         $"{date},\"{item.title}\",{item.mac.ToString("x")}," +
                         btn.name + "," + factor.ToUserSaveCsv());
-                    Console.WriteLine($"append B {sw.ElapsedMilliseconds}");
                 }
                 await Task.Yield();
             }
             func(sb.ToString());
-            Console.WriteLine($"done {sw.ElapsedMilliseconds}");
         }
 
         public virtual void Dispose()

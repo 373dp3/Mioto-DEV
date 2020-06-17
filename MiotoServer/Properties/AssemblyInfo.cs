@@ -34,8 +34,12 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-α1")]
+[assembly: AssemblyInformationalVersion("1.4.0-α2")]
 /*
+ * 2020.6.17
+ * ・CT指定なし処理への対応
+ * ・CSV出力範囲指定対応
+ * 
  * 2020.6.14
  * ・Blazor WebAssembly対応初版
  * 
