@@ -17,7 +17,7 @@ namespace MiotoBlazorCommon
             base.ClearPrevInfo();
             listSmallStop.Clear();
         }
-
+        
         public override void updateCycleTime(CycleTime ct)
         {
             base.updateCycleTime(ct);
@@ -25,7 +25,12 @@ namespace MiotoBlazorCommon
             if (
                 (ct.ct01 > smallStopLowerLimitSec) &&
                 (this.listProductionFactor
-                    .Where(q=>q.status == ProductionFactor.Status.START_PRODUCTION)
+                    .Where(q => {
+                        if ((q.status == ProductionFactor.Status.START_PRODUCTION)
+                        || (q.status == ProductionFactor.Status.START_PRODUCTION_NOCT))
+                            return true;
+                        return false;
+                        })
                     .Where(q => q.isInnerTimeRange(ct, true) == true).Count() > 0)
                 )
             {

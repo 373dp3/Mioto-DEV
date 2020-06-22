@@ -60,6 +60,16 @@ namespace MiotoServer
                 cfg.insertOrUpdateTwe(wrapper.getLastInfoList());
                 d("no blazor cfg exist");
             }
+            //TWE-Lite子機のリスト確認と追加
+            var list = DbWrapper.getInstance().getLastInfoList();
+            foreach(var twe in list)
+            {
+                if (cfg.listTwe.Where(q => q.mac == twe.mac).Count() != 0) continue;
+                cfg.listTwe.Add(new ConfigTwe() { mac = twe.mac, Ticks = twe.ticks });
+            }
+
+
+
             cfg.appVer = MiotoServerWrapper.config.appVer;
             var json = JsonSerializer.Serialize(cfg);
             await TxDataAsync(json);

@@ -48,10 +48,31 @@ namespace MiotoBlazorCommon.Struct
             START_REPAIRING=800,
             FINISH_REPAIRING=900,
         }
-        public Status status { get; set; } = Status.NOOP;
+        public Status status { get
+            {
+                return _status;
+            }
+            set
+            {
+                _status = value;
+                updateIfNoCT();
+            }
+        }
+
+        [Ignore]
+        private Status _status { get; set; } = Status.NOOP;
+
 
         [StringLength(500, ErrorMessage = "文字数が超過しています(500バイトまで)")]
         public string memo { get; set; } = "";
+
+        public void updateIfNoCT()
+        {
+            if (stTicks == SET_TICKS_AT_SERVER) return;
+            if (status != Status.START_PRODUCTION_NOCT) return;
+            if (_endTicks != long.MaxValue) return;
+            _endTicks = PanelModel.CreateEndTicks(new DateTime(stTicks));
+        }
 
         public string ToUserSaveCsv()
         {
@@ -123,7 +144,21 @@ namespace MiotoBlazorCommon.Struct
 
         #region DBに登録しない生産分析用の変数・メソッド群
         [Ignore]
-        public long endTicks { get; set; } = long.MaxValue;
+        public long endTicks
+        {
+            get
+            {
+                return _endTicks;
+            }
+            set
+            {
+                _endTicks = value;
+                updateIfNoCT();
+            }
+        }
+
+        [Ignore]
+        private long _endTicks { get; set; } = long.MaxValue;
         /// <summary>
         /// 要因開始前起動を対象外とした出来高
         /// </summary>

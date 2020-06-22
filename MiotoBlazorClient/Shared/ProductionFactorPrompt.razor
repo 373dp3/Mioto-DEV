@@ -1,7 +1,7 @@
 ﻿<div class="@classStr">
     <div class="card @borderStr">
 
-        @if (factor.endTicks == long.MaxValue)
+        @if (factor.endTicks > DateTime.Now.Ticks)
         {
             if (panel.status == PanelModel.RunOrStop.RUN)
             {

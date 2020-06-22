@@ -85,6 +85,7 @@ namespace MiotoBlazorClient
                         },
                         () => {
                             //完了後の処理
+
                             //サイクルタイム情報の取得
                             _ = loadCsvByHttp(() => new CycleTime(), q =>
                             {
@@ -311,10 +312,11 @@ namespace MiotoBlazorClient
                     //子機情報を構成する小パネルを作成
                     _listPanelModel.Add(panel);
                 }
+
             }
             else
             {
-                foreach(var panel in _listPanelModel)
+                foreach (var panel in _listPanelModel)
                 {
                     panel.ClearPrevInfo();
                 }

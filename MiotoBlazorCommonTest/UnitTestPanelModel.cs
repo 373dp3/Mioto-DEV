@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Security;
 using System.Threading;
@@ -664,7 +665,59 @@ namespace MiotoBlazorCommonTest
             Assert.AreEqual(0, Round01(panel.listProductionFactor[1].GetDurationSec()));
         }
 
+        /// <summary>
+        /// 時間帯マタギ時のバグ確認
+        /// </summary>
+        [TestMethod]
+        public void TestTimeRangeOverlap()
+        {
+            var panel = new PanelModelSmallStop() { mac = 1, };
+            var dt = new DateTime(2020, 6, 20, 14, 46, 7);
 
+            var dummy = new DummyCt(dt, true);
+            CycleTime ct = null;
+            var mt = 10.0;  //マシンタイム
+            var ht = 5.0;   //手作業時間(Human time)
+
+            //CT00～CT11を揃えるため2回捨てる
+            ct = dummy.flip(mt);//turn off
+
+            //以下、実際の計測データ
+            ct = dummy.flip(1.4); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(0.2); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(0.2); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(1.7); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(2); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(2.5); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(3.1); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(5.9); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(3.5); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(5.7); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(5.7); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(0.1); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(0.2); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(2.9); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(5.6); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(3.6); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(6.5); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(3.5); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(339.6); /*turn on*/ panel.updateCycleTime(ct);
+            Assert.AreEqual(1, panel.listSmallStop.Count);
+            ct = dummy.flip(2.7); /*turn off*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(4.1); /*turn on*/ panel.updateCycleTime(ct);
+            ct = dummy.flip(4); /*turn off*/ panel.updateCycleTime(ct);
+
+            ct = dummy.flip(1448.4); /*turn on*/ 
+            panel.updateCycleTime(ct);
+            Assert.AreEqual(2, panel.listSmallStop.Count);
+            Assert.AreEqual(2, panel.listProductionFactor.Count);
+
+            ct = dummy.flip(4.2); /*turn off*/ 
+            panel.updateCycleTime(ct);
+            Assert.AreEqual(2, panel.listProductionFactor.Count);
+
+
+        }
         public double Round01(double val)
         {
             return Math.Round(val * 10) / 10;

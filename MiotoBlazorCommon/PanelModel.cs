@@ -19,6 +19,11 @@ namespace MiotoBlazorCommon
 
         private ProductionFactorHelper productionHelper = new ProductionFactorHelper();
 
+        public static long CreateEndTicks(DateTime dt)
+        {
+            return DateTime.Parse((dt.AddHours(ProductionFactorHelper.SummaryDurationHour)).ToString("yyyy/MM/dd HH") + ":00:00").Ticks;
+        }
+
         /// <summary>
         /// ページ遷移用に以前のページに関わる情報をクリアする
         /// </summary>
@@ -163,6 +168,11 @@ namespace MiotoBlazorCommon
             productionHelper.SortAndSetEndTicks();
         }
 
+        public void RemoveProductionFactor(ProductionFactor factor)
+        {
+            productionHelper.list.Remove(factor);
+        }
+
         public IReadOnlyList<ProductionFactor> listProductionFactor { 
             get
             {
@@ -202,12 +212,14 @@ namespace MiotoBlazorCommon
                     mac = cycle.mac,
                     status = ProductionFactor.Status.START_PRODUCTION_NOCT,
                     stTicks = stDt.Ticks,
-                    endTicks = DateTime.Parse((stDt.AddHours(SummaryDurationHour)).ToString("yyyy/MM/dd HH") + ":00:00").Ticks,
+                    endTicks = CreateEndTicks(cycle.dt),
                     isValid = ProductionFactor.Validation.VALID
                 };
                 panel.SetProductionFactor(noct);
                 noct.updateByCycle(cycle);
             }
+
+
 
             public void SortAndSetEndTicks()
             {

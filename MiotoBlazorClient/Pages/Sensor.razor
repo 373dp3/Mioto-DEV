@@ -133,19 +133,89 @@
                             </table>
                         </div>
                     </div>
+                    <!--
+                        
+                    /*
+                            @foreach (var factor2 in item.listProductionFactor
+                          .Where(q => q.endTicks != long.MaxValue)
+                          .OrderBy(q => q.stTicks))
+                            {
+                                <ProductionFactorPrompt classStr="@classStr"
+                                                        factor="factor2"
+                                                        panel="item"
+                                                        borderStr="@("border"+ButtonAttr.GetBgCode(factor2.status)+" my-1")" />
+                            }
+                        //*/
+    -->
 
-                    @foreach (var factor2 in item.listProductionFactor
-                   .Where(q => q.endTicks != long.MaxValue)
-                   .OrderBy(q => q.stTicks))
-                    {
-                        <ProductionFactorPrompt classStr="@classStr"
-                                                factor="factor2"
-                                                panel="item"
-                                                borderStr="@("border"+ButtonAttr.GetBgCode(factor2.status)+" my-1")" />
-                    }
                 </div><!--row-->
             }
+            <div>
+                <table class="table w-auto text-center">
+                    <thead>
+                        <tr>
+                            <th>要因</th>
+                            <th>時間帯</th>
+                            <th>時間</th>
+                            <th>出来高</th>
+                            <th><small>可動率<br>MT率</small></th>
+                            <th>標準CT</th>
+                            <th>平均CT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in item.listProductionFactor
+                                             .OrderBy(q => q.stTicks))
+                        {
+                        <tr>
+                            <td class="bg@(ButtonAttr.GetBgCode(f.status)) @(ButtonAttr.GetTextCode(f.status))">
+                                @(ProductionFactor.GetStatusStr(f.status))
+                            </td>
+                            @if ((f.status == ProductionFactor.Status.START_PRODUCTION)
+                                  || (f.status == ProductionFactor.Status.START_PRODUCTION_NOCT))
+                            {
+                                <td>
+                                    @(new DateTime(f.stTicks).ToString("HH:mm"))～@if (f.endTicks != long.MaxValue)
+                                    {
+                                        <span>@(new DateTime(f.endTicks).ToString("HH:mm"))</span>
+                                    }
+                                </td>
+                                <td>
+                                    @(f.GetDuration())
+                                </td>
+                                <td>
+                                    @(f.dekidaka)
+                                </td>
+                                <td>
+                                    @((f.GetKadouritsu()*100).ToString("F1")) %
+                                </td>
+                                <td>
+                                    @(f.ct)
+                                </td>
+                                <td>
+                                    @(f.aveCt.ToString("F1"))
+                                </td>
 
+                            }
+                            else
+                            {
+                                <td>
+                                    @(new DateTime(f.stTicks).ToString("HH:mm"))～@if (f.endTicks != long.MaxValue)
+                                    {
+                                        <span>@(new DateTime(f.endTicks).ToString("HH:mm"))</span>
+                                    }
+                                </td>
+                                <td>
+                                    @(f.GetDuration())
+                                </td>
+                                <td colspan="4">                                    
+                                </td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
         }
     </div>
@@ -281,15 +351,21 @@
         {
             var ct = ProductionFactor.CT_NOOP;
             var memo = "";
+            var endTicks = long.MaxValue;
             if (btn.status == ProductionFactor.Status.START_PRODUCTION)
             {
                 ct = modal.factor.ct;
                 memo = modal.factor.memo;
             }
+            if (btn.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
+            {
+                endTicks = PanelModel.CreateEndTicks(DateTime.Now);
+            }
 
             await this.Send(new ProductionFactor()
-            { status = btn.status, mac = btn.mac, ct = ct, memo = memo }
+            { status = btn.status, mac = btn.mac, ct = ct, memo = memo, endTicks = endTicks }
             );
+
         }
     }
 

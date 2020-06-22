@@ -5,7 +5,7 @@
 ; アプリケーションの削除メニューに表示されるバージョンは、メニューを閉じて再表示すれば更新される。
 ;
 #define MyAppName "MiotoServer"
-#define MyAppVersion "1.4.0-alpha2"
+#define MyAppVersion "1.4.0-alpha3"
 #define MyAppPublisher "dp3"
 #define MyAppURL "https://mioto.dp3.jp"
 #define MyAppExeName "MiotoServerW.exe"
