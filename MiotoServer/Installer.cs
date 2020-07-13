@@ -33,23 +33,27 @@ namespace MiotoServerW
 
         public static void setFirewall(int portNumber)
         {
-            //[TODO] Raspberry Pi等のLinux・Mono環境下では以下の処理を無効にする必要がある。
-            /*
-            if (portNumber <= 0) { throw new InvalidDataException("ポート番号が不適切<=0です"); }
-            runDosCmd("netsh advfirewall firewall add rule "
-                + "name=\"" + RULE_NAME + "\" "
-                + " dir=in action=allow protocol=TCP localport=" + portNumber.ToString()
-                + " description=\"" + RULE_NAME + "用に外部接続を許可する\"");
-            //*/
+            //[NOTICE] Raspberry Pi等のLinux・Mono環境下では以下の例外が発生する
+            try
+            {
+                if (portNumber <= 0) { throw new InvalidDataException("ポート番号が不適切<=0です"); }
+                runDosCmd("netsh advfirewall firewall add rule "
+                    + "name=\"" + RULE_NAME + "\" "
+                    + " dir=in action=allow protocol=TCP localport=" + portNumber.ToString()
+                    + " description=\"" + RULE_NAME + "用に外部接続を許可する\"");
+            }
+            catch (Exception e) { }
         }
 
         public static void deleteFirewall()
         {
-            //[TODO] Raspberry Pi等のLinux・Mono環境下では以下の処理を無効にする必要がある。
-            /*
-            runDosCmd("netsh advfirewall firewall set rule name=\"" + RULE_NAME + "\" new enable=no");
-            runDosCmd("netsh advfirewall firewall del rule name=\"" + RULE_NAME + "\" ");
-            //*/
+            //[NOTICE] Raspberry Pi等のLinux・Mono環境下では以下の例外が発生する
+            try
+            {
+                runDosCmd("netsh advfirewall firewall set rule name=\"" + RULE_NAME + "\" new enable=no");
+                runDosCmd("netsh advfirewall firewall del rule name=\"" + RULE_NAME + "\" ");
+            }
+            catch (Exception e) { }
         }
 
         private static void RegistTaskScheduler()

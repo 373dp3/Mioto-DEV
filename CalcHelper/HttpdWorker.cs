@@ -182,6 +182,7 @@ namespace CalcHelper
             }
 
             // index.html以外の処理
+            log("path:" + path);
             if (path.Contains(HTML_DIR + INDEX_HTML) == false)
             {
                 return getFileByte(path, param, headers, context);

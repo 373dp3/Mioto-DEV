@@ -29,7 +29,7 @@ namespace MiotoServer
 
         static int portNumber { get; set; } = 80;
 
-        public HttpdWorker(int portNumber=80)
+        public HttpdWorker(int portNumber = 80)
         {
             HttpdWorker.portNumber = portNumber;
             if (paramFilterList.Count == 0)
@@ -44,16 +44,18 @@ namespace MiotoServer
         {
             Program.d("httpd restart required");
             if (httpTh == null) { return; }
-            if(listener==null) { return; }
+            if (listener == null) { return; }
             isThreadEnable = false;
             try
             {
                 listener.Stop();
                 httpTh.Join(30 * 1000);
-            }catch(ThreadStateException te)
+            }
+            catch (ThreadStateException te)
             {
-                Program.d("ThreadStateExcepton on httpdRestart:"+te.ToString());
-            }catch(HttpListenerException le)
+                Program.d("ThreadStateExcepton on httpdRestart:" + te.ToString());
+            }
+            catch (HttpListenerException le)
             {
                 Program.d("HttpListenerException on httpdRestart:" + le.ToString());
             }
@@ -99,7 +101,8 @@ namespace MiotoServer
                         catch (ProtocolViolationException pe)
                         {
                             Program.d("Error: " + pe.ToString());
-                        }catch (HttpListenerException le)
+                        }
+                        catch (HttpListenerException le)
                         {
                             Program.d("HttpListenerを停止しました");
                         }
@@ -134,7 +137,7 @@ namespace MiotoServer
             if (await wcWorker.doOperateIfWebsocketRequestAsync(context, res)) { return; }
 
             //通常のDB参照処理
-            if(doOperateIfHttpDbRequest(context, res)) { return; }
+            if (doOperateIfHttpDbRequest(context, res)) { return; }
 
         }
 
@@ -157,7 +160,7 @@ namespace MiotoServer
                 return true;
             }
             res.StatusCode = 200;
-            
+
             //Not Modifiedレスポンス処理
             if (reqHeaders.AllKeys.Contains(IF_MOD_SINCE)
                 && (!dbWrapper.isModified(reqHeaders.Get(IF_MOD_SINCE))))
@@ -222,17 +225,17 @@ namespace MiotoServer
             /**
              * http://localhost/sound/filename.(mp3|wav)/sessionid
              * */
-            if(context.Request.HttpMethod.CompareTo("HEAD")==0) { return false; }
+            if (context.Request.HttpMethod.CompareTo("HEAD") == 0) { return false; }
             var url = context.Request.RawUrl.ToLower();
             if (url.Contains("sound") == false) { return false; }
             if (url.Contains("\\")) { return false; }//\を含むURLは処理しない。
             var ary = context.Request.RawUrl.Split('/');
 
             var listSoundFile = new List<string>();
-            foreach(var node in ary)
+            foreach (var node in ary)
             {
                 var m = ptnSoundFile.Match(node);
-                if(m.Success==false) { continue; }
+                if (m.Success == false) { continue; }
                 listSoundFile.Add(m.Groups[0].Value);
                 Program.d("sound:" + m.Groups[0].Value);
             }
@@ -251,12 +254,12 @@ namespace MiotoServer
                 res.StatusCode = 200;
 
                 var p = DbSoundOrder.getInstance();
-                foreach(var soundFile in listSoundFile)
+                foreach (var soundFile in listSoundFile)
                 {
                     p.insertOrUpdateFile(soundFile);
                 }
                 byte[] content = null;
-                content = Encoding.UTF8.GetBytes("file: "+string.Join(", ", listSoundFile));
+                content = Encoding.UTF8.GetBytes("file: " + string.Join(", ", listSoundFile));
                 res.OutputStream.Write(content, 0, content.Length);
                 res.Close();
             }
@@ -306,7 +309,7 @@ namespace MiotoServer
             //ダウンロード対応
             if (param.url.Contains("/download"))
             {
-                headers.Add("Content-Disposition", "attachment;filename=\"mioto_" 
+                headers.Add("Content-Disposition", "attachment;filename=\"mioto_"
                     + paramStr + ".csv\"");
             }
 

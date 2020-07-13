@@ -22,7 +22,7 @@ namespace MiotoServer
 
         public void Dispose()
         {
-            if((wsContext!=null) && (wsContext.WebSocket != null))
+            if ((wsContext != null) && (wsContext.WebSocket != null))
             {
                 wsContext.WebSocket.Dispose();
             }
@@ -30,13 +30,13 @@ namespace MiotoServer
 
         public async Task TxCsvCtData(string msg)
         {
-            if(type!= OperationType.CSV) { return; }
+            if (type != OperationType.CSV) { return; }
             await TxDataAsync(msg);
         }
         public async Task TxDataAsync(string msg)
         {
             if (ws == null) { return; }
-            if(ws.State != WebSocketState.Open) { return; }
+            if (ws.State != WebSocketState.Open) { return; }
 
             await ws.SendAsync(
                 new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)),
@@ -56,13 +56,14 @@ namespace MiotoServer
                 var jsonCfg = wrapper.getConfig(CONFIG_DB_KEY);
                 cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 cfg.insertOrUpdateTwe(wrapper.getLastInfoList());
                 d("no blazor cfg exist");
             }
             //TWE-Lite子機のリスト確認と追加
             var list = DbWrapper.getInstance().getLastInfoList();
-            foreach(var twe in list)
+            foreach (var twe in list)
             {
                 if (cfg.listTwe.Where(q => q.mac == twe.mac).Count() != 0) continue;
                 cfg.listTwe.Add(new ConfigTwe() { mac = twe.mac, Ticks = twe.ticks });
@@ -93,7 +94,7 @@ namespace MiotoServer
                     {
                         var factor = JsonSerializer.Deserialize<ProductionFactor>(msg);
                         //日時指定がない場合は受信時刻を設定する
-                        if(factor.stTicks == ProductionFactor.SET_TICKS_AT_SERVER)
+                        if (factor.stTicks == ProductionFactor.SET_TICKS_AT_SERVER)
                         {
                             factor.stTicks = DateTime.Now.Ticks;
                         }

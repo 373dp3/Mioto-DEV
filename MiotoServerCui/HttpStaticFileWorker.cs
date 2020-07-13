@@ -49,8 +49,8 @@ namespace MiotoServer
             {".js", "text/javascript"},
             {".json", "application/json"},
             {".jsonld", "application/ld+json"},
-            {".mid", "audio/midi audio/x-midi"},
-            {".midi", "audio/midi audio/x-midi"},
+            {".mid", "audio/midi audio/x-midi"},
+            {".midi", "audio/midi audio/x-midi"},
             {".mjs", "text/javascript"},
             {".mp3", "audio/mpeg"},
             {".mpeg", "video/mpeg"},
@@ -105,7 +105,7 @@ namespace MiotoServer
                 root = frameworkRoot;
             }
 
-            var fileOrder = (root + m.Groups[1]).Replace('/','\\');
+            var fileOrder = (root + m.Groups[1]).Replace('/', '\\');
             if (m.Groups[1].Value.Length == 0)
             {
                 fileOrder += "index.html";
@@ -113,7 +113,7 @@ namespace MiotoServer
 
             //ファイルが見つからない場合の処理 [TODO] Blazer向けURLリライト処理が後々必要になる
             var fileInfo = new FileInfo(fileOrder);
-            if (fileInfo.Exists== false)
+            if (fileInfo.Exists == false)
             {
                 //ファイルの拡張子がない場合は、Blazor WebAssemblyの識別子だと判断する
                 if (fileInfo.Extension.Length == 0)
@@ -155,6 +155,6 @@ namespace MiotoServer
         {
             Program.d(msg);
         }
-        
+
     }
 }

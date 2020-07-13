@@ -15,7 +15,7 @@ namespace MiotoServer
         public static SynchronizedCollection<WebSocketWorker> collectionWebSocketWorker = new SynchronizedCollection<WebSocketWorker>();
         public async Task<bool> doOperateIfWebsocketRequestAsync(HttpListenerContext context, HttpListenerResponse res)
         {
-            if (context.Request.IsWebSocketRequest==false)
+            if (context.Request.IsWebSocketRequest == false)
             {
                 return false;
             }
