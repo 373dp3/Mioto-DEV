@@ -99,7 +99,7 @@ namespace MiotoServer
                             factor.stTicks = DateTime.Now.Ticks;
                         }
                         DbWrapper.getInstance().conn.Insert(factor);
-
+                        DbWrapper.getInstance().updateMacTicks(factor.mac, factor.stTicks);
                         //Echo back
                         mgr.fetchProFactor($"!{ProductionFactor.KEY},{factor.ToCSV()}");
                         Program.d("set factor");

@@ -14,6 +14,8 @@ namespace MiotoServer.Query
         public enum TYPE { CT, TWE, PAL, TWE2525, AH, 
             MEM_DB=101,
             PRODUCTION_FACTOR = 201,
+            BLAZOR_CLIENT_POLLING = 301,
+            BLAZOR_CONFIG = 401,
         };
         public VOLUME volume { get; set; }
         public OPTION option { get; set; }
@@ -29,6 +31,11 @@ namespace MiotoServer.Query
 
         //macもymdもともに8桁の為、2120年以降をMACと判断。ESPは0x81, TWEは0x7fから始まっているので大丈夫かと
         public long macMin { get; internal set; }
+
+        //問い合わせ結果の最大Ticks
+        public long ansMaxTicks { get; set; } = 0;
+        //最小Ticks要求（この値は含まず、それよりも大きな値）
+        public long orderMinTicks { get; set; } = 0;
 
         public Param(string url)
         {

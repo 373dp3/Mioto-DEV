@@ -10,6 +10,7 @@ namespace MiotoServer.Query
     public class ParamTypeVolume : ParamFilter
     {
         static Regex ptnTin = new Regex("/t(\\d{1,10})s", RegexOptions.Compiled);
+        static Regex ptnBlazor = new Regex("/bz(\\d{1,30})", RegexOptions.Compiled);
         static Regex ptnFix = new Regex("/fix(\\d{1,10})", RegexOptions.Compiled);
         public override void update(Param param)
         {
@@ -83,6 +84,19 @@ namespace MiotoServer.Query
                 param.fixRow = Convert.ToInt64(mFix.Groups[1].ToString());
             }
 
+            //Blazor Client用Ticks指定
+            var mticks = ptnBlazor.Match(param.url);
+            if (mticks.Success)
+            {
+                param.orderMinTicks = Convert.ToInt64(mticks.Groups[1].ToString());
+                param.type = Param.TYPE.BLAZOR_CLIENT_POLLING;
+                //Program.d("ticks :" + param.ansMaxTicks);
+            }
+
+            if (param.url.Contains("/bzconfig"))
+            {
+                param.type = Param.TYPE.BLAZOR_CONFIG;
+            }
         }
     }
 }

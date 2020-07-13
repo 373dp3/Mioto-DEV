@@ -5,6 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MiotoBlazorClient
@@ -30,24 +34,37 @@ namespace MiotoBlazorClient
                 action(config);
                 return;
             }
-
-            var cf = new SocketWorker(NavMgr, "config");
-            await Task.WhenAny(cf.connectAsync<Config>(c =>
+            
+            var http = new HttpClient();
+            var url = $"http://{new Uri(NavMgr.Uri).Host}/{URI_PREFIX}/_{DateTime.Now.Ticks}";
+            try
             {
-                config = c;
-                if (navMenu != null)
+                var jsonStr = await http.GetStringAsync(url);
+                if (jsonStr != null)
                 {
-                    navMenu.appVer = config.appVer;
-                    navMenu.Reflesh();
+                    var c = JsonSerializer.Deserialize<Config>(jsonStr);
+                    config = c;
+                    if (navMenu != null)
+                    {
+                        navMenu.appVer = config.appVer;
+                        navMenu.Reflesh();
+                    }
+                    action(c);
                 }
-                action(c);
-                Task.WhenAll(DisposeConfigSocket(cf));
-            }));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("GetBzConfig Exception: "+e.ToString());
+            }
+
             await Task.Yield();
         }
 
+        public const string URI_PREFIX = "bzconfig";
+
         public async Task update(NavigationManager NavMgr)
         {
+            /*
             var cf = new SocketWorker(NavMgr, "config");
             try
             {
@@ -60,6 +77,10 @@ namespace MiotoBlazorClient
                 var txt = e.Message;
                 cnt = txt.Length;
             }
+            //*/
+
+            var url = $"http://{new Uri(NavMgr.Uri).Host}/{URI_PREFIX}/_{DateTime.Now.Ticks}";
+            var response = await new HttpClient().PostAsJsonAsync(url, config);
         }
 
         private async Task DisposeConfigSocket(SocketWorker cf)

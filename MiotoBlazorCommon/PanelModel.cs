@@ -164,7 +164,15 @@ namespace MiotoBlazorCommon
         /// <param name="factor"></param>
         public void SetProductionFactor(ProductionFactor factor)
         {
-            productionHelper.list.Add(factor);
+            var old = productionHelper.list.Where(q => q.stTicks == factor.stTicks).FirstOrDefault();
+            if ((old != null) && (old.mac == factor.mac))
+            {
+                old.ParseInto(factor.ToCSV());
+            }
+            else
+            {
+                productionHelper.list.Add(factor);
+            }
             productionHelper.SortAndSetEndTicks();
         }
 

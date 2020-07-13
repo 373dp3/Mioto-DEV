@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -27,7 +28,6 @@ namespace MiotoBlazorClient
         public enum Mode { SINGLE, PANEL_LIST}
 
         Func<PanelModel> factory = null;
-        private SocketWorker wsWorker { get; set; } = null;
 
         private bool isHttpDone = false;
 
@@ -45,7 +45,6 @@ namespace MiotoBlazorClient
             tokenSource.Cancel();
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
-            wsWorker = null;
             isHttpDone = false; ;
             targetMacList.Clear();
 
@@ -97,7 +96,7 @@ namespace MiotoBlazorClient
                                 //今日の日付の場合に変更受信処理の登録
                                 if ((dateOrder == null) || (dateOrder.Length == 0))
                                 {
-                                    _ = socketListener();
+                                    _ = pollingWorker();
                                 }
                                 StateHasChanged();
                             },
@@ -131,6 +130,21 @@ namespace MiotoBlazorClient
             this.StateHasChanged();
         }
 
+        private long maxTicks = 0;
+        private void updateMaxTicks(HttpResponseMessage response)
+        {
+            if (response.Headers.Contains("MaxTicks"))
+            {
+                try
+                {
+                    var ans = Convert.ToInt64(response.Headers.GetValues("MaxTicks").First());
+                    if (ans > 0) { maxTicks = ans; }
+                }
+                catch (Exception e) { }
+                Console.WriteLine("MaxTicks: " + maxTicks);
+            }
+        }
+
         /// <summary>
         /// CSV情報の一括取得
         /// </summary>
@@ -145,57 +159,85 @@ namespace MiotoBlazorClient
             //CSV情報の一括取得
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
             var url = $"http://{new Uri(NavMgr.Uri).Host}/{uriPathWithEndSlash}{macListStr}/backup/_{DateTime.Now.Ticks}";
-            using (var stream = await Http.GetStreamAsync(url))
-            using (var sr = new System.IO.StreamReader(stream))
+            
+            using(var request = new HttpRequestMessage(HttpMethod.Get, url))
+            using(var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
             {
-                var dt = DateTime.Now.AddSeconds(1);
-                while (sr.EndOfStream == false)
+                if(response.StatusCode != System.Net.HttpStatusCode.OK) { return; }
+                updateMaxTicks(response);
+
+                using (var content = response.Content)
+                using(var stream = await content.ReadAsStreamAsync())
+                using (var sr = new System.IO.StreamReader(stream))
                 {
-                    var line = sr.ReadLine();
-                    if (line == null) { break; }
-                    try
+                    var dt = DateTime.Now.AddSeconds(1);
+                    while (sr.EndOfStream == false)
                     {
-                        var item = createFunc();
+                        var line = sr.ReadLine();
+                        if (line == null) { break; }
+                        //Console.WriteLine("http: " + line);
                         try
                         {
-                            item.ParseInto(line);
-                        }catch(Exception e) { continue; }
-                        callback(item);
+                            var item = createFunc();
+                            try
+                            {
+                                item.ParseInto(line);
+                            }
+                            catch (Exception e) { continue; }
+                            callback(item);
 
-                        if (DateTime.Now > dt)
-                        {
-                            dt = DateTime.Now.AddSeconds(1);
-                            debugMsg = $"情報を一括取得しています・・({stream.Position}/{stream.Length})";
-                            this.StateHasChanged();
-                            await Task.Yield();
+                            if (DateTime.Now > dt)
+                            {
+                                dt = DateTime.Now.AddSeconds(1);
+                                debugMsg = $"情報を一括取得しています・・({stream.Position}/{stream.Length})";
+                                this.StateHasChanged();
+                                await Task.Yield();
+                            }
                         }
+                        catch (Exception e) { }
                     }
-                    catch (Exception e) { }
                 }
             }
             if(funcDone!=null) { funcDone(); }
-
         }
 
-        /// <summary>
-        /// 最新情報受信用WebSocketを開始
-        /// </summary>
-        /// <returns></returns>
-        protected async Task socketListener()
+        protected async Task HttpLongPolling()
         {
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
-            using (wsWorker = new SocketWorker($"ws://{new Uri(NavMgr.Uri).Host}/csvcash/{macListStr}/"))
+
+            var token = tokenSource.Token;
+
+            while (token.IsCancellationRequested == false)
             {
                 try
                 {
-                    //tickAndDisposeTriggerで処理を抜けるためWhenAnyを用いる
-                    //WhenAllだとソケット待機が終わらないため
-                    await Task.WhenAny(
-                            wsWorker.connectAsync(msg => {
+                    var url = $"http://{new Uri(NavMgr.Uri).Host}/bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
+
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+                    using (var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        if (token.IsCancellationRequested) { continue; }
+                        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                        {
+                            await Task.Delay(1000);
+                            continue;
+                        }
+                        updateMaxTicks(response);
+
+                        using (var content = response.Content)
+                        using (var stream = await content.ReadAsStreamAsync())
+                        using (var sr = new System.IO.StreamReader(stream))
+                        {
+                            var dt = DateTime.Now.AddSeconds(1);
+                            while (sr.EndOfStream == false)
+                            {
+                                var msg = sr.ReadLine();
+                                if (msg == null) { break; }
+                                //Console.WriteLine("http-long_polling: " + msg);
                                 if (msg[0] != '!')//Cycle情報は従来どおり
                                 {
                                     OnCycle(CycleTime.Parse(msg));
-                                    return;
+                                    continue;
                                 }
                                 //サイクル情報以外は先頭に!と識別情報をつける
                                 //!OnProductionFactor,4,1,81.....
@@ -205,24 +247,39 @@ namespace MiotoBlazorClient
                                     factor.ParseInto(msg.Replace($"!{ProductionFactor.KEY},", ""));
                                     OnProductionFactor(factor);
                                 }
-                            }),
-                            tickAndDisposeTrigger()
-                        );
+                            }
+                        }
+                    }
+                    this.StateHasChanged();
                 }
                 catch (Exception e)
                 {
-                    debugMsg = e.ToString();
-                    this.StateHasChanged();
+                    Console.WriteLine(e.ToString());
                 }
+
+                await Task.Delay(200);
             }
+        }
+
+        /// <summary>
+        /// 最新情報受信用Web long polling
+        /// </summary>
+        /// <returns></returns>
+        protected async Task pollingWorker()
+        {
+            await Task.WhenAny(
+                HttpLongPolling(),
+                tickAndDisposeTrigger());
         }
 
         protected async Task Send(ProductionFactor factor)
         {
-            if (wsWorker == null) { return; }
-            if (wsWorker.state != System.Net.WebSockets.WebSocketState.Open) { return; }
             var json = JsonSerializer.Serialize(factor);
-            await wsWorker.SendData(json);
+            Console.WriteLine($"Dialog send json: {json}");
+
+            var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
+            var url = $"http://{new Uri(NavMgr.Uri).Host}/production_factor_post/_{DateTime.Now.Ticks}";
+            var response = await Http.PostAsJsonAsync(url, factor);
         }
 
         /// <summary>

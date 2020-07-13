@@ -15,8 +15,8 @@ namespace MiotoServer
         public string wwwroot { get; set; } = "..\\..\\..\\MiotoBlazorClient\\wwwroot\\";
         public string frameworkRoot { get; set; } = "..\\..\\..\\MiotoBlazorClient\\bin\\Debug\\netstandard2.1\\wwwroot\\";
 #else
-        public string wwwroot { get; set; } = ".\\html\\";
-        public string frameworkRoot { get; set; } = ".\\html\\";
+        public string wwwroot { get; set; } = "./html/";
+        public string frameworkRoot { get; set; } = "./html/";
 #endif
         private static Regex ptn = new Regex("\\/html\\/(.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public static Dictionary<string, string> dictMIME { get; set; } = new Dictionary<string, string>()
@@ -105,7 +105,7 @@ namespace MiotoServer
                 root = frameworkRoot;
             }
 
-            var fileOrder = (root + m.Groups[1]).Replace('/', '\\');
+            var fileOrder = (root + m.Groups[1]).Replace('\\', '/');
             if (m.Groups[1].Value.Length == 0)
             {
                 fileOrder += "index.html";
@@ -123,6 +123,7 @@ namespace MiotoServer
                 }
                 else
                 {
+                    d("404: "+ fileInfo.FullName);
                     res.StatusCode = 404;
                     res.Close();
                     return true;

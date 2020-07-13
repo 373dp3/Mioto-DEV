@@ -100,6 +100,7 @@
     <Compile Include="DB\date2row.cs" />
     <Compile Include="DB\latest2525.cs" />
     <Compile Include="DB\Mac2Ampere.cs" />
+    <Compile Include="DB\MacTicks.cs" />
     <Compile Include="DB\MemMac2Ah.cs" />
     <Compile Include="DB\SoundTbl.cs" />
     <Compile Include="HttpdWorker.cs" />

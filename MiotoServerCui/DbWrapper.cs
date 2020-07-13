@@ -13,9 +13,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel.Configuration;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MiotoServer
 {
@@ -32,6 +36,7 @@ namespace MiotoServer
         }
 
         public SQLiteConnection conn = null;
+        public SQLiteConnection memConn = null;
 
         const string dbFilePrefix = "mioto_db";
 
@@ -63,6 +68,7 @@ namespace MiotoServer
                 Directory.CreateDirectory(dbDirPath);
             }
             conn = new SQLiteConnection(dbPath);
+            memConn = new SQLiteConnection(":memory:");
 
 
             //テーブル作成
@@ -72,6 +78,7 @@ namespace MiotoServer
             conn.CreateTable<latest2525>();
             conn.CreateTable<ConfigTbl>();
             conn.CreateTable<ProductionFactor>();
+            memConn.CreateTable<MacTicks>();
 
             //DBフィールドを確認し必要であれば移行する。
             //migrateDbIfNeed();
@@ -193,13 +200,13 @@ namespace MiotoServer
             conn.Execute(query);
             updateDateFlg();
 
-            sockMgr.fetchCsv(csv);
         }
 
         const int FLG_TWE = 2;
         const int FLG_PAL = 3;
         const int FLG_2525 = 4;
         const int FLG_AMPERE = 5;
+        public const string CONFIG_BLAZOR_KEY = "BLAZOR_CONFIG";
 
         public void insertCsv(TwePacket packet, string csv)
         {
@@ -232,7 +239,63 @@ namespace MiotoServer
             updateDateFlg();
         }
 
-        public string getCsv(Param param)
+        public async Task<string> getCsv(Param param)
+        {
+            switch(param.type)
+            {
+                case Param.TYPE.BLAZOR_CLIENT_POLLING:
+                    return await GetMixedCsvAsync(param);
+                case Param.TYPE.BLAZOR_CONFIG:
+                    return GetBlazorConfig();
+                default:
+                    return _getCsv(param);
+            }
+        }
+
+        public string GetBlazorConfig()
+        {
+            var cfg = new Config();
+            try
+            {
+                var jsonCfg = getConfig(CONFIG_BLAZOR_KEY);
+                cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
+            }
+            catch (Exception e)
+            {
+                cfg.insertOrUpdateTwe(getLastInfoList());
+            }
+
+            //TWE-Lite子機のリスト確認と追加
+            var list = DbWrapper.getInstance().getLastInfoList();
+            foreach (var twe in list)
+            {
+                if (cfg.listTwe.Where(q => q.mac == twe.mac).Count() != 0) continue;
+                cfg.listTwe.Add(new ConfigTwe() { mac = twe.mac, Ticks = twe.ticks });
+            }
+
+            cfg.appVer = MiotoServerWrapper.config.appVer;
+            var json = JsonSerializer.Serialize(cfg);
+            return json;
+        }
+
+        public async Task<string> GetMixedCsvAsync(Param param)
+        {
+            //CSV情報取得
+            await Task.Yield();
+            var sb = new StringBuilder();
+
+            if(await pollingUntilUpdate(param) == false)
+            {
+                return "";
+            }
+            sb.Append(GetProductionFactorCsv(param, true));//数は大した事がないし、更新されている可能性もあるので
+            param.option = Param.OPTION.BACKUP;
+            sb.Append(_getCsv(param));
+
+            return sb.ToString();
+        }
+
+        public string _getCsv(Param param)
         {
             //*
             //string hhmm = Program.config[Program.HM_KEY];
@@ -324,20 +387,22 @@ namespace MiotoServer
             {
                 case Param.VOLUME.NORMAL:
                     //間引かない
-                    CommandText = "select csv from csvcash where " + whereKey
+                    CommandText = "select ticks, csv from csvcash where " + whereKey
                         + " ROWID > " + from + " and ROWID <=" + to + macListStr
+                        + " and ticks > " + param.orderMinTicks
                         + " order by ticks DESC " + fixRow;
                     if (param.option == Param.OPTION.BACKUP)
                     {
-                        CommandText = "select csv from csvcash where " + whereKey
+                        CommandText = "select ticks, csv from csvcash where " + whereKey
                             + " ROWID > " + from + " and ROWID <=" + to + macListStr
+                        + " and ticks > " + param.orderMinTicks
                             + " order by ticks ASC " + fixRow;
                     }
                     break;
                 case Param.VOLUME.THINING:
                     UInt64 val = (UInt64)param.thiningSec * 10000000UL;
                     //一定時間間隔で間引く
-                    CommandText = "select csv, cast(ticks/(" + val + ") as int) as tick2 "
+                    CommandText = "select ticks, csv, cast(ticks/(" + val + ") as int) as tick2 "
                         + "from csvcash where " + whereKey
                         + " ROWID > " + from + " and ROWID <=" + to + macListStr
                         + " group by mac, tick2 "
@@ -358,7 +423,7 @@ namespace MiotoServer
                     else
                     {
                         //最終データのみを対象とする
-                        CommandText = "select csv, max(ticks) from csvcash where " + whereKey
+                        CommandText = "select ticks, csv, max(ticks) from csvcash where " + whereKey
                             + " ROWID > " + from + " and ROWID <=" + to + macListStr
                             + " group by mac order by ticks DESC ";
                     }
@@ -382,6 +447,7 @@ namespace MiotoServer
                         sb.AppendLine();
                     }
                 }
+                param.ansMaxTicks = rs.Select(q => q.ticks).Max();
             }
             else
             {
@@ -399,6 +465,10 @@ namespace MiotoServer
                     {
                         sb.AppendLine();
                     }
+                }
+                if (rs.Count > 0)
+                {
+                    param.ansMaxTicks = rs.Select(q => q.ticks).Max();
                 }
 
             }
@@ -567,6 +637,7 @@ namespace MiotoServer
                 mac = packet.mac, seq = packet.seq, btn = packet.btn,
                 lqi = packet.lqi, batt = packet.btn, ticks = packet.dt.Ticks };
             conn.Insert(lastInfo);
+            updateMacTicks(packet.mac, packet.dt.Ticks);
             updateDateFlg();
         }
 
@@ -592,7 +663,7 @@ namespace MiotoServer
                 conn.Execute(query);
                 updateDateFlg();
             }
-
+            updateMacTicks(packet.mac, packet.dt.Ticks);
             conn.Commit();
         }
 
@@ -641,7 +712,7 @@ namespace MiotoServer
             Program.d(msg);
         }
 
-        public string GetProductionFactorCsv(Param param)
+        public string GetProductionFactorCsv(Param param, bool isAppendPrefix = false)
         {
             //日付による生産要因情報フィルタ処理の実装
             var dtList = new List<DateTime>();
@@ -660,21 +731,70 @@ namespace MiotoServer
             //基本的なクエリ
             var sb = new StringBuilder();
             var query = $"select * from ProductionFactor Where (stTicks>={from.Ticks} and stTicks<{to.Ticks}) ";
-            
+
             //macアドレスによるフィルタの追加
+            var whereOpt = " ";
             if((param.macList!=null) && (param.macList.Count > 0))
+            {
+                whereOpt = " and ( mac = " + string.Join(" or mac = ", param.macList) + " ) ";
+            }
+            query += whereOpt + " order by stTicks ";
+
+            //d(query);
+            if (isAppendPrefix)
+            {
+                foreach (var factor in conn.Query<ProductionFactor>(query))
+                {
+                    sb.AppendLine("!"+ProductionFactor.KEY+","+factor.ToCSV());
+                    param.ansMaxTicks = factor.stTicks;
+                }
+            }
+            else
+            {
+                foreach (var factor in conn.Query<ProductionFactor>(query))
+                {
+                    sb.AppendLine(factor.ToCSV());
+                    param.ansMaxTicks = factor.stTicks;
+                }
+            }
+
+
+
+            return sb.ToString();
+        }
+
+        public void updateMacTicks(long mac, long ticks)
+        {
+            var cnt = memConn.Table<MacTicks>().Where(q => q.mac == mac).Where(q=> q.ticks > ticks).Count();
+            if (cnt > 0)
+            {
+                //ProductionFactor等で更新されたことを想定し
+                //古い値で上書きされることを防ぎ、システムTicksを用いる
+                ticks = DateTime.Now.Ticks;
+            }
+            memConn.InsertOrReplace(new MacTicks { mac = mac, ticks = ticks });
+        }
+
+        public async Task<bool> pollingUntilUpdate(Param param, int durationSec = 60, int pollingIntervalMs = 1000)
+        {
+            var list = param.macList.Select(q => (long)q).ToList();
+            var dtLimit = DateTime.Now.AddSeconds(durationSec);
+            var query = $"select * from MacTicks where ticks > {param.orderMinTicks} ";
+            if (list.Count > 0)
             {
                 query += " and ( mac = " + string.Join(" or mac = ", param.macList) + " ) ";
             }
-            query += " order by stTicks ";
-
-            //d(query);
-            foreach (var factor in conn.Query<ProductionFactor>(query))
+            while(DateTime.Now < dtLimit)
             {
-                sb.AppendLine(factor.ToCSV());                
+                var ans = memConn.Query<MacTicks>(query).Count();
+                if (ans > 0)
+                {
+                    return true;
+                }
+                await Task.Delay(pollingIntervalMs);
             }
 
-            return sb.ToString();
+            return false;
         }
 
     }

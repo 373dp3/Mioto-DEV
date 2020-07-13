@@ -162,7 +162,7 @@ namespace TwePacketTest
         }
 
         [TestMethod]
-        public void TestOk2()
+        public async void TestOk2()
         {
             const string p1 = ":7FD30101AB8100763A008021000C650200004211250B4BEE";//TWE-CTパケット
             var wrapper = MiotoServerWrapper.getInstance();
@@ -177,7 +177,7 @@ namespace TwePacketTest
             filter.update(param);
             Assert.AreEqual(param.type, Param.TYPE.CT);
 
-            var ans = db.getCsv(param);
+            var ans = await db.getCsv(param);
             if (ans.Contains("8100763a") == false)
             {
                 Assert.Fail();
@@ -280,7 +280,7 @@ namespace TwePacketTest
         }
 
         [TestMethod]
-        public void TestCtPacketDbInsert()
+        public async void TestCtPacketDbInsert()
         {
             MiotoServerWrapper.getInstance(new AppConfig());
             var packet = new TweCtPacket(1, 2, 3, 4, 5, new DateTime(2020, 1, 21, 9, 0, 0).Ticks);
@@ -299,14 +299,14 @@ namespace TwePacketTest
             filter.update(param);
             Assert.AreEqual(param.type, Param.TYPE.CT);
 
-            var ans = p.getCsv(param);
+            var ans = await p.getCsv(param);
             if (ans.Contains("csv_test") == false)
             {
                 Assert.Fail("DBに値が反映されませんでした");
             }
         }
         [TestMethod]
-        public void TestTwePacketDbInsert()
+        public async void TestTwePacketDbInsert()
         {
             MiotoServerWrapper.getInstance(new AppConfig());
             const string p1 = ":7881150163810040FA781AC3000A531E0001FFFFFFFFFF07";
@@ -326,7 +326,7 @@ namespace TwePacketTest
             filter.update(param);
             Assert.AreEqual(param.type, Param.TYPE.CT);
 
-            var ans = p.getCsv(param);
+            var ans = await p.getCsv(param);
             if (ans.Contains("csv_test") == false)
             {
                 Assert.Fail("DBに値が反映されませんでした");

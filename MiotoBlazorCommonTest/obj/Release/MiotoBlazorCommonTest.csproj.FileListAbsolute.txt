@@ -38,3 +38,4 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Release\MiotoBlazo
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Release\MiotoBlazorCommonTest.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Release\MiotoBlazorCommonTest.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Release\MiotoBlazorCommonTest.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Release\MiotoBlazorCommonTest.dll.config

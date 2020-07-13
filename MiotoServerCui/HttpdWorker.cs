@@ -4,6 +4,7 @@ Released under the MIT license
 https://opensource.org/licenses/mit-license.php
  */
 
+using MiotoBlazorCommon.Struct;
 using MiotoServer.Query;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +12,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -137,11 +140,11 @@ namespace MiotoServer
             if (await wcWorker.doOperateIfWebsocketRequestAsync(context, res)) { return; }
 
             //通常のDB参照処理
-            if (doOperateIfHttpDbRequest(context, res)) { return; }
+            if (await doOperateIfHttpDbRequest(context, res)) { return; }
 
         }
 
-        private static bool doOperateIfHttpDbRequest(HttpListenerContext context, HttpListenerResponse res)
+        private static async Task<bool> doOperateIfHttpDbRequest(HttpListenerContext context, HttpListenerResponse res)
         {
             DbWrapper dbWrapper = DbWrapper.getInstance();
             res.AddHeader("Access-Control-Allow-Origin", "*");//複数Mioto結合に備えるため
@@ -187,23 +190,66 @@ namespace MiotoServer
                 return true;
             }
 
-            //POSTはESPからの情報アップロード
+            
             if (context.Request.HttpMethod.CompareTo("POST") == 0)
             {
-                Program.d("Method post");
+                //bodyの受信
+                string body = "";
                 using (var postBody = new StreamReader(context.Request.InputStream))
                 {
-                    var body = postBody.ReadToEnd();
-                    Program.d(body);
-                    //Serialと共通の解析処理へ転送
-                    parser.parse(body, 8);//ESPの場合、8ビット目まで入力と判定
+                    body = postBody.ReadToEnd();
+                    //Program.d(body);
                 }
+
+                if (context.Request.Url.AbsoluteUri.Contains("/production_factor_post"))
+                {
+                    try
+                    {
+                        var factor = JsonSerializer.Deserialize<ProductionFactor>(body);
+                        //日時指定がない場合は受信時刻を設定する
+                        if (factor.stTicks == ProductionFactor.SET_TICKS_AT_SERVER)
+                        {
+                            factor.stTicks = DateTime.Now.Ticks;
+                        }
+                        DbWrapper.getInstance().conn.Insert(factor);
+                        DbWrapper.getInstance().updateMacTicks(factor.mac, factor.stTicks);
+                        res.Close();
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Program.d("Exception: " + e.ToString());
+                        res.StatusCode = 500;
+                        res.Close();
+                    }
+                }
+
+                if (context.Request.Url.AbsoluteUri.Contains("/bzconfig"))
+                {
+                    try
+                    {
+                        DbWrapper.getInstance().setConfig(DbWrapper.CONFIG_BLAZOR_KEY, body);
+                        res.Close();
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Program.d("Exception: " + e.ToString());
+                        res.StatusCode = 500;
+                        res.Close();
+                    }
+                }
+
+                Program.d("Method post");
+                //その他のPOSTはESPからの情報アップロードと判断する。
+                //Serialと共通の解析処理へ転送
+                parser.parse(body, 8);//ESPの場合、8ビット目まで入力と判定
                 res.Close();
                 return true;
             }
 
             //DB参照リクエスト
-            byte[] content = getContents(dbWrapper, context);
+            byte[] content = await getContents(dbWrapper, context);
             if (content == null)
             {
                 res.StatusCode = 400;
@@ -269,7 +315,7 @@ namespace MiotoServer
             return true;
         }
 
-        private static byte[] getContents(DbWrapper dbWrapper, HttpListenerContext context)
+        private static async Task<byte[]> getContents(DbWrapper dbWrapper, HttpListenerContext context)
         {
             var headers = context.Response.Headers;
             headers.Add(HttpResponseHeader.ContentType, "text/plain; charset=UTF-8");
@@ -302,7 +348,9 @@ namespace MiotoServer
                     content = Encoding.UTF8.GetBytes(dbWrapper.GetProductionFactorCsv(param));
                     break;
                 default:
-                    content = Encoding.UTF8.GetBytes(dbWrapper.getCsv(param));
+                    var ans = await dbWrapper.getCsv(param);
+                    content = Encoding.UTF8.GetBytes(ans);
+                    headers.Add("MaxTicks", param.ansMaxTicks.ToString());
                     break;
             }
 

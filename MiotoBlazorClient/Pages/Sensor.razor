@@ -361,7 +361,6 @@
             {
                 endTicks = PanelModel.CreateEndTicks(DateTime.Now);
             }
-
             await this.Send(new ProductionFactor()
             { status = btn.status, mac = btn.mac, ct = ct, memo = memo, endTicks = endTicks }
             );
