@@ -66,6 +66,10 @@
                         <td><small>平均 CT</small></td>
                         <td>@(factor.aveCt.ToString("F1"))</td>
                     </tr>
+                    <tr>
+                        <td><small>最新 CT</small></td>
+                        <td>@(panel.lastCt00.ToString("F1"))</td>
+                    </tr>
                 }
                 else if (factor.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
                 {
@@ -78,12 +82,12 @@
                         <td>@((factor.signalCount))</td>
                     </tr>
                     <tr>
-                        <td><small>標準 CT</small></td>
-                        <td>@(factor.ct.ToString("F1"))</td>
-                    </tr>
-                    <tr>
                         <td><small>平均 CT</small></td>
                         <td>@(factor.aveCt.ToString("F1"))</td>
+                    </tr>
+                    <tr>
+                        <td><small>最新 CT</small></td>
+                        <td>@(panel.lastCt00.ToString("F1"))</td>
                     </tr>
                 }
             </tbody>

@@ -16,6 +16,7 @@ namespace MiotoBlazorCommon
         public RunOrStop status { get; private set; } = RunOrStop.NOOP;
         public long signalNum { get; set; } = 0;
         public CycleTime lastCycleTime { get; private set; } = new CycleTime();
+        public double lastCt00 { get; private set; } = 0;
 
         private ProductionFactorHelper productionHelper = new ProductionFactorHelper();
 
@@ -127,6 +128,7 @@ namespace MiotoBlazorCommon
             }
 
             lastCycleTime = ct;
+            if(ct.ct00>0) { lastCt00 = ct.ct00; }
 
             //サイクルタイム、可動率計算
             productionHelper.update(ct, this);

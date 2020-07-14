@@ -64,32 +64,11 @@ namespace MiotoBlazorClient
 
         public async Task update(NavigationManager NavMgr)
         {
-            /*
-            var cf = new SocketWorker(NavMgr, "config");
-            try
-            {
-                var json = System.Text.Json.JsonSerializer.Serialize(config);
-                await cf.SendData(json);
-                await Task.WhenAll(DisposeConfigSocket(cf));
-            }
-            catch (Exception e)
-            {
-                var txt = e.Message;
-                cnt = txt.Length;
-            }
-            //*/
-
             var url = $"http://{new Uri(NavMgr.Uri).Host}/{URI_PREFIX}/_{DateTime.Now.Ticks}";
             var response = await new HttpClient().PostAsJsonAsync(url, config);
         }
 
-        private async Task DisposeConfigSocket(SocketWorker cf)
-        {
-            await Task.Yield();
-            cf.Dispose();
-        }
         public Config config { get; set; } = null;
 
-        public int cnt { get; set; } = 0;
     }
 }

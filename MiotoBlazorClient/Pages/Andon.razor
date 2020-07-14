@@ -80,8 +80,8 @@
                             <tr>
                                 <td colspan="2" class="m-0 p-0 text-center">
                                     <small>
-                                        <span class="oi oi-battery-full @battAtt"></span> @(item.lastCycleTime.batt.ToString("F1"))v　
-                                        <span class="oi oi-signal @lqiAtt"></span> @(item.lastCycleTime.lqi)
+                                        <span class="oi oi-battery-full @battAtt"></span> @(item.lastCycleTime.batt.ToString("F1"))v&nbsp;
+                                        <span class="oi oi-signal @lqiAtt"></span> @(item.lastCycleTime.lqi)&nbsp;
                                         <span class="oi oi-clock"></span> @(item.lastCycleTime.dt.ToString("H:mm"))
                                     </small>
                                 </td>
@@ -102,6 +102,10 @@
                                 <td><small>稼働</small></td>
                                 <td class="text-center"><span>@(item.getRunSecStr(factor))</span></td>
                             </tr>
+                            <tr>
+                                <td><small>最終CT</small></td>
+                                <td class="text-center"><span>@(item.lastCt00.ToString("F1"))</span></td>
+                            </tr>
                         </table>
 
                     </div>
@@ -117,11 +121,14 @@
     <a class="btn btn-secondary" href="">一覧へ戻る</a>
     <button class="btn btn-primary"
             @onclick="@(()=> {
-                        datepicker.Open(e=> {
-                            dateOrder = e.ToString("yyyyMMdd");
-                            NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/{dateOrder}");
-                        });
-                    })">
+                            datepicker.Open(e=> {
+                                if(datepicker.result == ModalDatePicker.Result.OK)
+                                {
+                                    dateOrder = e.ToString("yyyyMMdd");
+                                    NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/{dateOrder}");
+                                }
+                            });
+                        })">
         日付選択
     </button>
     <button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"andon/{panelIndexStr}/{panelNameOrder}/"); })">
@@ -137,23 +144,29 @@
                 <td>
                     <button class="btn btn-outline-dark btn-sm"
                             @onclick="@(()=> {
-                        datepicker.Open(e=> {
-                            csvDateFrom = e;
-                            UpdateCsvDate();
-                            StateHasChanged();
-                        }, csvDateFrom.Ticks);
-                    })">
+                                            datepicker.Open(e=> {
+                                                if(datepicker.result == ModalDatePicker.Result.OK)
+                                                {
+                                                    csvDateFrom = e;
+                                                    UpdateCsvDate();
+                                                    StateHasChanged();
+                                                }
+                                            }, csvDateFrom.Ticks);
+                                        })">
                         @(csvDateFrom.ToShortDateString())
                     </button>
                     ～
                     <button class="btn btn-outline-dark btn-sm"
                             @onclick="@(()=> {
-                        datepicker.Open(e=> {
-                            csvDateTo = e;
-                            UpdateCsvDate();
-                            StateHasChanged();
-                        }, csvDateTo.Ticks);
-                    })">
+                                            datepicker.Open(e=> {
+                                                if(datepicker.result == ModalDatePicker.Result.OK)
+                                                {
+                                                    csvDateTo = e;
+                                                    UpdateCsvDate();
+                                                    StateHasChanged();
+                                                }
+                                            }, csvDateTo.Ticks);
+                                        })">
                         @(csvDateTo.ToShortDateString())
                     </button>
                 </td>

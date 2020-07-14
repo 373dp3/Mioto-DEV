@@ -34,8 +34,15 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-α3")]
+[assembly: AssemblyInformationalVersion("1.4.0-α4")]
 /*
+ * 2020.7.14
+ * ・通信方式をWebSocketからLongPollingに変更(ブラウザ20ページでの同時更新動作確認)
+ * ・Raspberry Pi4での動作確認
+ * ・最終CTを表示に追加
+ * ・ブラウザ上でのメモリリーク改善
+ * ・日付ダイアログをキャンセルしても適用されたバグの修正
+ * 
  * 2020.6.22
  * ・子機追加不能バグ修正
  * ・CT無指定時の表示分割改善

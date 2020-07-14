@@ -77,7 +77,6 @@ namespace MiotoBlazorClient
                 _ = loadCsvByHttp(() => new ProductionFactor(),
                         q => {
                         var factor = (ProductionFactor)q;
-                            tmp += ((ProductionFactor)q).ToCSV() + " // ";
                             listPanelModel.Where(q => q.mac == factor.mac)
                                 .FirstOrDefault()
                                 .SetProductionFactor(factor);
@@ -106,8 +105,6 @@ namespace MiotoBlazorClient
                         $"{ProductionFactor.KEY}/{dateOrder}");
             });
         }
-
-        public string tmp { get; set; } = "";
 
         /// <summary>
         /// 受信したCycle情報解釈
@@ -201,6 +198,48 @@ namespace MiotoBlazorClient
             if(funcDone!=null) { funcDone(); }
         }
 
+        /// <summary>
+        /// 現時点ではPolling用のhttpgetだが、後々初回取得時の処理と共通化を
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private async Task<bool> httpGetAsync(string url)
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            using (var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+            {
+                if (response.StatusCode != System.Net.HttpStatusCode.OK) { return false; }
+                updateMaxTicks(response);
+
+                using (var content = response.Content)
+                using (var stream = await content.ReadAsStreamAsync())
+                using (var sr = new System.IO.StreamReader(stream))
+                {
+                    var dt = DateTime.Now.AddSeconds(1);
+                    while (sr.EndOfStream == false)
+                    {
+                        var msg = sr.ReadLine();
+                        if (msg == null) { break; }
+                        //Console.WriteLine("http-long_polling: " + msg);
+                        if (msg[0] != '!')//Cycle情報は従来どおり
+                        {
+                            OnCycle(CycleTime.Parse(msg));
+                            continue;
+                        }
+                        //サイクル情報以外は先頭に!と識別情報をつける
+                        //!OnProductionFactor,4,1,81.....
+                        if (msg.Contains($"!{ProductionFactor.KEY}"))
+                        {
+                            var factor = new ProductionFactor();
+                            factor.ParseInto(msg.Replace($"!{ProductionFactor.KEY},", ""));
+                            OnProductionFactor(factor);
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        
         protected async Task HttpLongPolling()
         {
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
@@ -213,42 +252,12 @@ namespace MiotoBlazorClient
                 {
                     var url = $"http://{new Uri(NavMgr.Uri).Host}/bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
 
-                    using (var request = new HttpRequestMessage(HttpMethod.Get, url))
-                    using (var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
-                    {
-                        if (token.IsCancellationRequested) { continue; }
-                        if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                        {
-                            await Task.Delay(1000);
-                            continue;
-                        }
-                        updateMaxTicks(response);
+                    if (token.IsCancellationRequested) { continue; }
 
-                        using (var content = response.Content)
-                        using (var stream = await content.ReadAsStreamAsync())
-                        using (var sr = new System.IO.StreamReader(stream))
-                        {
-                            var dt = DateTime.Now.AddSeconds(1);
-                            while (sr.EndOfStream == false)
-                            {
-                                var msg = sr.ReadLine();
-                                if (msg == null) { break; }
-                                //Console.WriteLine("http-long_polling: " + msg);
-                                if (msg[0] != '!')//Cycle情報は従来どおり
-                                {
-                                    OnCycle(CycleTime.Parse(msg));
-                                    continue;
-                                }
-                                //サイクル情報以外は先頭に!と識別情報をつける
-                                //!OnProductionFactor,4,1,81.....
-                                if (msg.Contains($"!{ProductionFactor.KEY}"))
-                                {
-                                    var factor = new ProductionFactor();
-                                    factor.ParseInto(msg.Replace($"!{ProductionFactor.KEY},", ""));
-                                    OnProductionFactor(factor);
-                                }
-                            }
-                        }
+                    if(await httpGetAsync(url) == false)
+                    {
+                        await Task.Delay(1000);
+                        continue;
                     }
                     this.StateHasChanged();
                 }
