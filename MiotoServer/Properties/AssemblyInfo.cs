@@ -34,8 +34,11 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-α4")]
+[assembly: AssemblyInformationalVersion("1.4.0-α5")]
 /*
+ * 2020.7.21
+ * ・MaxTicksが遡る場合があるため、Blazor側で値が大きくなるときのみ更新するように対処療法を実施
+ * 
  * 2020.7.14
  * ・通信方式をWebSocketからLongPollingに変更(ブラウザ20ページでの同時更新動作確認)
  * ・Raspberry Pi4での動作確認

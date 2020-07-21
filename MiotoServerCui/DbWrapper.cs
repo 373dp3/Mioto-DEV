@@ -283,7 +283,6 @@ namespace MiotoServer
             //CSV情報取得
             await Task.Yield();
             var sb = new StringBuilder();
-
             if(await pollingUntilUpdate(param) == false)
             {
                 return "";

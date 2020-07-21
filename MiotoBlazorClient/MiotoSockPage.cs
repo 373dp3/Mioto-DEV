@@ -135,7 +135,9 @@ namespace MiotoBlazorClient
                 try
                 {
                     var ans = Convert.ToInt64(response.Headers.GetValues("MaxTicks").First());
-                    if (ans > 0) { maxTicks = ans; }
+                    //値が上回る時のみ更新する。Factorのみ、CSV空の応答が生じる場合があり、
+                    //その時、Ticksの値が過去に遡るケースがあるため。
+                    if (ans > maxTicks) { maxTicks = ans; }
                 }
                 catch (Exception e) { }
                 Console.WriteLine("MaxTicks: " + maxTicks);
