@@ -161,6 +161,8 @@
                             <th><small>可動率<br>MT率</small></th>
                             <th>標準CT</th>
                             <th>平均CT</th>
+                            <th>製造</th>
+                            <th>担当</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -172,7 +174,7 @@
                                 @(ProductionFactor.GetStatusStr(f.status))
                             </td>
                             @if ((f.status == ProductionFactor.Status.START_PRODUCTION)
-                                  || (f.status == ProductionFactor.Status.START_PRODUCTION_NOCT))
+                               || (f.status == ProductionFactor.Status.START_PRODUCTION_NOCT))
                             {
                                 <td>
                                     @(new DateTime(f.stTicks).ToString("HH:mm"))～@if (f.endTicks != long.MaxValue)
@@ -195,6 +197,12 @@
                                 <td>
                                     @(f.aveCt.ToString("F1"))
                                 </td>
+                                <td>
+                                    @(f.memoJson.itemNumber)
+                                </td>
+                                <td>
+                                    @(f.memoJson.operatorName)
+                                </td>
 
                             }
                             else
@@ -208,7 +216,7 @@
                                 <td>
                                     @(f.GetDuration())
                                 </td>
-                                <td colspan="4">                                    
+                                <td colspan="6">
                                 </td>
                             }
                         </tr>
@@ -350,20 +358,22 @@
         if (modal.result == Modal.Result.OK)
         {
             var ct = ProductionFactor.CT_NOOP;
-            var memo = "";
+            var memoJson = new ProductionFactorMemoJson();
             var endTicks = long.MaxValue;
             if (btn.status == ProductionFactor.Status.START_PRODUCTION)
             {
                 ct = modal.factor.ct;
-                memo = modal.factor.memo;
+                memoJson.Copy(modal.factor.memoJson);
+
             }
             if (btn.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
             {
                 endTicks = PanelModel.CreateEndTicks(DateTime.Now);
             }
-            await this.Send(new ProductionFactor()
-            { status = btn.status, mac = btn.mac, ct = ct, memo = memo, endTicks = endTicks }
-            );
+            var sendObj = new ProductionFactor()
+            { status = btn.status, mac = btn.mac, ct = ct, endTicks = endTicks };
+            sendObj.memoJson.Copy(memoJson);
+            await this.Send(sendObj);
 
         }
     }

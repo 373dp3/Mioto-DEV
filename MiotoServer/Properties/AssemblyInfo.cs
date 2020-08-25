@@ -34,8 +34,12 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-α5")]
+[assembly: AssemblyInformationalVersion("1.4.0-β1")]
 /*
+ * 2020.8.25
+ * ・CTつき登録において品番、担当者登録欄を追加
+ * ・CT未登録生産において、信号未受診時の色をグレーに修正
+ * 
  * 2020.7.21
  * ・MaxTicksが遡る場合があるため、Blazor側で値が大きくなるときのみ更新するように対処療法を実施
  * 

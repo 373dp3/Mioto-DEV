@@ -21,9 +21,9 @@
                 var factorName = "生産情報未入力";
                 if (factor != null)
                 {
-                    if (factor.memo.Length > 0)
+                    if (factor.memoJson.itemNumber.Length > 0)
                     {
-                        factorName = factor.memo;
+                        factorName = factor.memoJson.itemNumber + " " + factor.memoJson.operatorName;
                     }
                     else
                     {
@@ -70,6 +70,10 @@
                         @if ((item.status == PanelModel.RunOrStop.STOP)
                           && ((factor.status == ProductionFactor.Status.START_PRODUCTION)
                           || (factor.status == ProductionFactor.Status.START_PRODUCTION_NOCT)))
+                        {
+                            att = " bg-light text-dark";
+                        }
+                        @if(item.status == PanelModel.RunOrStop.NOOP)
                         {
                             att = " bg-light text-dark";
                         }

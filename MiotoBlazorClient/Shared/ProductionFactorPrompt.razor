@@ -6,20 +6,20 @@
             if (panel.status == PanelModel.RunOrStop.RUN)
             {
         <div class="card-header bg@(ButtonAttr.GetBgCode(factor.status)) @(ButtonAttr.GetTextCode(factor.status)) text-truncate">
-            @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+            @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memoJson.itemNumber) @(factor.memoJson.operatorName)
         </div>
             }
             else
             {
     <div class="card-header bg-light text-truncate">
-        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memoJson.itemNumber) @(factor.memoJson.operatorName)
     </div>
             }
         }
         else
         {
     <div class="card-header bg@(ButtonAttr.GetBgCode(factor.status)) @(ButtonAttr.GetTextCode(factor.status)) text-truncate">
-        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memo)
+        @(ProductionFactor.GetStatusStr(factor.status, true)) @(factor.memoJson.itemNumber)
     </div>
         }
         <table class="table mb-0 text-center">

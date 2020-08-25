@@ -83,6 +83,7 @@
     <Compile Include="Struct\ConfigTwe.cs" />
     <Compile Include="Struct\CycleTime.cs" />
     <Compile Include="Struct\IParseable.cs" />
+    <Compile Include="Struct\ProductionFactorMemoJson.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

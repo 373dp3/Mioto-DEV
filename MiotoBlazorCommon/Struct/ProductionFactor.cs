@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace MiotoBlazorCommon.Struct
 {
@@ -64,7 +65,22 @@ namespace MiotoBlazorCommon.Struct
 
 
         [StringLength(500, ErrorMessage = "文字数が超過しています(500バイトまで)")]
-        public string memo { get; set; } = "";
+        public string memo { 
+            set {
+                try
+                {
+                    memoJson = JsonSerializer.Deserialize<ProductionFactorMemoJson>(value);
+                }
+                catch(Exception e)
+                {
+                    memoJson.itemNumber = value;
+                }
+            }
+            get { return JsonSerializer.Serialize(memoJson); } 
+        }
+
+        [Ignore]
+        public ProductionFactorMemoJson memoJson { get; set; } = new ProductionFactorMemoJson();
 
         public void updateIfNoCT()
         {
@@ -79,12 +95,12 @@ namespace MiotoBlazorCommon.Struct
             if((this.status != Status.START_PRODUCTION)
                 && (this.status != Status.START_PRODUCTION_NOCT))
             {
-                return $"\"\"," +
+                return $"\"\",\"\"," +
                     new DateTime(stTicks).ToLongTimeString() + "," +
                         (GetDurationSec() / 60).ToString("F1");
             }
 
-            return $"\"{memo}\"," +
+            return $"\"{memoJson.itemNumber}\",\"{memoJson.operatorName}\"," +
                         new DateTime(stTicks).ToLongTimeString() + "," +
                         (GetDurationSec()/60).ToString("F1") + "," +
 
@@ -104,31 +120,11 @@ namespace MiotoBlazorCommon.Struct
                 $"{(int)status}," +
                 $"{memo}";
         }
-        public static ProductionFactor ParseCSV(string csv)
-        {
-            var item = csv.Split(',');
-            var i = 0;
-            var ans = new ProductionFactor();
-            try
-            {
-                ans.id = Convert.ToInt64(item[i],16); i++;
-                ans.isValid = (Validation)Convert.ToInt64(item[i]); i++;
-                ans.mac = Convert.ToInt64(item[i],16); i++;
-                ans.stTicks = Convert.ToInt64(item[i],16); i++;
-                ans.ct = Convert.ToDouble(item[i]); i++;
-                ans.status = (Status)Convert.ToInt64(item[i]); i++;
-                ans.memo =item[i]; i++;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-            return ans;
-        }
+
 
         public void ParseInto(string msg)
         {
-            var item = msg.Split(',');
+            var item = msg.Split(new char[] { ',' }, 7);
 
             var i = 0;
             id = Convert.ToInt64(item[i], 16); i++;
@@ -138,6 +134,7 @@ namespace MiotoBlazorCommon.Struct
             ct = Convert.ToDouble(item[i]); i++;
             status = (Status)Convert.ToInt64(item[i]); i++;
             memo = item[i]; i++;
+
         }
 
         public const string KEY = "production_factor";

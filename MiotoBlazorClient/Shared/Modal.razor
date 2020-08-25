@@ -18,7 +18,11 @@
                         <table class="table m-0 p-0">
                             <tr>
                                 <td><label>製造指示番号</label></td>
-                                <td><InputText @bind-Value="factor.memo" class="w-100" /></td>
+                                <td><InputText @bind-Value="factor.memoJson.itemNumber" class="w-100" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>担当者</label></td>
+                                <td><InputText @bind-Value="factor.memoJson.operatorName" class="w-100" /></td>
                             </tr>
                             <tr>
                                 <td><label>CT(秒)</label></td>

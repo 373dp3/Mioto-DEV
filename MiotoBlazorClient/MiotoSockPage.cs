@@ -431,7 +431,7 @@ namespace MiotoBlazorClient
 
             if (isHeader)
             {
-                sb.AppendLine("日付,子機名,MAC,要因,品番,開始時刻,期間(分),出来高,可動率,標準CT,平均CT");
+                sb.AppendLine("日付,子機名,MAC,要因,品番,担当,開始時刻,期間(分),出来高,可動率,標準CT,平均CT");
             }
 
             foreach (var item in this._listPanelModel)
