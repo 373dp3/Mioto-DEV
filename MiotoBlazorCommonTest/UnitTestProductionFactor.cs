@@ -45,9 +45,9 @@ namespace MiotoBlazorCommonTest
         public void TestSerialize()
         {
             var p = new ProductionFactor();
-            p.ParseInto("f3,1,8100763a,8d846838ac1bad0,0.0,290,{\"itemNumber\":\"memo\", \"operatorName\":\"name\"}");
+            p.ParseInto("f3,1,8100763a,8d846838ac1bad0,0.0,290,{\"itemNumber\":\"memo\", \"operatorName\":\"name\",\"itemsPerOperation\":1}");
             p.memoJson.itemNumber = "memo2";
-            Assert.AreEqual("f3,1,8100763a,8d846838ac1bad0,0.0,290,{\"itemNumber\":\"memo2\",\"operatorName\":\"name\"}", p.ToCSV());
+            Assert.AreEqual("f3,1,8100763a,8d846838ac1bad0,0.0,290,{\"itemNumber\":\"memo2\",\"operatorName\":\"name\",\"itemsPerOperation\":1}", p.ToCSV());
 
         }
     }

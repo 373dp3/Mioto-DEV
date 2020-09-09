@@ -34,8 +34,16 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-β1")]
+[assembly: AssemblyInformationalVersion("1.4.0-β2")]
 /*
+ * 2020.9.9
+ * ・設備毎の標準CT、取数登録対応
+ * ・稼働日切り替わり時にブラウザの強制リロード
+ * ・アンドンページのフォントサイズ切り替え対応
+ * ・最終信号日時更新対応
+ * ・CSVフォーマットの更新(取数考慮済みの出来高、動作回数の追加)
+ * ・http://localhost/mac2machine にて、MAC(16進表記),マシン名取得対応
+ * 
  * 2020.8.25
  * ・CTつき登録において品番、担当者登録欄を追加
  * ・CT未登録生産において、信号未受診時の色をグレーに修正

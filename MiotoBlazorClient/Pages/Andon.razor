@@ -63,7 +63,7 @@
                     lqiAtt = "text-danger";
                 }
 
-                <button class="btn col-xl-2 col-lg-3 col-md-4 col-sm-6 p-0 m-1 ">
+                <button class="btn col-xl-2 col-lg-3 col-md-4 col-sm-6 p-0 m-1 " style="font-size: @fontSize;">
                     <div class="card border@(ButtonAttr.GetBgCode(factor.status)) m-0 p-0"
                          @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{item.mac}/{dateOrder}"); })">
 
@@ -92,7 +92,7 @@
                             </tr>
                             <tr>
                                 <td><small>出来高</small></td>
-                                <td class="text-center"><span>@(item.dekidaka)</span></td>
+                                <td class="text-center"><span>@(item.itemCounts)</span></td>
                             </tr>
                             <tr>
                                 <td><small>可動率</small></td>
@@ -198,6 +198,8 @@
     public DateTime csvDateFrom { get; set; } = DateTime.Now;
     public DateTime csvDateTo { get; set; } = DateTime.Now;
 
+    public string fontSize { get; set; } = "16px";
+
     /// <summary>
     /// 全ての処理の起点
     /// </summary>
@@ -230,6 +232,12 @@
         }
         csvDateFrom = currentDate;
         csvDateTo = currentDate;
+
+        //フォントサイズ設定参照
+        var index = Convert.ToInt64(panelIndexStr);
+        var ccp = config.listCtPanel2Index.FirstOrDefault(q => q.index == index);
+        fontSize = ccp.panel.fontSize;
+
         await base.OnParametersSetAsync();
     }
 

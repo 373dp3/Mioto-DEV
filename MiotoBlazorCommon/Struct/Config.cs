@@ -30,6 +30,8 @@ namespace MiotoBlazorCommon.Struct
         }
 
         public ConfigAlert alert = new ConfigAlert();
+
+        public const string RELOAD_FORCE_KEY = "reload_force_key";
     }
 
     public class CtPanel2Index

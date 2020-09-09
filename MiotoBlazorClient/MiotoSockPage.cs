@@ -128,6 +128,7 @@ namespace MiotoBlazorClient
         }
 
         private long maxTicks = 0;
+        private DateTime preDt = DateTime.Now;
         private void updateMaxTicks(HttpResponseMessage response)
         {
             if (response.Headers.Contains("MaxTicks"))
@@ -135,6 +136,21 @@ namespace MiotoBlazorClient
                 try
                 {
                     var ans = Convert.ToInt64(response.Headers.GetValues("MaxTicks").First());
+
+                    //稼働日切り替え時のリロード対応
+                    if (maxTicks > 0)
+                    {
+                        var preHHMM = Convert.ToInt32(preDt.ToString("HHmm"));
+                        var curHHMM = Convert.ToInt32(DateTime.Now.ToString("HHmm"));
+                        var cfg = config.dateLineHHMM;
+                        if ((preHHMM< cfg) && (cfg <= curHHMM))
+                        {
+                            forceReload();
+                        }
+                        Console.WriteLine($"{preHHMM} => {curHHMM} [cfg:{cfg}]");
+                        preDt = DateTime.Now;
+                    }
+
                     //値が上回る時のみ更新する。Factorのみ、CSV空の応答が生じる場合があり、
                     //その時、Ticksの値が過去に遡るケースがあるため。
                     if (ans > maxTicks) { maxTicks = ans; }
@@ -236,12 +252,22 @@ namespace MiotoBlazorClient
                             factor.ParseInto(msg.Replace($"!{ProductionFactor.KEY},", ""));
                             OnProductionFactor(factor);
                         }
+
+                        if (msg.Contains($"!{Config.RELOAD_FORCE_KEY}"))
+                        {
+                            forceReload();
+                        }
                     }
                 }
             }
             return true;
         }
         
+        public void forceReload()
+        {
+            NavMgr.NavigateTo(NavMgr.Uri, true);
+        }
+
         protected async Task HttpLongPolling()
         {
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
@@ -431,7 +457,7 @@ namespace MiotoBlazorClient
 
             if (isHeader)
             {
-                sb.AppendLine("日付,子機名,MAC,要因,品番,担当,開始時刻,期間(分),出来高,可動率,標準CT,平均CT");
+                sb.AppendLine("日付,子機名,MAC,要因,品番,担当,開始時刻,期間(分),動作回数,出来高,可動率,標準CT,平均CT");
             }
 
             foreach (var item in this._listPanelModel)

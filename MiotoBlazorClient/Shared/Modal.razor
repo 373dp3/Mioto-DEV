@@ -17,7 +17,26 @@
                         <ValidationSummary />
                         <table class="table m-0 p-0">
                             <tr>
-                                <td><label>製造指示番号</label></td>
+                                <td>一覧から選択</td>
+                                <td>
+                                    <InputSelect @bind-Value="selectedIndexString" @onclick="onSelect">
+                                        @if (configTwe.listConditions.Count == 0)
+                                        {
+                                            <option value="">標準CT一覧が登録されていません</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">以下から選択してください</option>
+                                            @for(var i=0; i< configTwe.listConditions.Count; i++)
+                                            {
+                                                <option value="@(i)" >@(configTwe.listConditions[i].itemNumber)</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label>品番</label></td>
                                 <td><InputText @bind-Value="factor.memoJson.itemNumber" class="w-100" /></td>
                             </tr>
                             <tr>
@@ -27,6 +46,10 @@
                             <tr>
                                 <td><label>CT(秒)</label></td>
                                 <td><InputNumber @bind-Value="factor.ct" /></td>
+                            </tr>
+                            <tr>
+                                <td><label>取数(個)<br/><small>1回あたり出来高</small></label></td>
+                                <td><InputNumber @bind-Value="factor.memoJson.itemsPerOperation" /></td>
                             </tr>
                         </table>
                     </div>
@@ -63,6 +86,9 @@
     public string Text { get; set; } = "";
     public string Class { get; set; } = "";
 
+    public string selectedIndexString { get; set; } = "";
+    public ConfigTwe configTwe { get; set; } = null;
+
     public Guid Guid = Guid.NewGuid();
     public string ModalDisplay = "none;";
     public string ModalClass = "";
@@ -72,8 +98,22 @@
     public Func<ButtonAttr, Task> OnClose { get; set; } = null;
     public string name { get; set; } = "";
     public ButtonAttr Attr;
+
+    public void onSelect()
+    {
+        if(selectedIndexString.Length==0) { return; }
+        var con = configTwe.listConditions[Convert.ToInt32(selectedIndexString)];
+        factor.memoJson.itemNumber = con.itemNumber;
+        factor.ct = con.standardCt;
+        factor.memoJson.itemsPerOperation = con.itemsPerOperation;
+
+    }
+
     public void Open(ButtonAttr Attr, Func<ButtonAttr, Task> onclose =null)
     {
+        configTwe = ConfigSingleton.getInstance().config
+                        .listTwe.FirstOrDefault(q => q.mac == Attr.mac);
+
         this.Attr = Attr;
         name = Attr.name;
         ModalDisplay = "block;";

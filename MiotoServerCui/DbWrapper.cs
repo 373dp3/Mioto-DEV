@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Configuration;
 using System.Text;
@@ -247,9 +248,24 @@ namespace MiotoServer
                     return await GetMixedCsvAsync(param);
                 case Param.TYPE.BLAZOR_CONFIG:
                     return GetBlazorConfig();
+                case Param.TYPE.MAC2MACHINE:
+                    return GetMac2Machine();
                 default:
                     return _getCsv(param);
             }
+        }
+
+        public string GetMac2Machine()
+        {
+            var jsonCfg = getConfig(CONFIG_BLAZOR_KEY);
+            var cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
+            var sb = new StringBuilder();
+            foreach(var twe in cfg.listTwe)
+            {
+                sb.AppendLine($"{twe.mac.ToString("x")},{twe.name}");
+            }
+
+            return sb.ToString();
         }
 
         public string GetBlazorConfig()
@@ -259,6 +275,14 @@ namespace MiotoServer
             {
                 var jsonCfg = getConfig(CONFIG_BLAZOR_KEY);
                 cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
+
+                var lastInfoList = conn.Table<LastInfo>().ToList();
+                foreach(var twe in cfg.listTwe)
+                {
+                    var info = lastInfoList.FirstOrDefault(q => q.mac == twe.mac);
+                    if(info.ticks==0) { continue; }
+                    twe.Ticks = info.ticks;
+                }
             }
             catch (Exception e)
             {

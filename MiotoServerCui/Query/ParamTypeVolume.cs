@@ -97,6 +97,11 @@ namespace MiotoServer.Query
             {
                 param.type = Param.TYPE.BLAZOR_CONFIG;
             }
+
+            if (param.url.Contains("/mac2machine"))
+            {
+                param.type = Param.TYPE.MAC2MACHINE;
+            }
         }
     }
 }

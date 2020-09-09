@@ -104,7 +104,8 @@ namespace MiotoBlazorCommon.Struct
                         new DateTime(stTicks).ToLongTimeString() + "," +
                         (GetDurationSec()/60).ToString("F1") + "," +
 
-                        dekidaka + "," +
+                        operationCounts + "," +
+                        itemCounts + ","+
                         (GetKadouritsu() * 100.0).ToString("F1") + "," +
                         ct.ToString("F1") + "," +
                         aveCt.ToString("F1") + "," +
@@ -160,7 +161,9 @@ namespace MiotoBlazorCommon.Struct
         /// 要因開始前起動を対象外とした出来高
         /// </summary>
         [Ignore]
-        public long dekidaka { get; set; } = 0;
+        public long operationCounts { get; set; } = 0;
+        [Ignore]
+        public long itemCounts { get; set; } = 0;
         [Ignore]
         public long lastCycleTicks { get; set; } = 0;
         /// <summary>
@@ -297,7 +300,8 @@ namespace MiotoBlazorCommon.Struct
             var startDt = cycle.dt.AddSeconds(-1 * cycle.ct10);
             if (startDt.Ticks <  this.stTicks) { return true; }
 
-            dekidaka++;
+            operationCounts++;
+            itemCounts += memoJson.itemsPerOperation;
 
             return true;
         }
@@ -342,8 +346,8 @@ namespace MiotoBlazorCommon.Struct
         }
         private double GetAveCt()
         {
-            if(dekidaka==0) { return 0; }
-            return (new TimeSpan(GetDurationTicks()).TotalSeconds) / dekidaka;
+            if(operationCounts==0) { return 0; }
+            return (new TimeSpan(GetDurationTicks()).TotalSeconds) / operationCounts;
         }
 
         /// <summary>
@@ -352,7 +356,7 @@ namespace MiotoBlazorCommon.Struct
         /// <returns></returns>
         public double GetKadouritsu()
         {
-            if(dekidaka==0) { return 0; }
+            if(operationCounts==0) { return 0; }
             long bunbo = GetDurationTicks();
             if (bunbo<=0) { return 0; }
 
@@ -364,7 +368,7 @@ namespace MiotoBlazorCommon.Struct
                 return runSec / span.TotalSeconds;
             }
 
-            return (ct * dekidaka) / span.TotalSeconds;
+            return (ct * operationCounts) / span.TotalSeconds;
 
         }
 

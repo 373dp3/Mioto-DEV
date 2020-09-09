@@ -16,6 +16,7 @@ namespace MiotoServer.Query
             PRODUCTION_FACTOR = 201,
             BLAZOR_CLIENT_POLLING = 301,
             BLAZOR_CONFIG = 401,
+            MAC2MACHINE = 501,
         };
         public VOLUME volume { get; set; }
         public OPTION option { get; set; }

@@ -14,7 +14,7 @@ else
 {
     @if (status == Status.TWE_LIST)
     {
-        <table class="table">
+        <table class="table m-0 p-0 w-auto">
             <thead>
                 <tr>
                     <th>MAC</th>
@@ -29,6 +29,10 @@ else
                 <tr>
                     <td>@item.mac.ToString("x8") </td>
                     <td>@item.name </td>
+                    @if (true)
+                    {
+                        Console.WriteLine(item.Ticks);
+                    }
                     <td>@(new DateTime(item.Ticks).ToString("MM/dd HH:mm")) </td>
                     <td><a class="btn btn-primary" href="config/twe/@(Status.TWE_EDIT)/@(item.mac)/">編集</a></td>
                 </tr>
@@ -41,15 +45,56 @@ else
     {
         @if (editTwe != null)
         {
-            <EditForm Model="@editTwe" OnValidSubmit="SaveEditTwe">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+<EditForm Model="@editTwe" OnValidSubmit="SaveEditTwe">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-                <InputText id="name" @bind-Value="editTwe.name" />
+    <table class="table m-0 p-0 w-auto">
+        <tr><td>設備名称</td><td><InputText class="w-100" id="name" @bind-Value="editTwe.name" /></td></tr>
+        <tr>
+            <td>
+                タブ区切り標準CTマスタ<br /><small>品番(タブ)標準CT(タブ)取数<br />取数を省略した場合は1</small><br />
+                <small>Excelの表をコピー＆ペーストすると便利です。</small>
+            </td>
+            <td>
+                <InputTextArea class="w-100" id="tsvLines" @bind-Value="tsvLines" /><br />
+                <button type="button" class="btn btn-info btn-sm" @onclick="onUpdateTextArea">テキストボックスの反映</button>
+            </td>
+        </tr>
+    </table>
+    <p><small>取数 : 1回の信号OFFあたりに作られる製品の個数・出来高</small></p>
+    <h5>標準CTマスタ</h5>
+    <table class="table m-0 p-0 w-auto">
+        <thead>
+            <tr>
+                <th>品番</th>
+                <th>標準CT(秒)</th>
+                <th>取数</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var con in editTwe.listConditions)
+            {
+                <tr>
+                    <td>@(con.itemNumber)</td>
+                    <td>@(con.standardCt)</td>
+                    <td>@(con.itemsPerOperation)</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" @onclick="()=> { moveItem(con, true); }">up</button>
+                        <button type="button" class="btn btn-sm btn-outline-info" @onclick="()=> { moveItem(con, false); }">down</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="()=> { deleteItem(con); }">削除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p>
+        <button type="button" class="btn btn-primary" @onclick="SaveEditTwe">保存</button>
+        <a class="btn btn-secondary" href="config/twe/">キャンセル</a>
+    </p>
 
-                <button type="button" class="btn btn-primary" @onclick="SaveEditTwe">保存</button>
-                <a class="btn btn-secondary" href="config/twe/">キャンセル</a>
-            </EditForm>
+</EditForm>
         }
 
     }
@@ -61,12 +106,27 @@ else
     [Parameter]
     public string id { get; set; }
 
+    private string tsvLines { get; set; } = "";
     public string debugMsg { get; set; }
     private Config config;
     enum Status { NOOP, TWE_LIST, TWE_EDIT }
     private Status status = Status.TWE_LIST;
     private ConfigTwe editTwe = null;
 
+    public void deleteItem(ProductionConditions con)
+    {
+        editTwe.listConditions.Remove(con);
+        tsvLines = editTwe.getConditionsTsv();
+    }
+    public void moveItem(ProductionConditions con, bool isUp)
+    {
+        editTwe.moveConditions(con, isUp);
+        tsvLines = editTwe.getConditionsTsv();
+    }
+    public void onUpdateTextArea()
+    {
+        editTwe.setConditionsTsv(tsvLines);
+    }
     public void StartEditTwe(ConfigTwe twe)
     {
         var json = System.Text.Json.JsonSerializer.Serialize(twe);
@@ -74,6 +134,7 @@ else
 
         editTwe = System.Text.Json.JsonSerializer.Deserialize<ConfigTwe>(json);
         status = Status.TWE_EDIT;
+        tsvLines = editTwe.getConditionsTsv();
     }
     public async Task SaveEditTwe()
     {

@@ -76,9 +76,12 @@ namespace MiotoServer
                 var csvAry = values.Select(v => v.ToString("F1"));
                 this.csv = string.Join(",", csvAry);
 
-                MiotoServerWrapper.config.updateSerialCurrentList(mac);
-                Ct10CtDetector.getInstance().fetch(this);
-                SerialPortWorker.memDbBackup(this.toCsv());
+                if (MiotoServerWrapper.config != null)
+                {
+                    MiotoServerWrapper.config.updateSerialCurrentList(mac);
+                    Ct10CtDetector.getInstance().fetch(this);
+                    SerialPortWorker.memDbBackup(this.toCsv());
+                }
             }
 
 

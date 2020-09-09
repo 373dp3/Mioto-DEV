@@ -42,20 +42,69 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(ht);//turn on 
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(2, panel.dekidaka);
+            Assert.AreEqual(2, panel.operationCounts);
             Assert.AreEqual(2, panel.signalNum);
 
             Assert.AreEqual((2 * (mt + ht))/(2 * mt + ht), panel.bekidou);
+        }
+
+        [TestMethod]
+        public void Test取数()
+        {
+            var panel = new PanelModel() { mac = 1, };
+            var dt = new DateTime(2019, 10, 28, 9, 0, 0);
+            var factor = new ProductionFactor()
+                        {
+                            mac = 1,
+                            id = 1,
+                            stTicks = dt.Ticks,
+                            status = ProductionFactor.Status.START_PRODUCTION,
+                            isValid = ProductionFactor.Validation.VALID,
+                            ct = 15
+                        };
+            factor.memoJson.itemsPerOperation = 2;
+            panel.SetProductionFactor(
+                factor);
+
+            var dummy = new DummyCt(dt.AddSeconds(-15), true);
+            CycleTime ct = null;
+            var mt = 10.0;  //マシンタイム
+            var ht = 5.0;   //手作業時間(Human time)
+
+            //CT00～CT11を揃えるため2回捨てる
+            ct = dummy.flip(mt);//turn off
+            ct = dummy.flip(ht);//turn on 
+            // 上は9:00丁度のTurn on
+
+            ct = dummy.flip(mt);//turn off
+            panel.updateCycleTime(ct);
+            Assert.AreEqual(1, panel.operationCounts);
+            Assert.AreEqual(2, panel.itemCounts);
+            Assert.AreEqual(1, panel.signalNum);
+
+            ct = dummy.flip(ht);//turn on 
+            panel.updateCycleTime(ct);
+            Assert.AreEqual(1, panel.operationCounts);
+            Assert.AreEqual(2, panel.itemCounts);
+            Assert.AreEqual(1, panel.signalNum);
+
+            ct = dummy.flip(mt);//turn off
+            panel.updateCycleTime(ct);
+            Assert.AreEqual(2, panel.operationCounts);
+            Assert.AreEqual(4, panel.itemCounts);
+            Assert.AreEqual(2, panel.signalNum);
+
+            Assert.AreEqual((2 * (mt + ht)) / (2 * mt + ht), panel.bekidou);
         }
 
         /// <summary>
@@ -89,17 +138,17 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);//稼働としてカウントしないが信号はカウント
 
             ct = dummy.flip(ht);//turn on 
             panel.updateCycleTime(ct);
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(2, panel.signalNum);
 
             Assert.AreEqual(((mt + ht)) / ((mt-1) + ht + mt), panel.bekidou);
@@ -136,17 +185,17 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);//稼働としてカウントしないが信号はカウント
 
             ct = dummy.flip(ht);//turn on 
             panel.updateCycleTime(ct);
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(2, panel.signalNum);
 
             Assert.AreEqual(((mt + ht)) / ((mt - 1) + ht + mt), panel.bekidou);
@@ -178,11 +227,11 @@ namespace MiotoBlazorCommonTest
                 {
                     ct = dummy.flip(ht);//turn on 
                     panel.updateCycleTime(ct);
-                    Assert.AreEqual(1, panel.dekidaka);
+                    Assert.AreEqual(1, panel.operationCounts);
 
                     ct = dummy.flip(mt);//turn off
                     panel.updateCycleTime(ct);
-                    Assert.AreEqual(1, panel.dekidaka);
+                    Assert.AreEqual(1, panel.operationCounts);
                 }
             }
         }
@@ -218,7 +267,7 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
             Assert.AreEqual(1, panel.listProductionFactor.Count);
             Assert.AreEqual($"{(mt).ToString("F1")}秒", panel.getRunSecStr());
@@ -226,14 +275,14 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(ht);//turn on 
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
             Assert.AreEqual($"{(mt).ToString("F1")}秒", panel.getRunSecStr());
             Assert.AreEqual($"{(ht).ToString("F1")}秒", panel.getStopSecStr());
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(2, panel.dekidaka);
+            Assert.AreEqual(2, panel.operationCounts);
             Assert.AreEqual(2, panel.signalNum);
             Assert.AreEqual($"{(mt+mt).ToString("F1")}秒", panel.getRunSecStr());
             Assert.AreEqual($"{(ht).ToString("F1")}秒", panel.getStopSecStr());
@@ -310,7 +359,7 @@ namespace MiotoBlazorCommonTest
              */
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
             Assert.AreEqual(2, panel.listProductionFactor.Count);
             Assert.AreEqual($"{(mt).ToString("F1")}秒", panel.getRunSecStr());
@@ -318,12 +367,12 @@ namespace MiotoBlazorCommonTest
 
             ct = dummy.flip(ht);//turn on 
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
-            Assert.AreEqual(2, panel.dekidaka);
+            Assert.AreEqual(2, panel.operationCounts);
             Assert.AreEqual(2, panel.signalNum);
 
             Assert.AreEqual((2*mt)/(3600), panel.bekidou);
@@ -384,18 +433,18 @@ namespace MiotoBlazorCommonTest
             ct = dummy.flip(64430.8);//turn on 17時間超
             panel.updateCycleTime(ct);
             Assert.AreEqual(0, panel.listProductionFactor.Count);//新規要因を追加していないこと。
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(0, panel.signalNum);
 
             ct = dummy.flip(mt);//turn off
             panel.updateCycleTime(ct);
             Assert.AreEqual(1, panel.listProductionFactor.Count);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
 
             ct = dummy.flip(ht);//turn on
             panel.updateCycleTime(ct);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
         }
         /// <summary>
@@ -420,19 +469,19 @@ namespace MiotoBlazorCommonTest
             ct = dummy.flip(64430.8);//turn off 17時間超
             panel.updateCycleTime(ct);
             Assert.AreEqual(0, panel.listProductionFactor.Count);//新規要因を追加していないこと。
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(0, panel.signalNum);
 
             ct = dummy.flip(ht);//turn on
             panel.updateCycleTime(ct);
             Assert.AreEqual(1, panel.listProductionFactor.Count);
-            Assert.AreEqual(0, panel.dekidaka);
+            Assert.AreEqual(0, panel.operationCounts);
             Assert.AreEqual(0, panel.signalNum);
 
             ct = dummy.flip(ht);//turn off
             panel.updateCycleTime(ct);
             Assert.AreEqual(1, panel.listProductionFactor.Count);
-            Assert.AreEqual(1, panel.dekidaka);
+            Assert.AreEqual(1, panel.operationCounts);
             Assert.AreEqual(1, panel.signalNum);
         }
 

@@ -13,7 +13,7 @@ else
 {
     @if (status == Status.NOOP)
     {
-        <table class="table">
+        <table class="table m-0 p-0 w-auto">
             <thead>
                 <tr>
                     <th>項目</th>
@@ -43,7 +43,7 @@ else
     }
     else if (status == Status.PANEL)
     {
-        <table class="table">
+        <table class="table m-0 p-0 w-auto">
             <thead>
                 <tr>
                     <th>パネル名称</th>
@@ -74,7 +74,7 @@ else
     }
     else if (status == Status.TWE_LIST)
     {
-        <table class="table">
+        <table class="table m-0 p-0 w-auto">
             <thead>
                 <tr>
                     <th>MAC</th>
@@ -120,7 +120,6 @@ else
             <ValidationSummary />
             <h3>パネル名称</h3>
             <InputText id="name" @bind-Value="editPanel.name" />
-            <p class="text-danger">既存のパネルと同じ名称を使用した場合、古いパネルが上書きされます。</p>
             <h3>表示対象子機</h3>
             <table class="table">
                 <tbody>
@@ -147,7 +146,7 @@ else
                 </tbody>
             </table>
             <h3>非表示</h3>
-            <table class="table">
+            <table class="table m-0 p-0 w-auto">
                 <tbody>
                     @foreach (var item in config
                    .listTwe

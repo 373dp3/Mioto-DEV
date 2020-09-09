@@ -90,21 +90,26 @@ namespace MiotoBlazorCommon
         {
             return getSecString(getStopSec());
         }
-        public long dekidaka { 
-            get { return productionHelper.list.Select(q => q.dekidaka).Sum(); }
+        public long operationCounts
+        {
+            get { return productionHelper.list.Select(q => q.operationCounts).Sum(); }
+        }
+        public long itemCounts
+        {
+            get { return productionHelper.list.Select(q => q.itemCounts).Sum(); }
         }
         public double bekidou
         {
             get {
                 var list = productionHelper.list.Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
                                     || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT);
-                var bunbo = list.Select(q => q.dekidaka).Sum();
+                var bunbo = list.Select(q => q.operationCounts).Sum();
                 if (bunbo == 0)
                 {
                     return 0;
                 }
                 //各生産要因ごとの加重平均
-                return list.Select(q => q.GetKadouritsu() * q.dekidaka).Sum()
+                return list.Select(q => q.GetKadouritsu() * q.operationCounts).Sum()
                     / bunbo;
             }
         }
