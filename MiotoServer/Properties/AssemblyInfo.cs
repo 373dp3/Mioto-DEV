@@ -43,6 +43,7 @@ using System.Runtime.InteropServices;
  * ・最終信号日時更新対応
  * ・CSVフォーマットの更新(取数考慮済みの出来高、動作回数の追加)
  * ・http://localhost/mac2machine にて、MAC(16進表記),マシン名取得対応
+ * ・SQLite日付切替時の例外発生対応
  * 
  * 2020.8.25
  * ・CTつき登録において品番、担当者登録欄を追加

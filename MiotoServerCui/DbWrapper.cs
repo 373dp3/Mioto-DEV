@@ -584,10 +584,10 @@ namespace MiotoServer
         {
             try
             {
-                var id = conn.ExecuteScalar<long>(
-                            "select max(endrow) from date2row " +
-                            " where date = " + dateStr);
-                if(id==0) { return false; }
+                var list = conn.Table<date2row>().ToList();
+                var dt = Convert.ToInt32(dateStr);
+                var listId = list.LastOrDefault(q => q.date == dt);
+                if(listId == null) { return false; }
                 return true;
             }
             catch (Exception e)
