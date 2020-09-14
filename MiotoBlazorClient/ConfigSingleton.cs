@@ -36,7 +36,7 @@ namespace MiotoBlazorClient
             }
             
             var http = new HttpClient();
-            var url = $"http://{new Uri(NavMgr.Uri).Host}/{URI_PREFIX}/_{DateTime.Now.Ticks}";
+            var url = $"{NavMgr.BaseUri.Replace("/html/","/")}{URI_PREFIX}/_{DateTime.Now.Ticks}";
             try
             {
                 var jsonStr = await http.GetStringAsync(url);
@@ -64,7 +64,7 @@ namespace MiotoBlazorClient
 
         public async Task update(NavigationManager NavMgr)
         {
-            var url = $"http://{new Uri(NavMgr.Uri).Host}/{URI_PREFIX}/_{DateTime.Now.Ticks}";
+            var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}{URI_PREFIX}/_{DateTime.Now.Ticks}";
             var response = await new HttpClient().PostAsJsonAsync(url, config);
         }
 

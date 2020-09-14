@@ -622,6 +622,12 @@ namespace MiotoServer
             conn.Execute("vacuum;");
 
             beginRowId = rowid;
+
+            //メモリDBのリフレッシュ
+            memConn.BeginTransaction();
+            memConn.DropTable<MacTicks>();
+            memConn.CreateTable<MacTicks>();
+            memConn.Commit();
         }
 
         public List<TweCtPacket> getLatestTweCtPacketByMac(UInt32 mac)
@@ -809,10 +815,18 @@ namespace MiotoServer
             }
             while(DateTime.Now < dtLimit)
             {
-                var ans = memConn.Query<MacTicks>(query).Count();
-                if (ans > 0)
+                try
                 {
-                    return true;
+                    var ansList = memConn.Query<MacTicks>(query);
+                    if ((ansList != null) && (ansList.Count() > 0))
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    d("Exception:" + e.ToString());
+                    d(e.StackTrace);
                 }
                 await Task.Delay(pollingIntervalMs);
             }

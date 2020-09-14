@@ -34,8 +34,14 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.0")]
 [assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0-β2")]
+[assembly: AssemblyInformationalVersion("1.4.0")]
 /*
+ * 2020.9.15
+ * ・信号ON時に可動率が低下する処理を修正
+ * ・信号ON状態でCT無指定要因登録を開始した場合に停止時間、稼働時間が極大値になるバグの修正
+ * ・80ポート以外のポートでの動作対応
+ * ・日付変更時にPollingが暴走するバグの修正
+ * 
  * 2020.9.9
  * ・設備毎の標準CT、取数登録対応
  * ・稼働日切り替わり時にブラウザの強制リロード

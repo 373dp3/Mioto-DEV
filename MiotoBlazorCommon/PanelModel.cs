@@ -58,6 +58,7 @@ namespace MiotoBlazorCommon
             return listProductionFactor
                 .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
                          || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
+                .Where(q=>q.getRunSec(isRunning)<24*3600)
                 .Select(q => q.getRunSec(isRunning)).Sum();
         }
         public string getRunSecStr(ProductionFactor factor = null)
@@ -81,9 +82,15 @@ namespace MiotoBlazorCommon
         {
             var isRunning = status == RunOrStop.RUN;
 
+            var list = listProductionFactor
+                .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
+                         || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT);
+
+
             return listProductionFactor
                 .Where(q => q.status == ProductionFactor.Status.START_PRODUCTION
                          || q.status == ProductionFactor.Status.START_PRODUCTION_NOCT)
+                .Where(q=>q.getStopSec(isRunning)>0)
                 .Select(q => q.getStopSec(isRunning)).Sum();
         }
         public string getStopSecStr(ProductionFactor factor = null)

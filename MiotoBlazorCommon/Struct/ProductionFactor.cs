@@ -181,6 +181,9 @@ namespace MiotoBlazorCommon.Struct
         [Ignore]
         public bool isFixed { get; set; } = false;
 
+        [Ignore]
+        public bool isBtnZero { get; set; } = true;
+
         public double getRunSec(bool isRunning)
         {
             if(isRunning==false) { return runSec; }
@@ -277,6 +280,8 @@ namespace MiotoBlazorCommon.Struct
             signalCount++;
             lostSignalCount += Math.Max(cycle.seq - 1, 0);
             lastCycleTicks = cycle.dt.Ticks;
+            isBtnZero = (cycle.btn == 0);
+
 
             //MT状況把握 信号の原点時刻も要因の時刻範囲内であることを保証する
             if (cycle.ct10 > 0)
@@ -361,14 +366,21 @@ namespace MiotoBlazorCommon.Struct
             if (bunbo<=0) { return 0; }
 
             var span = new TimeSpan(bunbo);
+            var totalSec = span.TotalSeconds;
+
+            if ((isBtnZero == false) && (lastCycleTicks > 0) && (DateTime.Now.Ticks < endTicks))
+            {
+                var diff = (DateTime.Now - new DateTime(lastCycleTicks)).TotalSeconds;
+                totalSec -= diff;
+            }
 
             //NOCT対応
             if (ct == 0)
             {
-                return runSec / span.TotalSeconds;
+                return runSec / totalSec;
             }
 
-            return (ct * operationCounts) / span.TotalSeconds;
+            return (ct * operationCounts) / totalSec;
 
         }
 

@@ -173,9 +173,9 @@ namespace MiotoBlazorClient
         {
             //CSV情報の一括取得
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
-            var url = $"http://{new Uri(NavMgr.Uri).Host}/{uriPathWithEndSlash}{macListStr}/backup/_{DateTime.Now.Ticks}";
-            
-            using(var request = new HttpRequestMessage(HttpMethod.Get, url))
+            var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}{uriPathWithEndSlash}{macListStr}/backup/_{DateTime.Now.Ticks}";
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
             using(var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
             {
                 if(response.StatusCode != System.Net.HttpStatusCode.OK) { return; }
@@ -278,7 +278,7 @@ namespace MiotoBlazorClient
             {
                 try
                 {
-                    var url = $"http://{new Uri(NavMgr.Uri).Host}/bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
+                    var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
 
                     if (token.IsCancellationRequested) { continue; }
 
@@ -315,7 +315,7 @@ namespace MiotoBlazorClient
             Console.WriteLine($"Dialog send json: {json}");
 
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
-            var url = $"http://{new Uri(NavMgr.Uri).Host}/production_factor_post/_{DateTime.Now.Ticks}";
+            var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}production_factor_post/_{DateTime.Now.Ticks}";
             var response = await Http.PostAsJsonAsync(url, factor);
         }
 
