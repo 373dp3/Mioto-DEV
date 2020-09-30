@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.0")]
-[assembly: AssemblyFileVersion("1.4.0")]
-[assembly: AssemblyInformationalVersion("1.4.0")]
+[assembly: AssemblyVersion("1.4.1")]
+[assembly: AssemblyFileVersion("1.4.1")]
+[assembly: AssemblyInformationalVersion("1.4.1")]
 /*
+ * 2020.9.30
+ * ・3つ以上のCOMポート対応
+ * 
  * 2020.9.15
  * ・信号ON時に可動率が低下する処理を修正
  * ・信号ON状態でCT無指定要因登録を開始した場合に停止時間、稼働時間が極大値になるバグの修正

@@ -15,6 +15,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +26,7 @@ namespace MiotoServerW
     {
         public static AppConfig config { get; private set; } = null;
         private string jsonFile = getBaseDir() + Path.DirectorySeparatorChar + "config.json";
+        public const string DEFAULT_PORT_BPS = "115200";
 
         public Form1()
         {
@@ -81,7 +83,8 @@ namespace MiotoServerW
                 {
                     if (dMsgCnt > 100) { this.textBoxStatus.Text = ""; dMsgCnt = 0; }
                     var hhmm = DateTime.Now.ToString("HH:mm:ss ");
-                    this.textBoxStatus.AppendText(hhmm + msg + Environment.NewLine);
+                    if (dMsgCnt > 0) { this.textBoxStatus.AppendText(Environment.NewLine); }
+                    this.textBoxStatus.AppendText(hhmm + msg);
                     dMsgCnt++;
 
                 }
@@ -91,44 +94,28 @@ namespace MiotoServerW
 
         private void buttonUpdateComList_Click(object sender, EventArgs e)
         {
-            var preSelectAry = new string[] { PORT_NO_USE_KEY, PORT_NO_USE_KEY };
-            var comboBoxComAry = new ComboBox[] { comboBoxComList, comboBoxComList2 };
+            this.listBoxComport.Items.Clear();
+            var ary = SerialPort.GetPortNames().ToList();
 
-            for(var i=0; i< preSelectAry.Length; i++)
+            //前回使用したポートが存在しない場合でも表示する
+            foreach (var com in config.listComPort)
             {
-                if (i < config.listComPort.Count)
-                {
-                    preSelectAry[i] = config.listComPort[i].portName;
-                }
-                comboBoxComAry[i].Items.Clear();
-                setComboItemAndUpdateSelected(comboBoxComAry[i], PORT_NO_USE_KEY, preSelectAry[i]);
+                if (com.portName.CompareTo(PORT_NO_USE_KEY) == 0) continue;
+                if (ary.Contains(com.portName)) continue;
+                ary.Add(com.portName);
             }
 
-            var portlist = new List<string>();
-            portlist.AddRange(SerialPort.GetPortNames());
-            portlist.Sort();
+            //ポート番号の降順で並べ替え
+            ary = ary.OrderBy(q => Convert.ToInt32(q.Replace("com", "").Replace("COM", ""))).ToList();
 
-            for (var i = 0; i < preSelectAry.Length; i++)
-            {
-                foreach(var port in portlist)
-                {
-                    setComboItemAndUpdateSelected(comboBoxComAry[i], port, preSelectAry[i]);
-                }
-            }
+            this.listBoxComport.Items.AddRange(ary.ToArray());
 
-            //前回使用したポートは必ず残す
-            for(var i=0; i< preSelectAry.Length; i++)
+            //選択済み項目
+            var selected = config.listComPort.Select(q => q.portName).ToList();
+            for (var i = 0; i < listBoxComport.Items.Count; i++)
             {
-                setComboItemAndUpdateSelected(comboBoxComAry[i], preSelectAry[i], preSelectAry[i]);
-            }
-
-            // nullなら未選択項目を指定
-            for (var i = 0; i < preSelectAry.Length; i++)
-            {
-                if(comboBoxComAry[i] == null)
-                {
-                    comboBoxComAry[i].SelectedItem = PORT_NO_USE_KEY;
-                }
+                var item = listBoxComport.Items[i];
+                listBoxComport.SetSelected(i, selected.Contains(item));
             }
         }
 
@@ -161,34 +148,14 @@ namespace MiotoServerW
             }
         }
 
-        private void comboBoxComList_SelectedIndexChanged(object sender, EventArgs e)
+        private void listBoxComport_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(!(sender is ComboBox)) { return; }
-            var box = (ComboBox)sender;
-
-            if (box.Name.CompareTo(comboBoxComList.Name) == 0)
+            if (!(sender is ListBox)) return;
+            var box = (ListBox)sender;
+            config.listComPort.Clear();
+            foreach(var item in box.SelectedItems)
             {
-                config.listComPort[0].portName = box.SelectedItem.ToString();
-                if(comboBoxComList2.SelectedIndex == box.SelectedIndex)
-                {
-                    comboBoxComList2.SelectedIndex = 0;
-                }
-                if (config.listComPort[0].portName.CompareTo(PORT_NO_USE_KEY) != 0)
-                {
-                    saveConfigJson();
-                }
-            }
-            if (box.Name.CompareTo(comboBoxComList2.Name) == 0)
-            {
-                config.listComPort[1].portName = box.SelectedItem.ToString();
-                if (comboBoxComList.SelectedIndex == box.SelectedIndex)
-                {
-                    comboBoxComList.SelectedIndex = 0;
-                }
-                if (config.listComPort[1].portName.CompareTo(PORT_NO_USE_KEY) != 0)
-                {
-                    saveConfigJson();
-                }
+                config.listComPort.Add(new ComPort() { portName = item.ToString(), portBps = DEFAULT_PORT_BPS });
             }
         }
 
@@ -202,6 +169,7 @@ namespace MiotoServerW
             return Environment.GetFolderPath(Environment.SpecialFolder.Personal)
                     + Path.DirectorySeparatorChar + "MiotoServerDb";
         }
+
         private string GetAppVer()
         {
             //return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
@@ -216,10 +184,6 @@ namespace MiotoServerW
 
             //COMポート初期値更新
             buttonUpdateComList_Click(null, null);
-
-            //bps初期値更新            
-            comboBoxBps.SelectedItem = config.listComPort[0].portBps;
-            comboBoxBps2.SelectedItem = config.listComPort[1].portBps;
 
             //Server port number
             numericServerPortNumber.Value = config.serverPortNumber;
@@ -336,10 +300,6 @@ namespace MiotoServerW
         /// <param name="isStart"></param>
         private void updateButtonCtrl(bool isStart)
         {
-            this.comboBoxComList.Enabled = !isStart;
-            this.comboBoxComList2.Enabled = !isStart;
-            this.comboBoxBps.Enabled = !isStart;
-            this.comboBoxBps2.Enabled = !isStart;
             this.dateTimePickerHHMM.Enabled = !isStart;
             this.buttonStart.Enabled = !isStart;
             this.buttonUpdateComList.Enabled = !isStart;
@@ -349,6 +309,7 @@ namespace MiotoServerW
             this.buttonBackupDir.Enabled = !isStart;
             this.checkBoxMemBackup.Enabled = !isStart;
             this.numericServerPortNumber.Enabled = !isStart;
+            this.listBoxComport.Enabled = !isStart;
 
             this.buttonStop.Enabled = isStart;
             this.buttonDoBackup.Enabled = isStart;
@@ -382,24 +343,6 @@ namespace MiotoServerW
             //SerialPortを確実に終了させないとObjectDisposedExceptionが発生するため
             if (tokenSource != null) { e.Cancel = true; }
             stopServiceIfExist(true);
-        }
-
-        private void comboBoxBps_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (sender == null) { return; }
-            if(!(sender is ComboBox)) { return; }
-
-            var box = (ComboBox)sender;
-            if (box.Name.CompareTo(comboBoxBps.Name) == 0)
-            {
-                config.listComPort[0].portBps = box.SelectedItem.ToString();
-                saveConfigJson();
-            }
-            if (box.Name.CompareTo(comboBoxBps2.Name) == 0)
-            {
-                config.listComPort[1].portBps = box.SelectedItem.ToString();
-                saveConfigJson();
-            }
         }
 
         private void buttonDbDir_Click(object sender, EventArgs e)
@@ -566,6 +509,7 @@ namespace MiotoServerW
             config.isMemoryDbBackup = MiotoServerWrapper.config.isMemoryDbBackup;
             saveConfigJson();
         }
+
 
         #endregion //-- 電流関連
 
