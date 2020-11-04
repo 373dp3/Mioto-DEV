@@ -321,7 +321,7 @@ namespace MiotoServer
             headers.Add(HttpResponseHeader.ContentType, "text/plain; charset=UTF-8");
 
             //大文字・小文字のゆらぎ吸収
-            var param = new Param(context.Request.RawUrl.ToLower());
+            var param = new Param(context);
             try
             {
                 foreach (var f in paramFilterList)

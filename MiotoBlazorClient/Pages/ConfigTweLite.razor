@@ -61,6 +61,8 @@ else
                 <button type="button" class="btn btn-info btn-sm" @onclick="onUpdateTextArea">テキストボックスの反映</button>
             </td>
         </tr>
+        <tr><td>ON/OFFを反転させる<br /><small>停止時に点灯する光センサや、<br />停止時にONするリードスイッチ<br />の場合にチェック</small></td>
+        <td><InputCheckbox class="w-100" id="check" @bind-Value="editTwe.isNegativeLogic" /></td></tr>
     </table>
     <p><small>取数 : 1回の信号OFFあたりに作られる製品の個数・出来高</small></p>
     <h5>標準CTマスタ</h5>

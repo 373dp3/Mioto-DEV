@@ -116,7 +116,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\bin\Debug\System.Threading.Ta
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\bin\Debug\System.ValueTuple.xml
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csprojAssemblyReference.cache
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.exe
 C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\YoloJsonClient\obj\Debug\YoloJsonClient.csproj.CoreCompileInputs.cache

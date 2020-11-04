@@ -30,6 +30,7 @@ namespace MiotoBlazorClient
         Func<PanelModel> factory = null;
 
         private bool isHttpDone = false;
+        private Action<string> debugCallBackFunc = null;
 
         /// <summary>
         /// razorページからロードすべき情報の指示を受ける
@@ -37,9 +38,11 @@ namespace MiotoBlazorClient
         /// <param name="mgr"></param>
         /// <param name="client"></param>
         public async Task init(NavigationManager mgr, HttpClient client, List<PanelModel> listPanelModel,
-            string id, Mode mode, Func<PanelModel> factory, string dateOrder=null)
+            string id, Mode mode, Func<PanelModel> factory, string dateOrder=null, Action<string> debugCallBack=null)
         {
             this._listPanelModel = listPanelModel;
+            debugCallBackFunc = debugCallBack;
+
             //ページ遷移の際に前ページの情報を破棄
             //listPanelModel.Clear(); => チラツキ防止のため、直前にクリア
             tokenSource.Cancel();
@@ -72,6 +75,13 @@ namespace MiotoBlazorClient
 
                 //listPanelModeの実体化
                 funcLoadPanel(id);
+
+                foreach (var panel in this._listPanelModel)
+                {
+                    var tweCfg = config.listTwe.Where(q => q.mac == panel.mac).FirstOrDefault();
+                    panel.tweCfg = tweCfg;
+                }
+
 
                 //ProductionFactorの取得
                 _ = loadCsvByHttp(() => new ProductionFactor(),
@@ -180,7 +190,6 @@ namespace MiotoBlazorClient
             {
                 if(response.StatusCode != System.Net.HttpStatusCode.OK) { return; }
                 updateMaxTicks(response);
-
                 using (var content = response.Content)
                 using(var stream = await content.ReadAsStreamAsync())
                 using (var sr = new System.IO.StreamReader(stream))
@@ -188,6 +197,9 @@ namespace MiotoBlazorClient
                     var dt = DateTime.Now.AddSeconds(1);
                     while (sr.EndOfStream == false)
                     {
+                        //[TODO]このループ内部がCSV出力時等におけるボトルネック。
+                        //処理速度を改善する際に詳細な検討が必要。
+
                         var line = sr.ReadLine();
                         if (line == null) { break; }
                         //Console.WriteLine("http: " + line);
@@ -198,14 +210,25 @@ namespace MiotoBlazorClient
                             {
                                 item.ParseInto(line);
                             }
-                            catch (Exception e) { continue; }
+                            catch (Exception e)
+                            {
+                                continue;
+                            }
                             callback(item);
 
                             if (DateTime.Now > dt)
                             {
                                 dt = DateTime.Now.AddSeconds(1);
-                                debugMsg = $"情報を一括取得しています・・({stream.Position}/{stream.Length})";
-                                this.StateHasChanged();
+                                debugMsg = $"情報を一括取得しています・・({((100*stream.Position)/stream.Length).ToString("F1")}%)";
+                                Console.WriteLine(debugMsg);
+                                if (debugCallBackFunc != null)
+                                {
+                                    debugCallBackFunc(debugMsg);
+                                }
+                                else
+                                {
+                                    this.StateHasChanged();
+                                }
                                 await Task.Yield();
                             }
                         }
@@ -213,7 +236,9 @@ namespace MiotoBlazorClient
                     }
                 }
             }
-            if(funcDone!=null) { funcDone(); }
+            debugMsg = "";
+            if (debugCallBackFunc != null) { debugCallBackFunc(debugMsg); }
+            if (funcDone!=null) { funcDone(); }
         }
 
         /// <summary>

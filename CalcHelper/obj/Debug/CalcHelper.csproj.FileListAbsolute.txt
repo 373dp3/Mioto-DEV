@@ -21,7 +21,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.Resol
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.Form1.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.Properties.Resources.resources
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.GenerateResource.cache
+C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.CoreCompileInputs.cache
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.exe
 C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\CalcHelper\obj\Debug\CalcHelper.csproj.CoreCompileInputs.cache

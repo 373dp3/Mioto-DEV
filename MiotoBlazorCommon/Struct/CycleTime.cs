@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -87,6 +88,20 @@ namespace MiotoBlazorCommon.Struct
                 DI = Convert.ToByte(csvAry[i]); i++;
             }
             catch (Exception e) { i++; }
+        }
+
+        private bool isFlipNegative = false;
+        public void flipToNegative()
+        {
+            if (isFlipNegative) { return; }
+            var tmp = ct00;
+            ct00 = ct11;
+            ct11 = tmp;
+            tmp = ct01;
+            ct01 = ct10;
+            ct10 = tmp;
+            btn ^= (byte)0x01;
+            isFlipNegative = true;
         }
     }
 }

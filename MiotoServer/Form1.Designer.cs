@@ -45,6 +45,7 @@
             this.buttonDoBackup = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.listBoxComport = new System.Windows.Forms.ListBox();
             this.label9 = new System.Windows.Forms.Label();
             this.numericServerPortNumber = new System.Windows.Forms.NumericUpDown();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -56,7 +57,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.comboBoxSerialCurrent = new System.Windows.Forms.ComboBox();
-            this.listBoxComport = new System.Windows.Forms.ListBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericServerPortNumber)).BeginInit();
@@ -243,6 +243,17 @@
             this.tabPage1.Text = "基本";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // listBoxComport
+            // 
+            this.listBoxComport.FormattingEnabled = true;
+            this.listBoxComport.ItemHeight = 12;
+            this.listBoxComport.Location = new System.Drawing.Point(8, 28);
+            this.listBoxComport.Name = "listBoxComport";
+            this.listBoxComport.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+            this.listBoxComport.Size = new System.Drawing.Size(105, 52);
+            this.listBoxComport.TabIndex = 19;
+            this.listBoxComport.SelectedIndexChanged += new System.EventHandler(this.listBoxComport_SelectedIndexChanged);
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -371,24 +382,15 @@
             this.comboBoxSerialCurrent.TabIndex = 0;
             this.comboBoxSerialCurrent.SelectedIndexChanged += new System.EventHandler(this.comboBoxSerialCurrent_SelectedIndexChanged);
             // 
-            // listBoxComport
-            // 
-            this.listBoxComport.FormattingEnabled = true;
-            this.listBoxComport.ItemHeight = 12;
-            this.listBoxComport.Location = new System.Drawing.Point(8, 28);
-            this.listBoxComport.Name = "listBoxComport";
-            this.listBoxComport.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.listBoxComport.Size = new System.Drawing.Size(105, 52);
-            this.listBoxComport.TabIndex = 19;
-            this.listBoxComport.SelectedIndexChanged += new System.EventHandler(this.listBoxComport_SelectedIndexChanged);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(601, 304);
             this.Controls.Add(this.tabControl1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "MiotoServer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);

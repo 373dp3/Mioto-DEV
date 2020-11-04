@@ -314,6 +314,9 @@ namespace MiotoBlazorCommon.Struct
         {
             return new TimeSpan(GetDurationTicks()).TotalSeconds;
         }
+
+        const int houchiLimitHour = 1;//要因設定時に最終信号の後に放置していた場合の救済処理に入るまでに時間
+
         public long GetDurationTicks()
         {
             long bunbo;
@@ -329,7 +332,7 @@ namespace MiotoBlazorCommon.Struct
                 //最終信号から1時間以内の場合は現在時刻を優先し、
                 //超過している場合は最終信号を選択する。これは、
                 //生産要因を未登録のまま放置した場合の救済用の措置
-                if ((lastCycleTicks > 0) && ((new TimeSpan(DateTime.Now.Ticks - lastCycleTicks).TotalHours > 1)))
+                if ((lastCycleTicks > 0) && ((new TimeSpan(DateTime.Now.Ticks - lastCycleTicks).TotalHours > houchiLimitHour)))
                 {
                     return lastCycleTicks - stTicks;
                 }
@@ -371,7 +374,10 @@ namespace MiotoBlazorCommon.Struct
             if ((isBtnZero == false) && (lastCycleTicks > 0) && (DateTime.Now.Ticks < endTicks))
             {
                 var diff = (DateTime.Now - new DateTime(lastCycleTicks)).TotalSeconds;
-                totalSec -= diff;
+                if(diff< houchiLimitHour * 3600)
+                {
+                    totalSec -= diff;
+                }
             }
 
             //NOCT対応
@@ -379,7 +385,7 @@ namespace MiotoBlazorCommon.Struct
             {
                 return runSec / totalSec;
             }
-
+            var ansTemp = (ct * operationCounts) / totalSec;
             return (ct * operationCounts) / totalSec;
 
         }

@@ -99,6 +99,7 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Xml.XPath.XD
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\EntityFramework.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\EntityFramework.SqlServer.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Buffers.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Memory.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Numerics.Vectors.dll
@@ -107,6 +108,8 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Text.Encodin
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Text.Json.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.Threading.Tasks.Extensions.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\System.ValueTuple.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\EntityFramework.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\EntityFramework.SqlServer.xml
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
@@ -125,6 +128,3 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.cspr
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServerDLL.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\obj\Debug\MiotoServer.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.pdb
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoServerCui\bin\Debug\MiotoBlazorCommon.dll.config

@@ -13,6 +13,8 @@ namespace MiotoBlazorCommon
         public string title { get; set; }
         public long mac { get; set; } = 0;
 
+        public ConfigTwe tweCfg { get; set; } = null;
+
         public RunOrStop status { get; private set; } = RunOrStop.NOOP;
         public long signalNum { get; set; } = 0;
         public CycleTime lastCycleTime { get; private set; } = new CycleTime();
@@ -129,6 +131,8 @@ namespace MiotoBlazorCommon
                 lastCycleTime = null;
                 return;
             }
+            if ((tweCfg!=null) && (tweCfg.isNegativeLogic)) { ct.flipToNegative(); }
+
             if (ct.btn == 0)
             {
                 status = RunOrStop.STOP;

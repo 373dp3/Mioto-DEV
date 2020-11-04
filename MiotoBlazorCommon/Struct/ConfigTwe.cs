@@ -22,6 +22,8 @@ namespace MiotoBlazorCommon.Struct
 
         public long Ticks { get; set; }
 
+        public bool isNegativeLogic { get; set; } = false;//停止状態で光点灯またはスイッチCloseの場合
+
         public List<ProductionConditions> listConditions { get; set; } = new List<ProductionConditions>();
 
         public string getConditionsTsv()
@@ -83,6 +85,7 @@ namespace MiotoBlazorCommon.Struct
 
         public static void Copy(ConfigTwe from, ConfigTwe to)
         {
+            to.isNegativeLogic = from.isNegativeLogic;
             to.mac = from.mac;
             to.name = (string)from.name.Clone();
             to.setConditionsTsv(from.getConditionsTsv());

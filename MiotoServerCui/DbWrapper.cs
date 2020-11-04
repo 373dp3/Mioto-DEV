@@ -80,6 +80,7 @@ namespace MiotoServer
             conn.CreateTable<ConfigTbl>();
             conn.CreateTable<ProductionFactor>();
             memConn.CreateTable<MacTicks>();
+            memConn.CreateTable<ConnCounter>();
 
             //DBフィールドを確認し必要であれば移行する。
             //migrateDbIfNeed();
@@ -275,12 +276,13 @@ namespace MiotoServer
             {
                 var jsonCfg = getConfig(CONFIG_BLAZOR_KEY);
                 cfg = JsonSerializer.Deserialize<Config>(jsonCfg);
-
-                var lastInfoList = conn.Table<LastInfo>().ToList();
+                
+                var lastInfoList = conn.Query<LastInfo>("select * from LastInfo group by mac").ToList();
                 foreach(var twe in cfg.listTwe)
                 {
-                    var info = lastInfoList.FirstOrDefault(q => q.mac == twe.mac);
-                    if(info.ticks==0) { continue; }
+                    var info = lastInfoList.Where(q=>q.mac == twe.mac).FirstOrDefault();
+                    if (info == null) { continue; }
+                    if (info.ticks==0) { continue; }
                     twe.Ticks = info.ticks;
                 }
             }
@@ -619,6 +621,8 @@ namespace MiotoServer
             conn.Execute(query);
             updateDateFlg();
 
+            refreshLastInfoList();//mac, btnにてGroup化したリストのみを残す。
+
             conn.Execute("vacuum;");
 
             beginRowId = rowid;
@@ -633,14 +637,14 @@ namespace MiotoServer
         public List<TweCtPacket> getLatestTweCtPacketByMac(UInt32 mac)
         {
             //seq, btn, lqi, batt, ticks
-            var CommandText = "select * from LastInfo where mac=" + mac +" order by ticks DESC";
+            var CommandText = "select * from (select * from LastInfo where mac=" + mac + " order by ticks DESC) group by btn";
             var rs = conn.Query<LastInfo>(CommandText);
             List<TweCtPacket> ary = new List<TweCtPacket>();
             foreach(var item in rs)
             {
                 ary.Add(new TweCtPacket((uint)item.mac, (byte)item.seq, (byte)item.btn, (byte)item.lqi, (ushort)item.batt, item.ticks));
             }
-            return ary;
+            return ary.OrderByDescending(q=>q.dt.Ticks).ToList();
         }
 
         public Twe2525APacket getLatestTwe2525PacketByMac(UInt32 mac)
@@ -664,7 +668,7 @@ namespace MiotoServer
         {
             var lastInfo = new LastInfo {
                 mac = packet.mac, seq = packet.seq, btn = packet.btn,
-                lqi = packet.lqi, batt = packet.btn, ticks = packet.dt.Ticks };
+                lqi = packet.lqi, batt = packet.batt, ticks = packet.dt.Ticks };
             conn.Insert(lastInfo);
             updateMacTicks(packet.mac, packet.dt.Ticks);
             updateDateFlg();
@@ -716,7 +720,15 @@ namespace MiotoServer
 
         public List<LastInfo> getLastInfoList()
         {
-            return conn.Table<LastInfo>().OrderByDescending(q=>q.id).ToList();
+            return conn.Query<LastInfo>("select * from LastInfo group by mac order by ticks DESC").ToList();
+        }
+
+        public void refreshLastInfoList()
+        {
+            var list = conn.Query<LastInfo>("select * from LastInfo group by mac, btn order by ticks DESC").ToList();
+            conn.DropTable<LastInfo>();
+            conn.CreateTable<LastInfo>();
+            conn.InsertAll(list);
         }
 
         public string getConfig(string key)
@@ -813,7 +825,12 @@ namespace MiotoServer
             {
                 query += " and ( mac = " + string.Join(" or mac = ", param.macList) + " ) ";
             }
-            while(DateTime.Now < dtLimit)
+            var ticks = DateTime.Now.Ticks;
+
+            var connCounter = new ConnCounter() { ticks = DateTime.Now.Ticks };
+            memConn.InsertOrReplace(connCounter);
+
+            while (DateTime.Now < dtLimit)
             {
                 try
                 {
@@ -829,7 +846,20 @@ namespace MiotoServer
                     d(e.StackTrace);
                 }
                 await Task.Delay(pollingIntervalMs);
+                if (param.context != null)
+                {
+                    var count = memConn.Table<ConnCounter>().Count();
+                    if ((count > 5) 
+                        && (memConn.Table<ConnCounter>()
+                        .Where(q => q.ticks < connCounter.ticks)
+                        .Count() == 0))
+                    {
+                        //接続数が許容量を超えたため古いコネクションからLongPollingを中断する
+                        break;
+                    }
+                }
             }
+            memConn.Delete(connCounter);
 
             return false;
         }

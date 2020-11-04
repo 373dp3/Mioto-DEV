@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,6 +50,22 @@ namespace MiotoServer.Query
             macMin = Convert.ToInt64("21191231", 16);
             fixRow = FIX_ROW_NOOP;
         }
+
+        public HttpListenerContext context { get; set; } = null;
+
+        public Param(HttpListenerContext context)
+        {
+            this.context = context;
+            url = context.Request.RawUrl.ToLower();
+            volume = VOLUME.NORMAL;
+            option = OPTION.NORMAL;
+            type = TYPE.CT;
+            macList = new List<uint>();
+            dateList = new List<uint>();
+            macMin = Convert.ToInt64("21191231", 16);
+            fixRow = FIX_ROW_NOOP;
+        }
+
         public List<DateTime> GetDateTimes()
         {
             return dateList.Select(q => GetDateTimeByYYYYMMDD(q.ToString("D8"))).ToList();
