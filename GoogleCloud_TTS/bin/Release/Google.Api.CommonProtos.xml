@@ -10,6 +10,14 @@
         <member name="P:Google.Api.AnnotationsReflection.Descriptor">
             <summary>File descriptor for google/api/annotations.proto</summary>
         </member>
+        <member name="T:Google.Api.AnnotationsExtensions">
+            <summary>Holder for extension identifiers generated from the top level of google/api/annotations.proto</summary>
+        </member>
+        <member name="F:Google.Api.AnnotationsExtensions.Http">
+            <summary>
+            See `HttpRule`.
+            </summary>
+        </member>
         <member name="T:Google.Api.AuthReflection">
             <summary>Holder for reflection information generated from google/api/auth.proto</summary>
         </member>
@@ -99,6 +107,45 @@
             Requirements for additional authentication providers.
             </summary>
         </member>
+        <member name="T:Google.Api.JwtLocation">
+            <summary>
+            Specifies a location to extract JWT from an API request.
+            </summary>
+        </member>
+        <member name="F:Google.Api.JwtLocation.HeaderFieldNumber">
+            <summary>Field number for the "header" field.</summary>
+        </member>
+        <member name="P:Google.Api.JwtLocation.Header">
+            <summary>
+            Specifies HTTP header name to extract JWT token.
+            </summary>
+        </member>
+        <member name="F:Google.Api.JwtLocation.QueryFieldNumber">
+            <summary>Field number for the "query" field.</summary>
+        </member>
+        <member name="P:Google.Api.JwtLocation.Query">
+            <summary>
+            Specifies URL query parameter name to extract JWT token.
+            </summary>
+        </member>
+        <member name="F:Google.Api.JwtLocation.ValuePrefixFieldNumber">
+            <summary>Field number for the "value_prefix" field.</summary>
+        </member>
+        <member name="P:Google.Api.JwtLocation.ValuePrefix">
+             <summary>
+             The value prefix. The value format is "value_prefix{token}"
+             Only applies to "in" header type. Must be empty for "in" query type.
+             If not empty, the header value has to match (case sensitive) this prefix.
+             If not matched, JWT will not be extracted. If matched, JWT will be
+             extracted after the prefix is removed.
+            
+             For example, for "Authorization: Bearer {JWT}",
+             value_prefix="Bearer " with a space at the end.
+             </summary>
+        </member>
+        <member name="T:Google.Api.JwtLocation.InOneofCase">
+            <summary>Enum of possible cases for the "in" oneof.</summary>
+        </member>
         <member name="T:Google.Api.AuthProvider">
             <summary>
             Configuration for an authentication provider, including support for
@@ -157,11 +204,15 @@
              The list of JWT
              [audiences](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32#section-4.1.3).
              that are allowed to access. A JWT containing any of these audiences will
-             be accepted. When this setting is absent, only JWTs with audience
-             "https://[Service_name][google.api.Service.name]/[API_name][google.protobuf.Api.name]"
-             will be accepted. For example, if no audiences are in the setting,
-             LibraryService API will only accept JWTs with the following audience
-             "https://library-example.googleapis.com/google.example.library.v1.LibraryService".
+             be accepted. When this setting is absent, JWTs with audiences:
+               - "https://[service.name]/[google.protobuf.Api.name]"
+               - "https://[service.name]/"
+             will be accepted.
+             For example, if no audiences are in the setting, LibraryService API will
+             accept JWTs with the following audiences:
+               -
+               https://library-example.googleapis.com/google.example.library.v1.LibraryService
+               - https://library-example.googleapis.com/
             
              Example:
             
@@ -177,6 +228,30 @@
             Redirect URL if JWT token is required but not present or is expired.
             Implement authorizationUrl of securityDefinitions in OpenAPI spec.
             </summary>
+        </member>
+        <member name="F:Google.Api.AuthProvider.JwtLocationsFieldNumber">
+            <summary>Field number for the "jwt_locations" field.</summary>
+        </member>
+        <member name="P:Google.Api.AuthProvider.JwtLocations">
+             <summary>
+             Defines the locations to extract the JWT.
+            
+             JWT locations can be either from HTTP headers or URL query parameters.
+             The rule is that the first match wins. The checking order is: checking
+             all headers first, then URL query parameters.
+            
+             If not specified,  default to use following 3 locations:
+                1) Authorization: Bearer
+                2) x-goog-iap-jwt-assertion
+                3) access_token query parameter
+            
+             Default locations can be specified as followings:
+                jwt_locations:
+                - header: Authorization
+                  value_prefix: "Bearer "
+                - header: x-goog-iap-jwt-assertion
+                - query: access_token
+             </summary>
         </member>
         <member name="T:Google.Api.OAuthRequirements">
              <summary>
@@ -256,35 +331,6 @@
                             bookstore_web.apps.googleusercontent.com
              </summary>
         </member>
-        <member name="T:Google.Api.AuthorizationConfigReflection">
-            <summary>Holder for reflection information generated from google/api/experimental/authorization_config.proto</summary>
-        </member>
-        <member name="P:Google.Api.AuthorizationConfigReflection.Descriptor">
-            <summary>File descriptor for google/api/experimental/authorization_config.proto</summary>
-        </member>
-        <member name="T:Google.Api.AuthorizationConfig">
-             <summary>
-             Configuration of authorization.
-            
-             This section determines the authorization provider, if unspecified, then no
-             authorization check will be done.
-            
-             Example:
-            
-                 experimental:
-                   authorization:
-                     provider: firebaserules.googleapis.com
-             </summary>
-        </member>
-        <member name="F:Google.Api.AuthorizationConfig.ProviderFieldNumber">
-            <summary>Field number for the "provider" field.</summary>
-        </member>
-        <member name="P:Google.Api.AuthorizationConfig.Provider">
-            <summary>
-            The name of the authorization provider, such as
-            firebaserules.googleapis.com.
-            </summary>
-        </member>
         <member name="T:Google.Api.BackendReflection">
             <summary>Holder for reflection information generated from google/api/backend.proto</summary>
         </member>
@@ -325,17 +371,36 @@
             <summary>Field number for the "address" field.</summary>
         </member>
         <member name="P:Google.Api.BackendRule.Address">
-            <summary>
-            The address of the API backend.
-            </summary>
+             <summary>
+             The address of the API backend.
+            
+             The scheme is used to determine the backend protocol and security.
+             The following schemes are accepted:
+            
+                SCHEME        PROTOCOL    SECURITY
+                http://       HTTP        None
+                https://      HTTP        TLS
+                grpc://       gRPC        None
+                grpcs://      gRPC        TLS
+            
+             It is recommended to explicitly include a scheme. Leaving out the scheme
+             may cause constrasting behaviors across platforms.
+            
+             If the port is unspecified, the default is:
+             - 80 for schemes without TLS
+             - 443 for schemes with TLS
+            
+             For HTTP backends, use [protocol][google.api.BackendRule.protocol]
+             to specify the protocol version.
+             </summary>
         </member>
         <member name="F:Google.Api.BackendRule.DeadlineFieldNumber">
             <summary>Field number for the "deadline" field.</summary>
         </member>
         <member name="P:Google.Api.BackendRule.Deadline">
             <summary>
-            The number of seconds to wait for a response from a request.  The default
-            deadline for gRPC is infinite (no deadline) and HTTP requests is 5 seconds.
+            The number of seconds to wait for a response from a request. The default
+            varies based on the request protocol and deployment environment.
             </summary>
         </member>
         <member name="F:Google.Api.BackendRule.MinDeadlineFieldNumber">
@@ -364,8 +429,49 @@
         </member>
         <member name="P:Google.Api.BackendRule.JwtAudience">
             <summary>
-            The JWT audience is used when generating a JWT id token for the backend.
+            The JWT audience is used when generating a JWT ID token for the backend.
+            This ID token will be added in the HTTP "authorization" header, and sent
+            to the backend.
             </summary>
+        </member>
+        <member name="F:Google.Api.BackendRule.DisableAuthFieldNumber">
+            <summary>Field number for the "disable_auth" field.</summary>
+        </member>
+        <member name="P:Google.Api.BackendRule.DisableAuth">
+            <summary>
+            When disable_auth is true, a JWT ID token won't be generated and the
+            original "Authorization" HTTP header will be preserved. If the header is
+            used to carry the original token and is expected by the backend, this
+            field must be set to true to preserve the header.
+            </summary>
+        </member>
+        <member name="F:Google.Api.BackendRule.ProtocolFieldNumber">
+            <summary>Field number for the "protocol" field.</summary>
+        </member>
+        <member name="P:Google.Api.BackendRule.Protocol">
+             <summary>
+             The protocol used for sending a request to the backend.
+             The supported values are "http/1.1" and "h2".
+            
+             The default value is inferred from the scheme in the
+             [address][google.api.BackendRule.address] field:
+            
+                SCHEME        PROTOCOL
+                http://       http/1.1
+                https://      http/1.1
+                grpc://       h2
+                grpcs://      h2
+            
+             For secure HTTP backends (https://) that support HTTP/2, set this field
+             to "h2" for improved performance.
+            
+             Configuring this field to non-default values is only supported for secure
+             HTTP backends. This field will be ignored for all other backends.
+            
+             See
+             https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+             for more details on the supported values.
+             </summary>
         </member>
         <member name="T:Google.Api.BackendRule.AuthenticationOneofCase">
             <summary>Enum of possible cases for the "authentication" oneof.</summary>
@@ -445,22 +551,32 @@
              Billing related configuration of the service.
             
              The following example shows how to configure monitored resources and metrics
-             for billing:
+             for billing, `consumer_destinations` is the only supported destination and
+             the monitored resources need at least one label key
+             `cloud.googleapis.com/location` to indicate the location of the billing
+             usage, using different monitored resources between monitoring and billing is
+             recommended so they can be evolved independently:
             
                  monitored_resources:
-                 - type: library.googleapis.com/branch
+                 - type: library.googleapis.com/billing_branch
                    labels:
-                   - key: /city
-                     description: The city where the library branch is located in.
-                   - key: /name
-                     description: The name of the branch.
+                   - key: cloud.googleapis.com/location
+                     description: |
+                       Predefined label to support billing location restriction.
+                   - key: city
+                     description: |
+                       Custom label to define the city where the library branch is located
+                       in.
+                   - key: name
+                     description: Custom label to define the name of the library branch.
                  metrics:
                  - name: library.googleapis.com/book/borrowed_count
                    metric_kind: DELTA
                    value_type: INT64
+                   unit: "1"
                  billing:
                    consumer_destinations:
-                   - monitored_resource: library.googleapis.com/branch
+                   - monitored_resource: library.googleapis.com/billing_branch
                      metrics:
                      - library.googleapis.com/book/borrowed_count
              </summary>
@@ -508,6 +624,85 @@
         </member>
         <member name="P:Google.Api.ClientReflection.Descriptor">
             <summary>File descriptor for google/api/client.proto</summary>
+        </member>
+        <member name="T:Google.Api.ClientExtensions">
+            <summary>Holder for extension identifiers generated from the top level of google/api/client.proto</summary>
+        </member>
+        <member name="F:Google.Api.ClientExtensions.MethodSignature">
+             <summary>
+             A definition of a client library method signature.
+            
+             In client libraries, each proto RPC corresponds to one or more methods
+             which the end user is able to call, and calls the underlying RPC.
+             Normally, this method receives a single argument (a struct or instance
+             corresponding to the RPC request object). Defining this field will
+             add one or more overloads providing flattened or simpler method signatures
+             in some languages.
+            
+             The fields on the method signature are provided as a comma-separated
+             string.
+            
+             For example, the proto RPC and annotation:
+            
+               rpc CreateSubscription(CreateSubscriptionRequest)
+                   returns (Subscription) {
+                 option (google.api.method_signature) = "name,topic";
+               }
+            
+             Would add the following Java overload (in addition to the method accepting
+             the request object):
+            
+               public final Subscription createSubscription(String name, String topic)
+            
+             The following backwards-compatibility guidelines apply:
+            
+               * Adding this annotation to an unannotated method is backwards
+                 compatible.
+               * Adding this annotation to a method which already has existing
+                 method signature annotations is backwards compatible if and only if
+                 the new method signature annotation is last in the sequence.
+               * Modifying or removing an existing method signature annotation is
+                 a breaking change.
+               * Re-ordering existing method signature annotations is a breaking
+                 change.
+             </summary>
+        </member>
+        <member name="F:Google.Api.ClientExtensions.DefaultHost">
+             <summary>
+             The hostname for this service.
+             This should be specified with no prefix or protocol.
+            
+             Example:
+            
+               service Foo {
+                 option (google.api.default_host) = "foo.googleapi.com";
+                 ...
+               }
+             </summary>
+        </member>
+        <member name="F:Google.Api.ClientExtensions.OauthScopes">
+             <summary>
+             OAuth scopes needed for the client.
+            
+             Example:
+            
+               service Foo {
+                 option (google.api.oauth_scopes) = \
+                   "https://www.googleapis.com/auth/cloud-platform";
+                 ...
+               }
+            
+             If there is more than one scope, use a comma-separated string:
+            
+             Example:
+            
+               service Foo {
+                 option (google.api.oauth_scopes) = \
+                   "https://www.googleapis.com/auth/cloud-platform,"
+                   "https://www.googleapis.com/auth/monitoring";
+                 ...
+               }
+             </summary>
         </member>
         <member name="T:Google.Api.ConfigChangeReflection">
             <summary>Holder for reflection information generated from google/api/config_change.proto</summary>
@@ -1274,6 +1469,17 @@
             The URL to the root of documentation.
             </summary>
         </member>
+        <member name="F:Google.Api.Documentation.ServiceRootUrlFieldNumber">
+            <summary>Field number for the "service_root_url" field.</summary>
+        </member>
+        <member name="P:Google.Api.Documentation.ServiceRootUrl">
+            <summary>
+            Specifies the service root url if the default one (the service name
+            from the yaml file) is not suitable. This can be seen in any fully
+            specified service urls as well as sections that show a base that other
+            urls are relative to.
+            </summary>
+        </member>
         <member name="F:Google.Api.Documentation.OverviewFieldNumber">
             <summary>Field number for the "overview" field.</summary>
         </member>
@@ -1420,14 +1626,6 @@
              Additional names that this endpoint will be hosted on.
              </summary>
         </member>
-        <member name="F:Google.Api.Endpoint.FeaturesFieldNumber">
-            <summary>Field number for the "features" field.</summary>
-        </member>
-        <member name="P:Google.Api.Endpoint.Features">
-            <summary>
-            The list of features enabled on this endpoint.
-            </summary>
-        </member>
         <member name="F:Google.Api.Endpoint.TargetFieldNumber">
             <summary>Field number for the "target" field.</summary>
         </member>
@@ -1453,31 +1651,30 @@
             allowed to proceed.
             </summary>
         </member>
-        <member name="T:Google.Api.ExperimentalReflection">
-            <summary>Holder for reflection information generated from google/api/experimental/experimental.proto</summary>
-        </member>
-        <member name="P:Google.Api.ExperimentalReflection.Descriptor">
-            <summary>File descriptor for google/api/experimental/experimental.proto</summary>
-        </member>
-        <member name="T:Google.Api.Experimental">
-            <summary>
-            Experimental service configuration. These configuration options can
-            only be used by whitelisted users.
-            </summary>
-        </member>
-        <member name="F:Google.Api.Experimental.AuthorizationFieldNumber">
-            <summary>Field number for the "authorization" field.</summary>
-        </member>
-        <member name="P:Google.Api.Experimental.Authorization">
-            <summary>
-            Authorization configuration.
-            </summary>
-        </member>
         <member name="T:Google.Api.FieldBehaviorReflection">
             <summary>Holder for reflection information generated from google/api/field_behavior.proto</summary>
         </member>
         <member name="P:Google.Api.FieldBehaviorReflection.Descriptor">
             <summary>File descriptor for google/api/field_behavior.proto</summary>
+        </member>
+        <member name="T:Google.Api.FieldBehaviorExtensions">
+            <summary>Holder for extension identifiers generated from the top level of google/api/field_behavior.proto</summary>
+        </member>
+        <member name="F:Google.Api.FieldBehaviorExtensions.FieldBehavior">
+             <summary>
+             A designation of a specific field behavior (required, output only, etc.)
+             in protobuf messages.
+            
+             Examples:
+            
+               string name = 1 [(google.api.field_behavior) = REQUIRED];
+               State state = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+               google.protobuf.Duration ttl = 1
+                 [(google.api.field_behavior) = INPUT_ONLY];
+               google.protobuf.Timestamp expire_time = 1
+                 [(google.api.field_behavior) = OUTPUT_ONLY,
+                  (google.api.field_behavior) = IMMUTABLE];
+             </summary>
         </member>
         <member name="T:Google.Api.FieldBehavior">
              <summary>
@@ -2108,6 +2305,16 @@
             Do not use this default value.
             </summary>
         </member>
+        <member name="F:Google.Api.LaunchStage.Unimplemented">
+            <summary>
+            The feature is not yet implemented. Users can not use it.
+            </summary>
+        </member>
+        <member name="F:Google.Api.LaunchStage.Prelaunch">
+            <summary>
+            Prelaunch features are hidden from users and are only visible internally.
+            </summary>
+        </member>
         <member name="F:Google.Api.LaunchStage.EarlyAccess">
             <summary>
             Early Access features are limited to a closed group of testers. To use
@@ -2308,11 +2515,23 @@
             <summary>File descriptor for google/api/metric.proto</summary>
         </member>
         <member name="T:Google.Api.MetricDescriptor">
-            <summary>
-            Defines a metric type and its schema. Once a metric descriptor is created,
-            deleting or altering it stops data collection and makes the metric type's
-            existing data unusable.
-            </summary>
+             <summary>
+             Defines a metric type and its schema. Once a metric descriptor is created,
+             deleting or altering it stops data collection and makes the metric type's
+             existing data unusable.
+            
+             The following are specific rules for service defined Monitoring metric
+             descriptors:
+            
+             * `type`, `metric_kind`, `value_type`, `description`, `display_name`,
+               `launch_stage` fields are all required. The `unit` field must be specified
+               if the `value_type` is any of DOUBLE, INT64, DISTRIBUTION.
+             * Maximum of default 500 metric descriptors per service is allowed.
+             * Maximum of default 10 labels per metric descriptor is allowed.
+            
+             The default maximum limit can be overridden. Please follow
+             https://cloud.google.com/monitoring/quotas
+             </summary>
         </member>
         <member name="F:Google.Api.MetricDescriptor.NameFieldNumber">
             <summary>Field number for the "name" field.</summary>
@@ -2328,9 +2547,23 @@
         <member name="P:Google.Api.MetricDescriptor.Type">
              <summary>
              The metric type, including its DNS name prefix. The type is not
-             URL-encoded.  All user-defined metric types have the DNS name
-             `custom.googleapis.com` or `external.googleapis.com`.  Metric types should
-             use a natural hierarchical grouping. For example:
+             URL-encoded.
+            
+             All service defined metrics must be prefixed with the service name, in the
+             format of `{service name}/{relative metric name}`, such as
+             `cloudsql.googleapis.com/database/cpu/utilization`. The relative metric
+             name must follow:
+            
+             * Only upper and lower-case letters, digits, '/' and underscores '_' are
+               allowed.
+             * The maximum number of characters allowed for the relative_metric_name is
+               100.
+            
+             All user-defined metric types have the DNS name
+             `custom.googleapis.com`, `external.googleapis.com`, or
+             `logging.googleapis.com/user/`.
+            
+             Metric types should use a natural hierarchical grouping. For example:
             
                  "custom.googleapis.com/invoice/paid/amount"
                  "external.googleapis.com/prometheus/up"
@@ -2341,14 +2574,23 @@
             <summary>Field number for the "labels" field.</summary>
         </member>
         <member name="P:Google.Api.MetricDescriptor.Labels">
-            <summary>
-            The set of labels that can be used to describe a specific
-            instance of this metric type. For example, the
-            `appengine.googleapis.com/http/server/response_latencies` metric
-            type has a label for the HTTP response code, `response_code`, so
-            you can look at latencies for successful responses or just
-            for responses that failed.
-            </summary>
+             <summary>
+             The set of labels that can be used to describe a specific
+             instance of this metric type.
+            
+             The label key name must follow:
+            
+             * Only upper and lower-case letters, digits and underscores (_) are
+               allowed.
+             * Label name must start with a letter or digit.
+             * The maximum length of a label name is 100 characters.
+            
+             For example, the
+             `appengine.googleapis.com/http/server/response_latencies` metric
+             type has a label for the HTTP response code, `response_code`, so
+             you can look at latencies for successful responses or just
+             for responses that failed.
+             </summary>
         </member>
         <member name="F:Google.Api.MetricDescriptor.MetricKindFieldNumber">
             <summary>Field number for the "metric_kind" field.</summary>
@@ -2373,9 +2615,27 @@
         </member>
         <member name="P:Google.Api.MetricDescriptor.Unit">
              <summary>
-             The unit in which the metric value is reported. It is only applicable
-             if the `value_type` is `INT64`, `DOUBLE`, or `DISTRIBUTION`. The
-             supported units are a subset of [The Unified Code for Units of
+             The units in which the metric value is reported. It is only applicable
+             if the `value_type` is `INT64`, `DOUBLE`, or `DISTRIBUTION`. The `unit`
+             defines the representation of the stored metric values.
+            
+             Different systems may scale the values to be more easily displayed (so a
+             value of `0.02KBy` _might_ be displayed as `20By`, and a value of
+             `3523KBy` _might_ be displayed as `3.5MBy`). However, if the `unit` is
+             `KBy`, then the value of the metric is always in thousands of bytes, no
+             matter how it may be displayed..
+            
+             If you want a custom metric to record the exact number of CPU-seconds used
+             by a job, you can create an `INT64 CUMULATIVE` metric whose `unit` is
+             `s{CPU}` (or equivalently `1s{CPU}` or just `s`). If the job uses 12,005
+             CPU-seconds, then the value is written as `12005`.
+            
+             Alternatively, if you want a custom metric to record data in a more
+             granular way, you can create a `DOUBLE CUMULATIVE` metric whose `unit` is
+             `ks{CPU}`, and then write the value `12.005` (which is `12005/1000`),
+             or use `Kis{CPU}` and write `11.723` (which is `12005/1024`).
+            
+             The supported units are a subset of [The Unified Code for Units of
              Measure](http://unitsofmeasure.org/ucum.html) standard:
             
              **Basic units (UNIT)**
@@ -2386,36 +2646,44 @@
              * `min`   minute
              * `h`     hour
              * `d`     day
+             * `1`     dimensionless
             
              **Prefixes (PREFIX)**
             
-             * `k`     kilo    (10**3)
-             * `M`     mega    (10**6)
-             * `G`     giga    (10**9)
-             * `T`     tera    (10**12)
-             * `P`     peta    (10**15)
-             * `E`     exa     (10**18)
-             * `Z`     zetta   (10**21)
-             * `Y`     yotta   (10**24)
-             * `m`     milli   (10**-3)
-             * `u`     micro   (10**-6)
-             * `n`     nano    (10**-9)
-             * `p`     pico    (10**-12)
-             * `f`     femto   (10**-15)
-             * `a`     atto    (10**-18)
-             * `z`     zepto   (10**-21)
-             * `y`     yocto   (10**-24)
-             * `Ki`    kibi    (2**10)
-             * `Mi`    mebi    (2**20)
-             * `Gi`    gibi    (2**30)
-             * `Ti`    tebi    (2**40)
+             * `k`     kilo    (10^3)
+             * `M`     mega    (10^6)
+             * `G`     giga    (10^9)
+             * `T`     tera    (10^12)
+             * `P`     peta    (10^15)
+             * `E`     exa     (10^18)
+             * `Z`     zetta   (10^21)
+             * `Y`     yotta   (10^24)
+            
+             * `m`     milli   (10^-3)
+             * `u`     micro   (10^-6)
+             * `n`     nano    (10^-9)
+             * `p`     pico    (10^-12)
+             * `f`     femto   (10^-15)
+             * `a`     atto    (10^-18)
+             * `z`     zepto   (10^-21)
+             * `y`     yocto   (10^-24)
+            
+             * `Ki`    kibi    (2^10)
+             * `Mi`    mebi    (2^20)
+             * `Gi`    gibi    (2^30)
+             * `Ti`    tebi    (2^40)
+             * `Pi`    pebi    (2^50)
             
              **Grammar**
             
              The grammar also includes these connectors:
             
-             * `/`    division (as an infix operator, e.g. `1/s`).
-             * `.`    multiplication (as an infix operator, e.g. `GBy.d`)
+             * `/`    division or ratio (as an infix operator). For examples,
+                      `kBy/{email}` or `MiBy/10ms` (although you should almost never
+                      have `/s` in a metric `unit`; rates should always be computed at
+                      query time from the underlying cumulative or delta value).
+             * `.`    multiplication or composition (as an infix operator). For
+                      examples, `GBy.d` or `k{watt}.h`.
             
              The grammar for a unit is as follows:
             
@@ -2430,14 +2698,25 @@
             
              Notes:
             
-             * `Annotation` is just a comment if it follows a `UNIT` and is
-                equivalent to `1` if it is used alone. For examples,
-                `{requests}/s == 1/s`, `By{transmitted}/s == By/s`.
+             * `Annotation` is just a comment if it follows a `UNIT`. If the annotation
+                is used alone, then the unit is equivalent to `1`. For examples,
+                `{request}/s == 1/s`, `By{transmitted}/s == By/s`.
              * `NAME` is a sequence of non-blank printable ASCII characters not
-                containing '{' or '}'.
-             * `1` represents dimensionless value 1, such as in `1/s`.
-             * `%` represents dimensionless value 1/100, and annotates values giving
-                a percentage.
+                containing `{` or `}`.
+             * `1` represents a unitary [dimensionless
+                unit](https://en.wikipedia.org/wiki/Dimensionless_quantity) of 1, such
+                as in `1/s`. It is typically used when none of the basic units are
+                appropriate. For example, "new users per day" can be represented as
+                `1/d` or `{new-users}/d` (and a metric value `5` would mean "5 new
+                users). Alternatively, "thousands of page views per day" would be
+                represented as `1000/d` or `k1/d` or `k{page_views}/d` (and a metric
+                value of `5.3` would mean "5300 page views per day").
+             * `%` represents dimensionless value of 1/100, and annotates values giving
+                a percentage (so the metric values are typically in the range of 0..100,
+                and a metric value `3` means "3 percent").
+             * `10^2.%` indicates a metric contains a ratio, typically in the range
+                0..1, that will be multiplied by 100 and displayed as a percentage
+                (so a metric value `0.03` means "3 percent").
              </summary>
         </member>
         <member name="F:Google.Api.MetricDescriptor.DescriptionFieldNumber">
@@ -2473,6 +2752,18 @@
         <member name="P:Google.Api.MetricDescriptor.LaunchStage">
             <summary>
             Optional. The launch stage of the metric definition.
+            </summary>
+        </member>
+        <member name="F:Google.Api.MetricDescriptor.MonitoredResourceTypesFieldNumber">
+            <summary>Field number for the "monitored_resource_types" field.</summary>
+        </member>
+        <member name="P:Google.Api.MetricDescriptor.MonitoredResourceTypes">
+            <summary>
+            Read-only. If present, then a [time
+            series][google.monitoring.v3.TimeSeries], which is identified partially by
+            a metric type and a [MonitoredResourceDescriptor][google.api.MonitoredResourceDescriptor], that is associated
+            with this metric type can only be associated with one of the monitored
+            resource types listed here.
             </summary>
         </member>
         <member name="T:Google.Api.MetricDescriptor.Types">
@@ -2559,8 +2850,7 @@
         </member>
         <member name="P:Google.Api.MetricDescriptor.Types.MetricDescriptorMetadata.LaunchStage">
             <summary>
-            Deprecated. Please use the MetricDescriptor.launch_stage instead.
-            The launch stage of the metric definition.
+            Deprecated. Must use the [MetricDescriptor.launch_stage][google.api.MetricDescriptor.launch_stage] instead.
             </summary>
         </member>
         <member name="F:Google.Api.MetricDescriptor.Types.MetricDescriptorMetadata.SamplePeriodFieldNumber">
@@ -2622,9 +2912,23 @@
              `"gce_instance"` and specifies the use of the labels `"instance_id"` and
              `"zone"` to identify particular VM instances.
             
-             Different APIs can support different monitored resource types. APIs generally
-             provide a `list` method that returns the monitored resource descriptors used
-             by the API.
+             Different services can support different monitored resource types.
+            
+             The following are specific rules to service defined monitored resources for
+             Monitoring and Logging:
+            
+             * The `type`, `display_name`, `description`, `labels` and `launch_stage`
+               fields are all required.
+             * The first label of the monitored resource descriptor must be
+               `resource_container`. There are legacy monitored resource descritptors
+               start with `project_id`.
+             * It must include a `location` label.
+             * Maximum of default 5 service defined monitored resource descriptors
+               is allowed per service.
+             * Maximum of default 10 labels per monitored resource is allowed.
+            
+             The default maximum limit can be overridden. Please follow
+             https://cloud.google.com/monitoring/quotas
              </summary>
         </member>
         <member name="F:Google.Api.MonitoredResourceDescriptor.NameFieldNumber">
@@ -2644,11 +2948,22 @@
             <summary>Field number for the "type" field.</summary>
         </member>
         <member name="P:Google.Api.MonitoredResourceDescriptor.Type">
-            <summary>
-            Required. The monitored resource type. For example, the type
-            `"cloudsql_database"` represents databases in Google Cloud SQL.
-            The maximum length of this value is 256 characters.
-            </summary>
+             <summary>
+             Required. The monitored resource type. For example, the type
+             `cloudsql_database` represents databases in Google Cloud SQL.
+            
+             All service defined monitored resource types must be prefixed with the
+             service name, in the format of `{service name}/{relative resource name}`.
+             The relative resource name must follow:
+            
+             * Only upper and lower-case letters and digits are allowed.
+             * It must start with upper case character and is recommended to use Upper
+               Camel Case style.
+             * The maximum number of characters allowed for the relative_resource_name
+               is 100.
+            
+             Note there are legacy service monitored resources not following this rule.
+             </summary>
         </member>
         <member name="F:Google.Api.MonitoredResourceDescriptor.DisplayNameFieldNumber">
             <summary>Field number for the "display_name" field.</summary>
@@ -2674,11 +2989,19 @@
             <summary>Field number for the "labels" field.</summary>
         </member>
         <member name="P:Google.Api.MonitoredResourceDescriptor.Labels">
-            <summary>
-            Required. A set of labels used to describe instances of this monitored
-            resource type. For example, an individual Google Cloud SQL database is
-            identified by values for the labels `"database_id"` and `"zone"`.
-            </summary>
+             <summary>
+             Required. A set of labels used to describe instances of this monitored
+             resource type.
+             The label key name must follow:
+            
+             * Only upper and lower-case letters, digits and underscores (_) are
+               allowed.
+             * Label name must start with a letter or digit.
+             * The maximum length of a label name is 100 characters.
+            
+             For example, an individual Google Cloud SQL database is
+             identified by values for the labels `database_id` and `location`.
+             </summary>
         </member>
         <member name="F:Google.Api.MonitoredResourceDescriptor.LaunchStageFieldNumber">
             <summary>Field number for the "launch_stage" field.</summary>
@@ -3047,10 +3370,7 @@
         </member>
         <member name="P:Google.Api.QuotaLimit.Duration">
              <summary>
-             Duration of this limit in textual notation. Example: "100s", "24h", "1d".
-             For duration longer than a day, only multiple of days is supported. We
-             support only "100s" and "1d" for now. Additional support will be added in
-             the future. "0" indicates indefinite duration.
+             Duration of this limit in textual notation. Must be "100s" or "1d".
             
              Used by group-based quotas only.
              </summary>
@@ -3108,6 +3428,27 @@
         <member name="P:Google.Api.ResourceReflection.Descriptor">
             <summary>File descriptor for google/api/resource.proto</summary>
         </member>
+        <member name="T:Google.Api.ResourceExtensions">
+            <summary>Holder for extension identifiers generated from the top level of google/api/resource.proto</summary>
+        </member>
+        <member name="F:Google.Api.ResourceExtensions.ResourceReference">
+            <summary>
+            An annotation that describes a resource reference, see
+            [ResourceReference][].
+            </summary>
+        </member>
+        <member name="F:Google.Api.ResourceExtensions.ResourceDefinition">
+            <summary>
+            An annotation that describes a resource definition without a corresponding
+            message; see [ResourceDescriptor][].
+            </summary>
+        </member>
+        <member name="F:Google.Api.ResourceExtensions.Resource">
+            <summary>
+            An annotation that describes a resource definition, see
+            [ResourceDescriptor][].
+            </summary>
+        </member>
         <member name="T:Google.Api.ResourceDescriptor">
              <summary>
              A simple descriptor of a resource type.
@@ -3118,30 +3459,106 @@
             
              Example:
             
-               message Topic {
-                 // Indicates this message defines a resource schema.
-                 // Declares the resource type in the format of {service}/{kind}.
-                 // For Kubernetes resources, the format is {api group}/{kind}.
-                 option (google.api.resource) = {
-                   type: "pubsub.googleapis.com/Topic"
-                   pattern: "projects/{project}/topics/{topic}"
-                 };
-               }
+                 message Topic {
+                   // Indicates this message defines a resource schema.
+                   // Declares the resource type in the format of {service}/{kind}.
+                   // For Kubernetes resources, the format is {api group}/{kind}.
+                   option (google.api.resource) = {
+                     type: "pubsub.googleapis.com/Topic"
+                     name_descriptor: {
+                       pattern: "projects/{project}/topics/{topic}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                       parent_name_extractor: "projects/{project}"
+                     }
+                   };
+                 }
+            
+             The ResourceDescriptor Yaml config will look like:
+            
+                 resources:
+                 - type: "pubsub.googleapis.com/Topic"
+                   name_descriptor:
+                     - pattern: "projects/{project}/topics/{topic}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                       parent_name_extractor: "projects/{project}"
             
              Sometimes, resources have multiple patterns, typically because they can
              live under multiple parents.
             
              Example:
             
-               message LogEntry {
-                 option (google.api.resource) = {
-                   type: "logging.googleapis.com/LogEntry"
-                   pattern: "projects/{project}/logs/{log}"
-                   pattern: "organizations/{organization}/logs/{log}"
-                   pattern: "folders/{folder}/logs/{log}"
-                   pattern: "billingAccounts/{billing_account}/logs/{log}"
-                 };
-               }
+                 message LogEntry {
+                   option (google.api.resource) = {
+                     type: "logging.googleapis.com/LogEntry"
+                     name_descriptor: {
+                       pattern: "projects/{project}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                       parent_name_extractor: "projects/{project}"
+                     }
+                     name_descriptor: {
+                       pattern: "folders/{folder}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Folder"
+                       parent_name_extractor: "folders/{folder}"
+                     }
+                     name_descriptor: {
+                       pattern: "organizations/{organization}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Organization"
+                       parent_name_extractor: "organizations/{organization}"
+                     }
+                     name_descriptor: {
+                       pattern: "billingAccounts/{billing_account}/logs/{log}"
+                       parent_type: "billing.googleapis.com/BillingAccount"
+                       parent_name_extractor: "billingAccounts/{billing_account}"
+                     }
+                   };
+                 }
+            
+             The ResourceDescriptor Yaml config will look like:
+            
+                 resources:
+                 - type: 'logging.googleapis.com/LogEntry'
+                   name_descriptor:
+                     - pattern: "projects/{project}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                       parent_name_extractor: "projects/{project}"
+                     - pattern: "folders/{folder}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Folder"
+                       parent_name_extractor: "folders/{folder}"
+                     - pattern: "organizations/{organization}/logs/{log}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Organization"
+                       parent_name_extractor: "organizations/{organization}"
+                     - pattern: "billingAccounts/{billing_account}/logs/{log}"
+                       parent_type: "billing.googleapis.com/BillingAccount"
+                       parent_name_extractor: "billingAccounts/{billing_account}"
+            
+             For flexible resources, the resource name doesn't contain parent names, but
+             the resource itself has parents for policy evaluation.
+            
+             Example:
+            
+                 message Shelf {
+                   option (google.api.resource) = {
+                     type: "library.googleapis.com/Shelf"
+                     name_descriptor: {
+                       pattern: "shelves/{shelf}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                     }
+                     name_descriptor: {
+                       pattern: "shelves/{shelf}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Folder"
+                     }
+                   };
+                 }
+            
+             The ResourceDescriptor Yaml config will look like:
+            
+                 resources:
+                 - type: 'library.googleapis.com/Shelf'
+                   name_descriptor:
+                     - pattern: "shelves/{shelf}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Project"
+                     - pattern: "shelves/{shelf}"
+                       parent_type: "cloudresourcemanager.googleapis.com/Folder"
              </summary>
         </member>
         <member name="F:Google.Api.ResourceDescriptor.TypeFieldNumber">
@@ -3166,11 +3583,20 @@
         </member>
         <member name="P:Google.Api.ResourceDescriptor.Pattern">
              <summary>
-             Optional. The valid resource name pattern(s) for this resource type.
+             Optional. The relative resource name pattern associated with this resource
+             type. The DNS prefix of the full resource name shouldn't be specified here.
+            
+             The path pattern must follow the syntax, which aligns with HTTP binding
+             syntax:
+            
+                 Template = Segment { "/" Segment } ;
+                 Segment = LITERAL | Variable ;
+                 Variable = "{" LITERAL "}" ;
             
              Examples:
-               - "projects/{project}/topics/{topic}"
-               - "projects/{project}/knowledgeBases/{knowledge_base}"
+            
+                 - "projects/{project}/topics/{topic}"
+                 - "projects/{project}/knowledgeBases/{knowledge_base}"
             
              The components in braces correspond to the IDs for each resource in the
              hierarchy. It is expected that, if multiple patterns are provided,
@@ -3195,18 +3621,54 @@
              Optional. The historical or future-looking state of the resource pattern.
             
              Example:
-               // The InspectTemplate message originally only supported resource
-               // names with organization, and project was added later.
-               message InspectTemplate {
-                 option (google.api.resource) = {
-                   type: "dlp.googleapis.com/InspectTemplate"
-                   pattern:
-                   "organizations/{organization}/inspectTemplates/{inspect_template}"
-                   pattern: "projects/{project}/inspectTemplates/{inspect_template}"
-                   history: ORIGINALLY_SINGLE_PATTERN
-                 };
-               }
+            
+                 // The InspectTemplate message originally only supported resource
+                 // names with organization, and project was added later.
+                 message InspectTemplate {
+                   option (google.api.resource) = {
+                     type: "dlp.googleapis.com/InspectTemplate"
+                     pattern:
+                     "organizations/{organization}/inspectTemplates/{inspect_template}"
+                     pattern: "projects/{project}/inspectTemplates/{inspect_template}"
+                     history: ORIGINALLY_SINGLE_PATTERN
+                   };
+                 }
              </summary>
+        </member>
+        <member name="F:Google.Api.ResourceDescriptor.PluralFieldNumber">
+            <summary>Field number for the "plural" field.</summary>
+        </member>
+        <member name="P:Google.Api.ResourceDescriptor.Plural">
+             <summary>
+             The plural name used in the resource name and permission names, such as
+             'projects' for the resource name of 'projects/{project}' and the permission
+             name of 'cloudresourcemanager.googleapis.com/projects.get'. It is the same
+             concept of the `plural` field in k8s CRD spec
+             https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/
+            
+             Note: The plural form is required even for singleton resources. See
+             https://aip.dev/156
+             </summary>
+        </member>
+        <member name="F:Google.Api.ResourceDescriptor.SingularFieldNumber">
+            <summary>Field number for the "singular" field.</summary>
+        </member>
+        <member name="P:Google.Api.ResourceDescriptor.Singular">
+            <summary>
+            The same concept of the `singular` field in k8s CRD spec
+            https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/
+            Such as "project" for the `resourcemanager.googleapis.com/Project` type.
+            </summary>
+        </member>
+        <member name="F:Google.Api.ResourceDescriptor.StyleFieldNumber">
+            <summary>Field number for the "style" field.</summary>
+        </member>
+        <member name="P:Google.Api.ResourceDescriptor.Style">
+            <summary>
+            Style flag(s) for this resource.
+            These indicate that a resource is expected to conform to a given
+            style. See the specific style flags for additional information.
+            </summary>
         </member>
         <member name="T:Google.Api.ResourceDescriptor.Types">
             <summary>Container for nested types declared in the ResourceDescriptor message type.</summary>
@@ -3235,9 +3697,32 @@
             that from being necessary once there are multiple patterns.)
             </summary>
         </member>
+        <member name="T:Google.Api.ResourceDescriptor.Types.Style">
+            <summary>
+            A flag representing a specific style that a resource claims to conform to.
+            </summary>
+        </member>
+        <member name="F:Google.Api.ResourceDescriptor.Types.Style.Unspecified">
+            <summary>
+            The unspecified value. Do not use.
+            </summary>
+        </member>
+        <member name="F:Google.Api.ResourceDescriptor.Types.Style.DeclarativeFriendly">
+             <summary>
+             This resource is intended to be "declarative-friendly".
+            
+             Declarative-friendly resources must be more strictly consistent, and
+             setting this to true communicates to tools that this resource should
+             adhere to declarative-friendly expectations.
+            
+             Note: This is used by the API linter (linter.aip.dev) to enable
+             additional checks.
+             </summary>
+        </member>
         <member name="T:Google.Api.ResourceReference">
             <summary>
-            Defines a proto annotation that describes a field that refers to a resource.
+            Defines a proto annotation that describes a string field that refers to
+            an API resource.
             </summary>
         </member>
         <member name="F:Google.Api.ResourceReference.TypeFieldNumber">
@@ -3249,11 +3734,22 @@
             
              Example:
             
-               message Subscription {
-                 string topic = 2 [(google.api.resource_reference) = {
-                   type = "pubsub.googleapis.com/Topic"
-                 }];
-               }
+                 message Subscription {
+                   string topic = 2 [(google.api.resource_reference) = {
+                     type: "pubsub.googleapis.com/Topic"
+                   }];
+                 }
+            
+             Occasionally, a field may reference an arbitrary resource. In this case,
+             APIs use the special value * in their resource reference.
+            
+             Example:
+            
+                 message GetIamPolicyRequest {
+                   string resource = 2 [(google.api.resource_reference) = {
+                     type: "*"
+                   }];
+                 }
              </summary>
         </member>
         <member name="F:Google.Api.ResourceReference.ChildTypeFieldNumber">
@@ -3262,16 +3758,16 @@
         <member name="P:Google.Api.ResourceReference.ChildType">
              <summary>
              The resource type of a child collection that the annotated field
-             references. This is useful for `parent` fields where a resource has more
-             than one possible type of parent.
+             references. This is useful for annotating the `parent` field that
+             doesn't have a fixed resource type.
             
              Example:
             
-               message ListLogEntriesRequest {
-                 string parent = 1 [(google.api.resource_reference) = {
-                   child_type: "logging.googleapis.com/LogEntry"
-                 };
-               }
+                 message ListLogEntriesRequest {
+                   string parent = 1 [(google.api.resource_reference) = {
+                     child_type: "logging.googleapis.com/LogEntry"
+                   };
+                 }
              </summary>
         </member>
         <member name="T:Google.Api.ServiceReflection">
@@ -3311,12 +3807,13 @@
             <summary>Field number for the "config_version" field.</summary>
         </member>
         <member name="P:Google.Api.Service.ConfigVersion">
-            <summary>
-            The semantic version of the service configuration. The config version
-            affects the interpretation of the service configuration. For example,
-            certain features are enabled by default for certain config versions.
-            The latest config version is `3`.
-            </summary>
+             <summary>
+             The semantic version of the service configuration. The config version
+             affects the interpretation of the service configuration. For example,
+             certain features are enabled by default for certain config versions.
+            
+             The latest config version is `3`.
+             </summary>
         </member>
         <member name="F:Google.Api.Service.NameFieldNumber">
             <summary>Field number for the "name" field.</summary>
@@ -3335,8 +3832,9 @@
         <member name="P:Google.Api.Service.Id">
             <summary>
             A unique ID for a specific instance of this message, typically assigned
-            by the client for tracking purpose. If empty, the server may choose to
-            generate one instead. Must be no longer than 60 characters.
+            by the client for tracking purpose. Must be no longer than 63 characters
+            and only lower case letters, digits, '.', '_' and '-' are allowed. If
+            empty, the server may choose to generate one instead.
             </summary>
         </member>
         <member name="F:Google.Api.Service.TitleFieldNumber">
@@ -3780,7 +4278,7 @@
         </member>
         <member name="T:Google.Rpc.Code">
              <summary>
-             The canonical error codes for Google APIs.
+             The canonical error codes for gRPC APIs.
             
              Sometimes multiple error codes may apply.  Services should return
              the most specific error code that applies.  For example, prefer
@@ -3960,7 +4458,8 @@
              <summary>
              The service is currently unavailable.  This is most likely a
              transient condition, which can be corrected by retrying with
-             a backoff.
+             a backoff. Note that it is not always safe to retry
+             non-idempotent operations.
             
              See the guidelines above for deciding between `FAILED_PRECONDITION`,
              `ABORTED`, and `UNAVAILABLE`.
@@ -3974,6 +4473,503 @@
             
              HTTP Mapping: 500 Internal Server Error
              </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContextReflection">
+            <summary>Holder for reflection information generated from google/rpc/context/attribute_context.proto</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContextReflection.Descriptor">
+            <summary>File descriptor for google/rpc/context/attribute_context.proto</summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext">
+             <summary>
+             This message defines the standard attribute vocabulary for Google APIs.
+            
+             An attribute is a piece of metadata that describes an activity on a network
+             service. For example, the size of an HTTP request, or the status code of
+             an HTTP response.
+            
+             Each attribute has a type and a name, which is logically defined as
+             a proto message field in `AttributeContext`. The field type becomes the
+             attribute type, and the field path becomes the attribute name. For example,
+             the attribute `source.ip` maps to field `AttributeContext.source.ip`.
+            
+             This message definition is guaranteed not to have any wire breaking change.
+             So you can use it directly for passing attributes across different systems.
+            
+             NOTE: Different system may generate different subset of attributes. Please
+             verify the system specification before relying on an attribute generated
+             a system.
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.OriginFieldNumber">
+            <summary>Field number for the "origin" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Origin">
+            <summary>
+            The origin of a network activity. In a multi hop network activity,
+            the origin represents the sender of the first hop. For the first hop,
+            the `source` and the `origin` must have the same content.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.SourceFieldNumber">
+            <summary>Field number for the "source" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Source">
+            <summary>
+            The source of a network activity, such as starting a TCP connection.
+            In a multi hop network activity, the source represents the sender of the
+            last hop.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.DestinationFieldNumber">
+            <summary>Field number for the "destination" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Destination">
+            <summary>
+            The destination of a network activity, such as accepting a TCP connection.
+            In a multi hop network activity, the destination represents the receiver of
+            the last hop.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.RequestFieldNumber">
+            <summary>Field number for the "request" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Request">
+            <summary>
+            Represents a network request, such as an HTTP request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.ResponseFieldNumber">
+            <summary>Field number for the "response" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Response">
+            <summary>
+            Represents a network response, such as an HTTP response.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.ResourceFieldNumber">
+            <summary>Field number for the "resource" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Resource">
+            <summary>
+            Represents a target resource that is involved with a network activity.
+            If multiple resources are involved with an activity, this must be the
+            primary one.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.ApiFieldNumber">
+            <summary>Field number for the "api" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Api">
+            <summary>
+            Represents an API operation that is involved to a network activity.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.ExtensionsFieldNumber">
+            <summary>Field number for the "extensions" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Extensions">
+            <summary>
+            Supports extensions for advanced use cases, such as logs and metrics.
+            </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types">
+            <summary>Container for nested types declared in the AttributeContext message type.</summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Peer">
+            <summary>
+            This message defines attributes for a node that handles a network request.
+            The node can be either a service or an application that sends, forwards,
+            or receives the request. Service peers should fill in
+            `principal` and `labels` as appropriate.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Peer.IpFieldNumber">
+            <summary>Field number for the "ip" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Peer.Ip">
+            <summary>
+            The IP address of the peer.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Peer.PortFieldNumber">
+            <summary>Field number for the "port" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Peer.Port">
+            <summary>
+            The network port of the peer.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Peer.LabelsFieldNumber">
+            <summary>Field number for the "labels" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Peer.Labels">
+            <summary>
+            The labels associated with the peer.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Peer.PrincipalFieldNumber">
+            <summary>Field number for the "principal" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Peer.Principal">
+            <summary>
+            The identity of this peer. Similar to `Request.auth.principal`, but
+            relative to the peer instead of the request. For example, the
+            idenity associated with a load balancer that forwared the request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Peer.RegionCodeFieldNumber">
+            <summary>Field number for the "region_code" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Peer.RegionCode">
+            <summary>
+            The CLDR country/region code associated with the above IP address.
+            If the IP address is private, the `region_code` should reflect the
+            physical location where this peer is running.
+            </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Api">
+            <summary>
+            This message defines attributes associated with API operations, such as
+            a network API request. The terminology is based on the conventions used
+            by Google APIs, Istio, and OpenAPI.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Api.ServiceFieldNumber">
+            <summary>Field number for the "service" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Api.Service">
+            <summary>
+            The API service name. It is a logical identifier for a networked API,
+            such as "pubsub.googleapis.com". The naming syntax depends on the
+            API management system being used for handling the request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Api.OperationFieldNumber">
+            <summary>Field number for the "operation" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Api.Operation">
+            <summary>
+            The API operation name. For gRPC requests, it is the fully qualified API
+            method name, such as "google.pubsub.v1.Publisher.Publish". For OpenAPI
+            requests, it is the `operationId`, such as "getPet".
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Api.ProtocolFieldNumber">
+            <summary>Field number for the "protocol" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Api.Protocol">
+            <summary>
+            The API protocol used for sending the request, such as "http", "https",
+            "grpc", or "internal".
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Api.VersionFieldNumber">
+            <summary>Field number for the "version" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Api.Version">
+            <summary>
+            The API version associated with the API operation above, such as "v1" or
+            "v1alpha1".
+            </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Auth">
+            <summary>
+            This message defines request authentication attributes. Terminology is
+            based on the JSON Web Token (JWT) standard, but the terms also
+            correlate to concepts in other standards.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Auth.PrincipalFieldNumber">
+            <summary>Field number for the "principal" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Auth.Principal">
+            <summary>
+            The authenticated principal. Reflects the issuer (`iss`) and subject
+            (`sub`) claims within a JWT. The issuer and subject should be `/`
+            delimited, with `/` percent-encoded within the subject fragment. For
+            Google accounts, the principal format is:
+            "https://accounts.google.com/{id}"
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Auth.AudiencesFieldNumber">
+            <summary>Field number for the "audiences" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Auth.Audiences">
+             <summary>
+             The intended audience(s) for this authentication information. Reflects
+             the audience (`aud`) claim within a JWT. The audience
+             value(s) depends on the `issuer`, but typically include one or more of
+             the following pieces of information:
+            
+             *  The services intended to receive the credential. For example,
+                ["https://pubsub.googleapis.com/", "https://storage.googleapis.com/"].
+             *  A set of service-based scopes. For example,
+                ["https://www.googleapis.com/auth/cloud-platform"].
+             *  The client id of an app, such as the Firebase project id for JWTs
+                from Firebase Auth.
+            
+             Consult the documentation for the credential issuer to determine the
+             information provided.
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Auth.PresenterFieldNumber">
+            <summary>Field number for the "presenter" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Auth.Presenter">
+            <summary>
+            The authorized presenter of the credential. Reflects the optional
+            Authorized Presenter (`azp`) claim within a JWT or the
+            OAuth client id. For example, a Google Cloud Platform client id looks
+            as follows: "123456789012.apps.googleusercontent.com".
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Auth.ClaimsFieldNumber">
+            <summary>Field number for the "claims" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Auth.Claims">
+             <summary>
+             Structured claims presented with the credential. JWTs include
+             `{key: value}` pairs for standard and private claims. The following
+             is a subset of the standard required and optional claims that would
+             typically be presented for a Google-based JWT:
+            
+                {'iss': 'accounts.google.com',
+                 'sub': '113289723416554971153',
+                 'aud': ['123456789012', 'pubsub.googleapis.com'],
+                 'azp': '123456789012.apps.googleusercontent.com',
+                 'email': 'jsmith@example.com',
+                 'iat': 1353601026,
+                 'exp': 1353604926}
+            
+             SAML assertions are similarly specified, but with an identity provider
+             dependent structure.
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Auth.AccessLevelsFieldNumber">
+            <summary>Field number for the "access_levels" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Auth.AccessLevels">
+             <summary>
+             A list of access level resource names that allow resources to be
+             accessed by authenticated requester. It is part of Secure GCP processing
+             for the incoming request. An access level string has the format:
+             "//{api_service_name}/accessPolicies/{policy_id}/accessLevels/{short_name}"
+            
+             Example:
+             "//accesscontextmanager.googleapis.com/accessPolicies/MY_POLICY_ID/accessLevels/MY_LEVEL"
+             </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Request">
+            <summary>
+            This message defines attributes for an HTTP request. If the actual
+            request is not an HTTP request, the runtime system should try to map
+            the actual request to an equivalent HTTP request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Id">
+            <summary>
+            The unique ID for a request, which can be propagated to downstream
+            systems. The ID should have low probability of collision
+            within a single day for a specific service.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.MethodFieldNumber">
+            <summary>Field number for the "method" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Method">
+            <summary>
+            The HTTP request method, such as `GET`, `POST`.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.HeadersFieldNumber">
+            <summary>Field number for the "headers" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Headers">
+            <summary>
+            The HTTP request headers. If multiple headers share the same key, they
+            must be merged according to the HTTP spec. All header keys must be
+            lowercased, because HTTP header keys are case-insensitive.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.PathFieldNumber">
+            <summary>Field number for the "path" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Path">
+            <summary>
+            The HTTP URL path.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.HostFieldNumber">
+            <summary>Field number for the "host" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Host">
+            <summary>
+            The HTTP request `Host` header value.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.SchemeFieldNumber">
+            <summary>Field number for the "scheme" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Scheme">
+            <summary>
+            The HTTP URL scheme, such as `http` and `https`.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.QueryFieldNumber">
+            <summary>Field number for the "query" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Query">
+            <summary>
+            The HTTP URL query in the format of `name1=value1&amp;name2=value2`, as it
+            appears in the first line of the HTTP request. No decoding is performed.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.TimeFieldNumber">
+            <summary>Field number for the "time" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Time">
+            <summary>
+            The timestamp when the `destination` service receives the first byte of
+            the request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.SizeFieldNumber">
+            <summary>Field number for the "size" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Size">
+            <summary>
+            The HTTP request size in bytes. If unknown, it must be -1.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.ProtocolFieldNumber">
+            <summary>Field number for the "protocol" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Protocol">
+            <summary>
+            The network protocol used with the request, such as "http/1.1",
+            "spdy/3", "h2", "h2c", "webrtc", "tcp", "udp", "quic". See
+            https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+            for details.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.ReasonFieldNumber">
+            <summary>Field number for the "reason" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Reason">
+            <summary>
+            A special parameter for request reason. It is used by security systems
+            to associate auditing information with a request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Request.AuthFieldNumber">
+            <summary>Field number for the "auth" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Request.Auth">
+            <summary>
+            The request authentication. May be absent for unauthenticated requests.
+            Derived from the HTTP request `Authorization` header or equivalent.
+            </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Response">
+            <summary>
+            This message defines attributes for a typical network response. It
+            generally models semantics of an HTTP response.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Response.CodeFieldNumber">
+            <summary>Field number for the "code" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Response.Code">
+            <summary>
+            The HTTP response status code, such as `200` and `404`.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Response.SizeFieldNumber">
+            <summary>Field number for the "size" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Response.Size">
+            <summary>
+            The HTTP response size in bytes. If unknown, it must be -1.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Response.HeadersFieldNumber">
+            <summary>Field number for the "headers" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Response.Headers">
+            <summary>
+            The HTTP response headers. If multiple headers share the same key, they
+            must be merged according to HTTP spec. All header keys must be
+            lowercased, because HTTP header keys are case-insensitive.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Response.TimeFieldNumber">
+            <summary>Field number for the "time" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Response.Time">
+            <summary>
+            The timestamp when the `destination` service generates the first byte of
+            the response.
+            </summary>
+        </member>
+        <member name="T:Google.Rpc.Context.AttributeContext.Types.Resource">
+            <summary>
+            This message defines core attributes for a resource. A resource is an
+            addressable (named) entity provided by the destination service. For
+            example, a file stored on a network storage service.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Resource.ServiceFieldNumber">
+            <summary>Field number for the "service" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Resource.Service">
+            <summary>
+            The name of the service that this resource belongs to, such as
+            `pubsub.googleapis.com`. The service may be different from the DNS
+            hostname that actually serves the request.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Resource.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Resource.Name">
+             <summary>
+             The stable identifier (name) of a resource on the `service`. A resource
+             can be logically identified as "//{resource.service}/{resource.name}".
+             The differences between a resource name and a URI are:
+            
+             *   Resource name is a logical identifier, independent of network
+                 protocol and API version. For example,
+                 `//pubsub.googleapis.com/projects/123/topics/news-feed`.
+             *   URI often includes protocol and version information, so it can
+                 be used directly by applications. For example,
+                 `https://pubsub.googleapis.com/v1/projects/123/topics/news-feed`.
+            
+             See https://cloud.google.com/apis/design/resource_names for details.
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Resource.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Resource.Type">
+             <summary>
+             The type of the resource. The syntax is platform-specific because
+             different platforms define their resources differently.
+            
+             For Google APIs, the type format must be "{service}/{kind}".
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.Context.AttributeContext.Types.Resource.LabelsFieldNumber">
+            <summary>Field number for the "labels" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.Context.AttributeContext.Types.Resource.Labels">
+            <summary>
+            The labels or tags on the resource, such as AWS resource tags and
+            Kubernetes resource labels.
+            </summary>
         </member>
         <member name="T:Google.Rpc.ErrorDetailsReflection">
             <summary>Holder for reflection information generated from google/rpc/error_details.proto</summary>
@@ -3994,7 +4990,7 @@
              receiving the error response before retrying.  If retrying requests also
              fail, clients should use an exponential backoff scheme to gradually increase
              the delay between retries based on `retry_delay`, until either a maximum
-             number of retires have been reached or a maximum retry delay cap has been
+             number of retries have been reached or a maximum retry delay cap has been
              reached.
              </summary>
         </member>
@@ -4038,7 +5034,7 @@
              a service could respond with the project id and set `service_disabled`
              to true.
             
-             Also see RetryDetail and Help types for other details about handling a
+             Also see RetryInfo and Help types for other details about handling a
              quota failure.
              </summary>
         </member>
@@ -4083,6 +5079,73 @@
              exceeded".
              </summary>
         </member>
+        <member name="T:Google.Rpc.ErrorInfo">
+             <summary>
+             Describes the cause of the error with structured details.
+            
+             Example of an error when contacting the "pubsub.googleapis.com" API when it
+             is not enabled:
+            
+                 { "reason": "API_DISABLED"
+                   "domain": "googleapis.com"
+                   "metadata": {
+                     "resource": "projects/123",
+                     "service": "pubsub.googleapis.com"
+                   }
+                 }
+            
+             This response indicates that the pubsub.googleapis.com API is not enabled.
+            
+             Example of an error that is returned when attempting to create a Spanner
+             instance in a region that is out of stock:
+            
+                 { "reason": "STOCKOUT"
+                   "domain": "spanner.googleapis.com",
+                   "metadata": {
+                     "availableRegions": "us-central1,us-east2"
+                   }
+                 }
+             </summary>
+        </member>
+        <member name="F:Google.Rpc.ErrorInfo.ReasonFieldNumber">
+            <summary>Field number for the "reason" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.ErrorInfo.Reason">
+            <summary>
+            The reason of the error. This is a constant value that identifies the
+            proximate cause of the error. Error reasons are unique within a particular
+            domain of errors. This should be at most 63 characters and match
+            /[A-Z0-9_]+/.
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.ErrorInfo.DomainFieldNumber">
+            <summary>Field number for the "domain" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.ErrorInfo.Domain">
+            <summary>
+            The logical grouping to which the "reason" belongs. The error domain
+            is typically the registered service name of the tool or product that
+            generates the error. Example: "pubsub.googleapis.com". If the error is
+            generated by some common infrastructure, the error domain must be a
+            globally unique value that identifies the infrastructure. For Google API
+            infrastructure, the error domain is "googleapis.com".
+            </summary>
+        </member>
+        <member name="F:Google.Rpc.ErrorInfo.MetadataFieldNumber">
+            <summary>Field number for the "metadata" field.</summary>
+        </member>
+        <member name="P:Google.Rpc.ErrorInfo.Metadata">
+             <summary>
+             Additional structured details about this error.
+            
+             Keys should match /[a-zA-Z0-9-_]/ and be limited to 64 characters in
+             length. When identifying the current value of an exceeded limit, the units
+             should be contained in the key, not the value.  For example, rather than
+             {"instanceLimit": "100/request"}, should be returned as,
+             {"instanceLimitPerRequest": "100"}, if the client exceeds the number of
+             instances that can be created in a single (batch) request.
+             </summary>
+        </member>
         <member name="T:Google.Rpc.PreconditionFailure">
              <summary>
              Describes what preconditions have failed.
@@ -4114,7 +5177,7 @@
         <member name="P:Google.Rpc.PreconditionFailure.Types.Violation.Type">
             <summary>
             The type of PreconditionFailure. We recommend using a service-specific
-            enum type to define the supported precondition violation types. For
+            enum type to define the supported precondition violation subjects. For
             example, "TOS" for "Terms of Service violation".
             </summary>
         </member>
@@ -4124,8 +5187,8 @@
         <member name="P:Google.Rpc.PreconditionFailure.Types.Violation.Subject">
             <summary>
             The subject, relative to the type, that failed.
-            For example, "google.com/cloud" relative to the "TOS" type would
-            indicate which terms of service is being referenced.
+            For example, "google.com/cloud" relative to the "TOS" type would indicate
+            which terms of service is being referenced.
             </summary>
         </member>
         <member name="F:Google.Rpc.PreconditionFailure.Types.Violation.DescriptionFieldNumber">
@@ -4225,8 +5288,7 @@
             <summary>
             The name of the resource being accessed.  For example, a shared calendar
             name: "example.com_4fghdhgsrgh@group.calendar.google.com", if the current
-            error is
-            [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
+            error is [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
             </summary>
         </member>
         <member name="F:Google.Rpc.ResourceInfo.OwnerFieldNumber">
@@ -4324,57 +5386,11 @@
              <summary>
              The `Status` type defines a logical error model that is suitable for
              different programming environments, including REST APIs and RPC APIs. It is
-             used by [gRPC](https://github.com/grpc). The error model is designed to be:
+             used by [gRPC](https://github.com/grpc). Each `Status` message contains
+             three pieces of data: error code, error message, and error details.
             
-             - Simple to use and understand for most users
-             - Flexible enough to meet unexpected needs
-            
-             # Overview
-            
-             The `Status` message contains three pieces of data: error code, error
-             message, and error details. The error code should be an enum value of
-             [google.rpc.Code][google.rpc.Code], but it may accept additional error codes
-             if needed.  The error message should be a developer-facing English message
-             that helps developers *understand* and *resolve* the error. If a localized
-             user-facing error message is needed, put the localized message in the error
-             details or localize it in the client. The optional error details may contain
-             arbitrary information about the error. There is a predefined set of error
-             detail types in the package `google.rpc` that can be used for common error
-             conditions.
-            
-             # Language mapping
-            
-             The `Status` message is the logical representation of the error model, but it
-             is not necessarily the actual wire format. When the `Status` message is
-             exposed in different client libraries and different wire protocols, it can be
-             mapped differently. For example, it will likely be mapped to some exceptions
-             in Java, but more likely mapped to some error codes in C.
-            
-             # Other uses
-            
-             The error model and the `Status` message can be used in a variety of
-             environments, either with or without APIs, to provide a
-             consistent developer experience across different environments.
-            
-             Example uses of this error model include:
-            
-             - Partial errors. If a service needs to return partial errors to the client,
-                 it may embed the `Status` in the normal response to indicate the partial
-                 errors.
-            
-             - Workflow errors. A typical workflow has multiple steps. Each step may
-                 have a `Status` message for error reporting.
-            
-             - Batch operations. If a client uses batch request and batch response, the
-                 `Status` message should be used directly inside batch response, one for
-                 each error sub-response.
-            
-             - Asynchronous operations. If an API call embeds asynchronous operation
-                 results in its response, the status of those operations should be
-                 represented directly using the `Status` message.
-            
-             - Logging. If some API errors are stored in logs, the message `Status` could
-                 be used directly after any stripping needed for security/privacy reasons.
+             You can find out more about this error model and how to work with it in the
+             [API Design Guide](https://cloud.google.com/apis/design/errors).
              </summary>
         </member>
         <member name="F:Google.Rpc.Status.CodeFieldNumber">
@@ -4382,8 +5398,7 @@
         </member>
         <member name="P:Google.Rpc.Status.Code">
             <summary>
-            The status code, which should be an enum value of
-            [google.rpc.Code][google.rpc.Code].
+            The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
             </summary>
         </member>
         <member name="F:Google.Rpc.Status.MessageFieldNumber">
@@ -4393,8 +5408,7 @@
             <summary>
             A developer-facing error message, which should be in English. Any
             user-facing error message should be localized and sent in the
-            [google.rpc.Status.details][google.rpc.Status.details] field, or localized
-            by the client.
+            [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
             </summary>
         </member>
         <member name="F:Google.Rpc.Status.DetailsFieldNumber">
@@ -4686,7 +5700,7 @@
             <summary>
             Converts <see cref="T:Google.Type.Date"/> to <see cref="T:System.DateTime"/>.
             </summary>
-            <returns>The converted <see cref="T:System.DateTime"/> with time at midnight and <see cref="P:System.DateTime.Kind"/> of <see cref="F:System.DateTimeKind.Unspecified"/>.</returns>
+            <returns>The converted <see cref="T:Google.Type.DateTime"/> with time at midnight and <see cref="P:System.DateTime.Kind"/> of <see cref="F:System.DateTimeKind.Unspecified"/>.</returns>
             <exception cref="T:System.InvalidOperationException">Thrown when <see cref="P:Google.Type.Date.Year"/>, <see cref="P:Google.Type.Date.Month"/>, and/or <see cref="P:Google.Type.Date.Day"/> are not within the valid range.</exception>
         </member>
         <member name="M:Google.Type.Date.ToDateTimeOffset">
@@ -4698,7 +5712,7 @@
         </member>
         <member name="M:Google.Type.Date.FromDateTime(System.DateTime)">
             <summary>
-            Creates a <see cref="T:Google.Type.Date"/> instance from the <see cref="P:System.DateTime.Date"/> part of <see cref="T:System.DateTime"/>.
+            Creates a <see cref="T:Google.Type.Date"/> instance from the <see cref="P:System.DateTime.Date"/> part of <see cref="T:Google.Type.DateTime"/>.
             </summary>     
             <param name="dateTime">The <see cref="T:System.DateTime"/> value being converted.</param>
             <returns>The created <see cref="T:Google.Type.Date"/>.</returns>
@@ -4728,6 +5742,137 @@
             </summary>
             <param name="dateTimeOffset">The <see cref="T:System.DateTimeOffset"/> instance being converted.</param>
             <returns>The converted <see cref="T:Google.Type.Date"/>.</returns>
+        </member>
+        <member name="T:Google.Type.DatetimeReflection">
+            <summary>Holder for reflection information generated from google/type/datetime.proto</summary>
+        </member>
+        <member name="P:Google.Type.DatetimeReflection.Descriptor">
+            <summary>File descriptor for google/type/datetime.proto</summary>
+        </member>
+        <member name="T:Google.Type.DateTime">
+             <summary>
+             Represents civil time in one of a few possible ways:
+            
+              * When utc_offset is set and time_zone is unset: a civil time on a calendar
+                day with a particular offset from UTC.
+              * When time_zone is set and utc_offset is unset: a civil time on a calendar
+                day in a particular time zone.
+              * When neither time_zone nor utc_offset is set: a civil time on a calendar
+                day in local time.
+            
+             The date is relative to the Proleptic Gregorian Calendar.
+            
+             If year is 0, the DateTime is considered not to have a specific year. month
+             and day must have valid, non-zero values.
+            
+             This type is more flexible than some applications may want. Make sure to
+             document and validate your application's limitations.
+             </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.YearFieldNumber">
+            <summary>Field number for the "year" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Year">
+            <summary>
+            Optional. Year of date. Must be from 1 to 9999, or 0 if specifying a
+            datetime without a year.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.MonthFieldNumber">
+            <summary>Field number for the "month" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Month">
+            <summary>
+            Required. Month of year. Must be from 1 to 12.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.DayFieldNumber">
+            <summary>Field number for the "day" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Day">
+            <summary>
+            Required. Day of month. Must be from 1 to 31 and valid for the year and
+            month.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.HoursFieldNumber">
+            <summary>Field number for the "hours" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Hours">
+            <summary>
+            Required. Hours of day in 24 hour format. Should be from 0 to 23. An API
+            may choose to allow the value "24:00:00" for scenarios like business
+            closing time.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.MinutesFieldNumber">
+            <summary>Field number for the "minutes" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Minutes">
+            <summary>
+            Required. Minutes of hour of day. Must be from 0 to 59.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.SecondsFieldNumber">
+            <summary>Field number for the "seconds" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Seconds">
+            <summary>
+            Required. Seconds of minutes of the time. Must normally be from 0 to 59. An
+            API may allow the value 60 if it allows leap-seconds.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.NanosFieldNumber">
+            <summary>Field number for the "nanos" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.Nanos">
+            <summary>
+            Required. Fractions of seconds in nanoseconds. Must be from 0 to
+            999,999,999.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.UtcOffsetFieldNumber">
+            <summary>Field number for the "utc_offset" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.UtcOffset">
+            <summary>
+            UTC offset. Must be whole seconds, between -18 hours and +18 hours.
+            For example, a UTC offset of -4:00 would be represented as
+            { seconds: -14400 }.
+            </summary>
+        </member>
+        <member name="F:Google.Type.DateTime.TimeZoneFieldNumber">
+            <summary>Field number for the "time_zone" field.</summary>
+        </member>
+        <member name="P:Google.Type.DateTime.TimeZone">
+            <summary>
+            Time zone.
+            </summary>
+        </member>
+        <member name="T:Google.Type.DateTime.TimeOffsetOneofCase">
+            <summary>Enum of possible cases for the "time_offset" oneof.</summary>
+        </member>
+        <member name="T:Google.Type.TimeZone">
+            <summary>
+            Represents a time zone from the
+            [IANA Time Zone Database](https://www.iana.org/time-zones).
+            </summary>
+        </member>
+        <member name="F:Google.Type.TimeZone.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="P:Google.Type.TimeZone.Id">
+            <summary>
+            IANA Time Zone Database time zone, e.g. "America/New_York".
+            </summary>
+        </member>
+        <member name="F:Google.Type.TimeZone.VersionFieldNumber">
+            <summary>Field number for the "version" field.</summary>
+        </member>
+        <member name="P:Google.Type.TimeZone.Version">
+            <summary>
+            Optional. IANA Time Zone Database version number, e.g. "2019a".
+            </summary>
         </member>
         <member name="T:Google.Type.DayofweekReflection">
             <summary>Holder for reflection information generated from google/type/dayofweek.proto</summary>
@@ -4942,6 +6087,82 @@
             </summary>
             <exception cref="T:System.ArgumentOutOfRangeException">The integral part of the decimal must be a valid <see cref="T:System.Int64"/>, and the fractional part must have a maximum of 9 digits of precision.</exception>
         </member>
+        <member name="T:Google.Type.MonthReflection">
+            <summary>Holder for reflection information generated from google/type/month.proto</summary>
+        </member>
+        <member name="P:Google.Type.MonthReflection.Descriptor">
+            <summary>File descriptor for google/type/month.proto</summary>
+        </member>
+        <member name="T:Google.Type.Month">
+            <summary>
+            Represents a month in the Gregorian calendar.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.Unspecified">
+            <summary>
+            The unspecifed month.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.January">
+            <summary>
+            The month of January.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.February">
+            <summary>
+            The month of February.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.March">
+            <summary>
+            The month of March.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.April">
+            <summary>
+            The month of April.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.May">
+            <summary>
+            The month of May.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.June">
+            <summary>
+            The month of June.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.July">
+            <summary>
+            The month of July.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.August">
+            <summary>
+            The month of August.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.September">
+            <summary>
+            The month of September.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.October">
+            <summary>
+            The month of October.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.November">
+            <summary>
+            The month of November.
+            </summary>
+        </member>
+        <member name="F:Google.Type.Month.December">
+            <summary>
+            The month of December.
+            </summary>
+        </member>
         <member name="T:Google.Type.PostalAddressReflection">
             <summary>Holder for reflection information generated from google/type/postal_address.proto</summary>
         </member>
@@ -4973,10 +6194,12 @@
             <summary>Field number for the "revision" field.</summary>
         </member>
         <member name="P:Google.Type.PostalAddress.Revision">
-            <summary>
-            The schema revision of the `PostalAddress`.
-            All new revisions **must** be backward compatible with old revisions.
-            </summary>
+             <summary>
+             The schema revision of the `PostalAddress`. This must be set to 0, which is
+             the latest revision.
+            
+             All new revisions **must** be backward compatible with old revisions.
+             </summary>
         </member>
         <member name="F:Google.Type.PostalAddress.RegionCodeFieldNumber">
             <summary>Field number for the "region_code" field.</summary>
@@ -5133,35 +6356,35 @@
             
              Quaternions are generally represented in this form:
             
-               w + xi + yj + zk
+                 w + xi + yj + zk
             
              where x, y, z, and w are real numbers, and i, j, and k are three imaginary
              numbers.
             
-             Our naming choice (x, y, z, w) comes from the desire to avoid confusion for
+             Our naming choice `(x, y, z, w)` comes from the desire to avoid confusion for
              those interested in the geometric properties of the quaternion in the 3D
              Cartesian space. Other texts often use alternative names or subscripts, such
-             as (a, b, c, d), (1, i, j, k), or (0, 1, 2, 3), which are perhaps better
-             suited for mathematical interpretations.
+             as `(a, b, c, d)`, `(1, i, j, k)`, or `(0, 1, 2, 3)`, which are perhaps
+             better suited for mathematical interpretations.
             
              To avoid any confusion, as well as to maintain compatibility with a large
              number of software libraries, the quaternions represented using the protocol
-             buffer below *must* follow the Hamilton convention, which defines ij = k
+             buffer below *must* follow the Hamilton convention, which defines `ij = k`
              (i.e. a right-handed algebra), and therefore:
             
-               i^2 = j^2 = k^2 = ijk = −1
-               ij = −ji = k
-               jk = −kj = i
-               ki = −ik = j
+                 i^2 = j^2 = k^2 = ijk = −1
+                 ij = −ji = k
+                 jk = −kj = i
+                 ki = −ik = j
             
              Please DO NOT use this to represent quaternions that follow the JPL
              convention, or any of the other quaternion flavors out there.
             
              Definitions:
             
-               - Quaternion norm (or magnitude): sqrt(x^2 + y^2 + z^2 + w^2).
+               - Quaternion norm (or magnitude): `sqrt(x^2 + y^2 + z^2 + w^2)`.
                - Unit (or normalized) quaternion: a quaternion whose norm is 1.
-               - Pure quaternion: a quaternion whose scalar component (w) is 0.
+               - Pure quaternion: a quaternion whose scalar component (`w`) is 0.
                - Rotation quaternion: a unit quaternion used to represent rotation.
                - Orientation quaternion: a unit quaternion used to represent orientation.
             
@@ -5171,12 +6394,11 @@
              quaternions, to avoid rounding errors:
              https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
             
-             Note that (x, y, z, w) and (-x, -y, -z, -w) represent the same rotation, but
-             normalization would be even more useful, e.g. for comparison purposes, if it
-             would produce a unique representation. It is thus recommended that w be kept
-             positive, which can be achieved by changing all the signs when w is negative.
-            
-             Next available tag: 5
+             Note that `(x, y, z, w)` and `(-x, -y, -z, -w)` represent the same rotation,
+             but normalization would be even more useful, e.g. for comparison purposes, if
+             it would produce a unique representation. It is thus recommended that `w` be
+             kept positive, which can be achieved by changing all the signs when `w` is
+             negative.
              </summary>
         </member>
         <member name="F:Google.Type.Quaternion.XFieldNumber">

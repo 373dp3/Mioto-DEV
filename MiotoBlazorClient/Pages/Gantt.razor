@@ -1,0 +1,263 @@
+﻿@page "/gantt/"
+@page "/gantt/{panelIndexStr}/"
+@page "/gantt/{panelIndexStr}/{panelNameOrder}/"
+@page "/gantt/{panelIndexStr}/{panelNameOrder}/{dateOrder}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+@implements IDisposable
+@inherits MiotoSockPage
+@inject IJSRuntime js
+
+@using ChartJs.Blazor.Charts
+@using ChartJs.Blazor.ChartJS
+@using ChartJs.Blazor.ChartJS.Common.Properties
+@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.ChartJS.Common.Axes
+@using ChartJs.Blazor.ChartJS.Common.Axes.Ticks
+@using ChartJs.Blazor.ChartJS.Common.Handlers
+@using ChartJs.Blazor.ChartJS.Common.Time
+@using ChartJs.Blazor.ChartJS.LineChart
+@using ChartJs.Blazor.Util
+
+
+@if (listPanelModel.Count > 0)
+{
+    <h3>@panelNameOrder</h3>
+    <p>@(currentDate.ToString("yyyy/MM/dd"))</p>
+    <div>
+        @foreach (var itemBase in listPanelModel)
+        {
+            var item = (PanelModelGantt)itemBase;
+            var factor = item.listProductionFactor.OrderByDescending(q => q.stTicks).FirstOrDefault();
+            var att = "";
+            var factorName = "生産情報未入力";
+            if (factor != null)
+            {
+                if (factor.memoJson.itemNumber.Length > 0)
+                {
+                    factorName = factor.memoJson.itemNumber + " " + factor.memoJson.operatorName;
+                }
+                else
+                {
+                    factorName = ProductionFactor.GetStatusStr(factor.status, true);
+                }
+            }
+            else
+            {
+                factor = new ProductionFactor();
+            }
+            att = "bg" + ButtonAttr.GetBgCode(factor.status) + " " + ButtonAttr.GetTextCode(factor.status);
+            var battAtt = "text-muted";
+            var lqiAtt = "text-muted";
+
+            if (item.lastCycleTime.batt > config.alert.battGreen)
+            {
+                battAtt = "text-primary";
+            }
+            else if (item.lastCycleTime.batt > config.alert.battRed)
+            {
+                battAtt = "text-warning";
+            }
+            else if (item.lastCycleTime.batt > 0)
+            {
+                battAtt = "text-danger";
+            }
+            if (item.lastCycleTime.lqi > config.alert.lqiGreen)
+            {
+                lqiAtt = "text-primary";
+            }
+            else if (item.lastCycleTime.lqi > config.alert.lqiRed)
+            {
+                lqiAtt = "text-warning";
+            }
+            else if (item.lastCycleTime.lqi > 0)
+            {
+                lqiAtt = "text-danger";
+            }
+
+            <button class="btn col-xl-12 col-lg-12 col-md-12 col-sm-12 p-0 m-1 " style="font-size: @fontSize;">
+                <div class="card border@(ButtonAttr.GetBgCode(factor.status)) m-0 p-0"
+                     @onclick="@(()=> { NavMgr.NavigateTo($"sensor/{item.mac}/{dateOrder}"); })">
+
+                    @if ((item.status == PanelModel.RunOrStop.STOP)
+                 && ((factor.status == ProductionFactor.Status.START_PRODUCTION)
+                 || (factor.status == ProductionFactor.Status.START_PRODUCTION_NOCT)))
+                    {
+                        att = " bg-light text-dark";
+                    }
+                    @if (item.status == PanelModel.RunOrStop.NOOP)
+                    {
+                        att = " bg-light text-dark";
+                    }
+                    <div class="card-header @att text-center text-truncate pt-2 pb-2">
+                        <div class="@att text-center text-truncate">
+                            @(item.title) @factorName
+                        </div>
+                    </div>
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="m-0 p-0 text-center">
+                                    <small><span class="oi oi-battery-full @battAtt"></span></small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small><span class="oi oi-signal @lqiAtt"></span></small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small>出来高</small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small>可動率</small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small>稼働</small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small>停止</small>
+                                </th>
+                                <th class="m-0 p-0 text-center">
+                                    <small>最終CT</small>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td class="m-0 p-1 text-center">
+                                @(item.lastCycleTime.batt.ToString("F1"))v
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(item.lastCycleTime.lqi)
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(item.itemCounts)
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(((item.bekidou * 100.0).ToString("F1")))%
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(item.getRunSecStr(factor))
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(item.getStopSecStr(factor))
+                            </td>
+                            <td class="m-0 p-1 text-center">
+                                @(item.lastCt00.ToString("F1"))
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </button>
+            @if (dicMac2Chart.ContainsKey(item.mac))
+            {
+    <div class="mb-3">
+        <ChartJsLineChart Config="@dicMac2Chart[item.mac].configShort" Width="400" Height="40" />
+        <ChartJsLineChart Config="@dicMac2Chart[item.mac].config" Width="400" Height="40" />
+    </div>
+            }
+
+            }
+    </div>
+}
+<ModalDatePicker @ref="datepicker" CurrentDate="currentDate"></ModalDatePicker>
+<div class="mt-3">
+    <a class="btn btn-secondary" href="">一覧へ戻る</a>
+    <button class="btn btn-primary"
+            @onclick="@(()=> {
+                            datepicker.Open(e=> {
+                                if(datepicker.result == ModalDatePicker.Result.OK)
+                                {
+                                    dateOrder = e.ToString("yyyyMMdd");
+                                    NavMgr.NavigateTo($"gantt/{panelIndexStr}/{panelNameOrder}/{dateOrder}");
+                                }
+                            });
+                        })">
+        日付選択
+    </button>
+    <button class="btn btn-secondary" @onclick="@(()=> { NavMgr.NavigateTo($"gantt/{panelIndexStr}/{panelNameOrder}/"); })">
+        本日のデータ
+    </button>
+
+</div>
+<div class="mt-3">
+    <p>@debugMsg</p>
+</div>
+
+
+@code{
+    [Parameter]
+    public string panelNameOrder { get; set; } = null;
+    [Parameter]
+    public string panelIndexStr { get; set; } = null;
+    [Parameter]
+    public string dateOrder { get; set; } = null;
+
+    public ModalDatePicker datepicker { get; set; } = null;
+    public DateTime currentDate { get; set; } = DateTime.Now;
+    List<PanelModel> listPanelModel = new List<PanelModel>();
+
+    public string fontSize { get; set; } = "16px";
+
+
+    /// <summary>
+    /// 全ての処理の起点
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    public Dictionary<long, ChartJsGanttHelper> dicMac2Chart = new Dictionary<long, ChartJsGanttHelper>();
+    public void onUpdate()
+    {
+        Console.WriteLine("on update called.");
+        foreach (var panelBase in listPanelModel)
+        {
+            var panel = (PanelModelGantt)panelBase;
+            if (dicMac2Chart.ContainsKey(panel.mac) == false)
+            {
+                var cy = panel.listCycle.OrderBy(q => q.dt).FirstOrDefault();
+                if (cy == null) continue;
+                dicMac2Chart.Add(panel.mac, new ChartJsGanttHelper(config, cy.dt));
+            }
+            var ch = dicMac2Chart[panel.mac];
+            var list = panel.listCycle.OrderBy(q => q.dt).Select(q => (q.dt, (double)q.btn)).ToList();
+            Console.WriteLine($"list size: {list.Count}");
+            ch.createLine(list);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        dicMac2Chart.Clear();
+        stateHasChangedTickMs = 100000;
+        await init(NavMgr, Http, listPanelModel, panelIndexStr, Mode.GANTT_LIST, PanelModelGantt.Create, dateOrder);
+
+        this.onUpdateCallback = onUpdate;
+
+        if (dateOrder != null)
+        {
+            try
+            {
+                currentDate = DateTime.ParseExact(dateOrder, "yyyyMMdd", CultureInfo.InvariantCulture);
+            }
+            catch (Exception e) { }
+            if (dateOrder.CompareTo(DateTime.Now.ToString("yyyyMMdd")) == 0)
+            {
+                dateOrder = "";
+            }
+        }
+        else
+        {
+            currentDate = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd"));
+            dateOrder = "";
+        }
+
+        //フォントサイズ設定参照
+        var index = Convert.ToInt64(panelIndexStr);
+        var ccp = config.listGanttPanel2Index.FirstOrDefault(q => q.index == index);
+        fontSize = ccp.panel.fontSize;
+
+        await base.OnParametersSetAsync();
+    }
+
+}

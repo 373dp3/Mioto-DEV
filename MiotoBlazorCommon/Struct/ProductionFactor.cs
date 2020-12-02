@@ -184,11 +184,13 @@ namespace MiotoBlazorCommon.Struct
         [Ignore]
         public bool isBtnZero { get; set; } = true;
 
+        [Ignore]
+        public string debug { get; set; } = "";
+
         public double getRunSec(bool isRunning)
         {
             if(isRunning==false) { return runSec; }
-            if(isFixed) { return runSec; }
-
+            if (isFixed) { return runSec; }
             //以下、稼働中のrunSec扱い
 
             //より新しい生産要因が存在するか？
@@ -210,6 +212,8 @@ namespace MiotoBlazorCommon.Struct
             {
                 return runSec;
             }
+
+
             //信号を1度も受信していない状態で、4時間以上経過した場合、
             //0にする。
             if ((lastCycleTicks == 0) && ((new TimeSpan(DateTime.Now.Ticks - stTicks).TotalHours > 4)))

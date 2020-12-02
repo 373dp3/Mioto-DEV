@@ -16,6 +16,7 @@ namespace MiotoBlazorCommon.Struct
         public int dateLineHHMM { get; set; } = 500;
 
         public List<CtPanel2Index> listCtPanel2Index { get; set; } = new List<CtPanel2Index>();
+        public List<GanttPanel2Index> listGanttPanel2Index { get; set; } = new List<GanttPanel2Index>();
         public List<ConfigTwe> listTwe { get; set; } = new List<ConfigTwe>();
 
         public void insertOrUpdateTwe(List<LastInfo> list)
@@ -37,6 +38,12 @@ namespace MiotoBlazorCommon.Struct
     public class CtPanel2Index
     {
         public ConfigCtPanel panel { get; set; } = new ConfigCtPanel();
+        public long index { get; set; } = 0;
+    }
+
+    public class GanttPanel2Index
+    {
+        public ConfigGanttPanel panel { get; set; } = new ConfigGanttPanel();
         public long index { get; set; } = 0;
     }
 

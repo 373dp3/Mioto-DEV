@@ -106,7 +106,7 @@ namespace MiotoServer
                     var packet = new TwePacket(msg, ref ofs);
                     var csv = packet.ToCSV();
                     wrapper.insertCsv(packet, csv);
-                    Program.d("twe:" + csv);
+                    //Program.d("twe:" + csv);
                     break;
             }
         }

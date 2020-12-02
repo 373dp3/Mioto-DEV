@@ -25,12 +25,16 @@ namespace MiotoBlazorClient
         private HttpClient Http;
         //表示順のMACアドレス一覧(loadPanelDefinitionの後に利用可能)
         private List<long> targetMacList = new List<long>();
-        public enum Mode { SINGLE, PANEL_LIST}
+        public enum Mode { SINGLE, PANEL_LIST, GANTT_LIST}
 
         Func<PanelModel> factory = null;
 
         private bool isHttpDone = false;
         private Action<string> debugCallBackFunc = null;
+        public Action onUpdateCallback { get; set; } = null;
+
+        //表示の定期更新用待ち時間(ミリ秒)
+        public int stateHasChangedTickMs { get; set; } = 1000;
 
         /// <summary>
         /// razorページからロードすべき情報の指示を受ける
@@ -67,6 +71,9 @@ namespace MiotoBlazorClient
                     break;
                 case Mode.PANEL_LIST:
                     funcLoadPanel = loadPanelListDefinition;
+                    break;
+                case Mode.GANTT_LIST:
+                    funcLoadPanel = loadGanttListDefinition;
                     break;
             }
             //Configの取得
@@ -107,6 +114,9 @@ namespace MiotoBlazorClient
                                 {
                                     _ = pollingWorker();
                                 }
+
+                                //Callback
+                                if (onUpdateCallback!=null) onUpdateCallback();
                                 StateHasChanged();
                             },
                             dateOrder);
@@ -306,12 +316,13 @@ namespace MiotoBlazorClient
                     var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
 
                     if (token.IsCancellationRequested) { continue; }
-
                     if(await httpGetAsync(url) == false)
                     {
                         await Task.Delay(1000);
                         continue;
                     }
+                    //Callback
+                    if (onUpdateCallback != null) onUpdateCallback();
                     this.StateHasChanged();
                 }
                 catch (Exception e)
@@ -387,6 +398,47 @@ namespace MiotoBlazorClient
             preparePanel();
         }
 
+        /// <summary>
+        /// ガントチャート一覧リスト用情報の展開
+        /// </summary>
+        /// <param name="idStr"></param>
+        protected void loadGanttListDefinition(string idStr)
+        {
+            long panelIndex = 0;
+
+            //引数の確認
+            try
+            {
+                if ((idStr != null) && (idStr.Length > 0))
+                {
+                    panelIndex = Convert.ToInt64(idStr);
+                }
+                idStr = "";
+            }
+            catch (Exception e) { }
+
+            if ((panelIndex == 0) || (config == null))
+            {
+                debugMsg = "情報が見つかりません。管理者によって削除された可能性があります。";
+                this.StateHasChanged();
+                return;
+            }
+
+
+            //該当のパネル情報取得
+            var panel2idx = config.listGanttPanel2Index
+                        .Where(q => q.index == panelIndex)
+                        .FirstOrDefault();
+            if (panel2idx == null)
+            {
+                debugMsg = "パネル情報が見つかりません。管理者によって削除された可能性があります。";
+                this.StateHasChanged();
+                return;
+            }
+
+            targetMacList = panel2idx.panel.listMac2Index.OrderBy(q => q.index).Select(q => q.mac).ToList();
+            preparePanel();
+        }
 
         /// <summary>
         /// 子機単一パネル用情報ロード
@@ -455,7 +507,7 @@ namespace MiotoBlazorClient
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        await Task.Delay(1000);
+                        await Task.Delay(stateHasChangedTickMs);
                         this.StateHasChanged();
                     }
                 });

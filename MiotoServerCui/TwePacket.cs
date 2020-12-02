@@ -82,7 +82,13 @@ namespace MiotoServer
             return "" + dt.ToString("M/d HH:mm:ss")
                 + "," + Convert.ToString(mac, 16) + "," + btn + "," + btnCange + "," + (batt / 1000d).ToString("0.0")
                 + "," + lqi + "," + string.Join(",", adList);
+        }
 
+        public string ToCtCSV()
+        {
+            return "" + dt.ToString("yyyy/MM/dd HH:mm:ss")
+                        + "," + Convert.ToString(mac, 16) + "," + 1 + "," + btn + "," + (batt / 1000d).ToString("0.0")
+                        + "," + lqi;
         }
 
     }

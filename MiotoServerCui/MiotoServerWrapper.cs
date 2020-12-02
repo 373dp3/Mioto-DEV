@@ -44,6 +44,8 @@ namespace MiotoServer
             try
             {
                 DbWrapper dbWrapper = DbWrapper.getInstance(config.dbdir);
+                dbWrapper.refreshLastInfoList();
+                dbWrapper.vacuum();
             }
             catch (Exception e)
             {

@@ -25,9 +25,17 @@ else
                 @if (config.listCtPanel2Index != null)
                 {
                     <tr>
-                        <td>パネル</td>
+                        <td>あんどんパネル</td>
                         <td>@(config.listCtPanel2Index.Count)</td>
                         <td><a class="btn btn-primary" href="config/panellist/">編集</a></td>
+                    </tr>
+                }
+                @if (config.listGanttPanel2Index != null)
+                {
+                    <tr>
+                        <td>ガントチャートパネル</td>
+                        <td>@(config.listGanttPanel2Index.Count)</td>
+                        <td><a class="btn btn-primary" href="config/ganttlist/">編集</a></td>
                     </tr>
                 }
                 @if (config.listTwe != null)

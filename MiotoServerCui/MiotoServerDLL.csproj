@@ -107,6 +107,7 @@
     <Compile Include="DB\Mac2Ampere.cs" />
     <Compile Include="DB\MacTicks.cs" />
     <Compile Include="DB\MemMac2Ah.cs" />
+    <Compile Include="DB\MemTwePacket.cs" />
     <Compile Include="DB\SoundTbl.cs" />
     <Compile Include="HttpdWorker.cs" />
     <Compile Include="HttpStaticFileWorker.cs" />

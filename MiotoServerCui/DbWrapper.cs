@@ -81,6 +81,7 @@ namespace MiotoServer
             conn.CreateTable<ProductionFactor>();
             memConn.CreateTable<MacTicks>();
             memConn.CreateTable<ConnCounter>();
+            memConn.CreateTable<MemTwePacket>();
 
             //DBフィールドを確認し必要であれば移行する。
             //migrateDbIfNeed();
@@ -212,13 +213,51 @@ namespace MiotoServer
 
         public void insertCsv(TwePacket packet, string csv)
         {
-            var data = csv;
-            string query = "INSERT INTO csvcash (mac, ticks, csv, flg) "
-                + " values ("
-                + packet.mac + ", "
-                + packet.dt.Ticks + ", '" + data + "', "+ FLG_TWE+")";//純正TWE-Liteパケットは2固定
-            conn.Execute(query);
-            updateDateFlg();
+            //既存の最終情報取得
+            var curList = memConn.Table<MemTwePacket>().Where(q => q.mac == packet.mac).ToList();
+
+            //DI0が同一、異なる最新値を取得
+            var diSame = curList.Where(q => (q.btn & 0x01) == (packet.btn & 0x01))
+                                .OrderByDescending(q=>q.ticks).FirstOrDefault();
+            var diDiff = curList.Where(q => (q.btn & 0x01) != (packet.btn & 0x01))
+                                .OrderByDescending(q => q.ticks).FirstOrDefault();
+            //DI0に依存しない最新値を取得
+            var lastValue = curList.OrderByDescending(q => q.ticks).FirstOrDefault();
+
+            //ともに有効値であり、フラグが異なる値のTicksが大きければ、CTを算出して登録する。
+            if ((diSame!=null) && (diDiff != null) && (diDiff.ticks > diSame.ticks))
+            {
+                //DB登録処理
+                var data = "";
+                var ctList = new double[4] { 0, 0, 0, 0 };
+                //00,01,10,11の値設定
+                if ((packet.btn & 0x01) == 1)
+                {
+                    //01,11の値が有効
+                    ctList[1] = (packet.dt - new DateTime(diDiff.ticks)).TotalSeconds;
+                    ctList[3] = (packet.dt - new DateTime(diSame.ticks)).TotalSeconds;
+                }
+                else
+                {
+                    //00,10の値が有効
+                    ctList[0] = (packet.dt - new DateTime(diSame.ticks)).TotalSeconds;
+                    ctList[2] = (packet.dt - new DateTime(diDiff.ticks)).TotalSeconds;
+                }
+                var ctStr = String.Join(",", ctList.Select(q => q == 0 ? "" : q.ToString("F1")).ToList());
+                data = packet.ToCtCSV() + "," + ctStr;
+                d("TWE-CT)"+data);
+                string query = "INSERT INTO csvcash (mac, ticks, csv) "
+                        + " values ("
+                        + packet.mac + ", "
+                        + packet.dt.Ticks + ", '" + data + "')";
+                conn.Execute(query);
+                insertOrUpdatePacket(packet);//LastInfoの更新
+                updateDateFlg();
+            }
+
+            //メモリDBへの反映
+            memConn.InsertOrReplace(MemTwePacket.Convert(packet, lastValue));
+
         }
 
         public void insertCsv(TwePalSensePacket pal)
@@ -674,6 +713,22 @@ namespace MiotoServer
             updateDateFlg();
         }
 
+        public void insertOrUpdatePacket(TwePacket packet)
+        {
+            var lastInfo = new LastInfo
+            {
+                mac = packet.mac,
+                seq = 0,
+                btn = packet.btn,
+                lqi = packet.lqi,
+                batt = packet.batt,
+                ticks = packet.dt.Ticks
+            };
+            conn.Insert(lastInfo);
+            updateMacTicks(packet.mac, packet.dt.Ticks);
+        }
+
+
         public void insertOrUpdatePacket(Twe2525APacket packet)
         {
             conn.BeginTransaction();
@@ -729,6 +784,11 @@ namespace MiotoServer
             conn.DropTable<LastInfo>();
             conn.CreateTable<LastInfo>();
             conn.InsertAll(list);
+        }
+
+        public void vacuum()
+        {
+            conn.Execute("vacuum;");
         }
 
         public string getConfig(string key)

@@ -73,7 +73,9 @@
     <Compile Include="Class1.cs" />
     <Compile Include="DB\LastInfo.cs" />
     <Compile Include="PanelModel.cs" />
+    <Compile Include="PanelModelGantt.cs" />
     <Compile Include="PanelModelSmallStop.cs" />
+    <Compile Include="Struct\ConfigGanttPanel.cs" />
     <Compile Include="Struct\ProductionConditions.cs" />
     <Compile Include="Struct\ProductionFactor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
