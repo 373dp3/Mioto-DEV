@@ -16,5 +16,7 @@ namespace MiotoBlazorCommon.Struct
         public List<Mac2Index> listMac2Index { get; set; } = new List<Mac2Index>();
 
         public string fontSize { get; set; } = "16px";
+
+        public string graphHeight { get; set; } = "10";
     }
 }

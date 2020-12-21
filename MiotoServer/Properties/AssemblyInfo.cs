@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.2")]
-[assembly: AssemblyFileVersion("1.4.2")]
-[assembly: AssemblyInformationalVersion("1.4.2")]
+[assembly: AssemblyVersion("1.4.3")]
+[assembly: AssemblyFileVersion("1.4.3")]
+[assembly: AssemblyInformationalVersion("1.4.3")]
 /*
+ * 2020.11.25
+ * ・ガントチャート高さ変更機能の追加
+ * 
  * 2020.11.25
  * ・TWE-Lite標準FW＋1s設定による稼働情報に対応
  * ・負論理対応

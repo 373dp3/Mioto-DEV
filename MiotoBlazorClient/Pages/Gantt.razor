@@ -149,8 +149,8 @@
             @if (dicMac2Chart.ContainsKey(item.mac))
             {
     <div class="mb-3">
-        <ChartJsLineChart Config="@dicMac2Chart[item.mac].configShort" Width="400" Height="40" />
-        <ChartJsLineChart Config="@dicMac2Chart[item.mac].config" Width="400" Height="40" />
+        <ChartJsLineChart Config="@dicMac2Chart[item.mac].configShort" Width="100" Height="@graphHeight" />
+        <ChartJsLineChart Config="@dicMac2Chart[item.mac].config" Width="100" Height="@graphHeight" />
     </div>
             }
 
@@ -195,6 +195,7 @@
     List<PanelModel> listPanelModel = new List<PanelModel>();
 
     public string fontSize { get; set; } = "16px";
+    public int graphHeight { get; set; } = 10;
 
 
     /// <summary>
@@ -256,6 +257,7 @@
         var index = Convert.ToInt64(panelIndexStr);
         var ccp = config.listGanttPanel2Index.FirstOrDefault(q => q.index == index);
         fontSize = ccp.panel.fontSize;
+        graphHeight = Convert.ToInt32(ccp.panel.graphHeight);
 
         await base.OnParametersSetAsync();
     }
