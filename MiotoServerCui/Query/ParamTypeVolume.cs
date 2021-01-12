@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiotoBlazorCommon.Struct;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -101,6 +102,11 @@ namespace MiotoServer.Query
             if (param.url.Contains("/mac2machine"))
             {
                 param.type = Param.TYPE.MAC2MACHINE;
+            }
+
+            if (param.url.Contains("/"+Config.URL_NO_LONGPOLLING_KEY))
+            {
+                param.isLongPolling = false;
             }
         }
     }

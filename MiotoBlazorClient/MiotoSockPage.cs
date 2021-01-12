@@ -36,6 +36,22 @@ namespace MiotoBlazorClient
         //表示の定期更新用待ち時間(ミリ秒)
         public int stateHasChangedTickMs { get; set; } = 1000;
 
+        public int pollingSec { get; private set; } = Config.POLLING_LONGPOLLING;
+
+        public void setPollingSec(string secString)
+        {
+            try
+            {
+                pollingSec = Convert.ToInt32(secString);
+            }
+            catch (Exception e) {
+                pollingSec = Config.POLLING_LONGPOLLING;
+            }
+            Console.WriteLine($"Polling sec {pollingSec}");
+        }
+
+        public Mode mode { get; private set; } = Mode.PANEL_LIST;
+
         /// <summary>
         /// razorページからロードすべき情報の指示を受ける
         /// </summary>
@@ -64,6 +80,7 @@ namespace MiotoBlazorClient
             Http = client;
             this.factory = factory;
             Action<string> funcLoadPanel = null;
+            this.mode = mode;
             switch (mode)
             {
                 case Mode.SINGLE:
@@ -305,15 +322,29 @@ namespace MiotoBlazorClient
 
         protected async Task HttpLongPolling()
         {
+            /*
+             * [TODO]
+             * ・引数もしくはメンバ変数で、LongPollingもしくは定期更新の切り替えができるようにする。
+             * ・httpの引数に、LongPollingかどうかの引数を追加する。
+             * ・MiotoServer側に定期更新用の処理を追加する。
+             * */
+
             var macListStr = String.Join('/', targetMacList.Select(q => q.ToString("x8")).ToArray());
 
             var token = tokenSource.Token;
+
+
+
 
             while (token.IsCancellationRequested == false)
             {
                 try
                 {
                     var url = $"{NavMgr.BaseUri.Replace("/html/", "/")}bz{maxTicks}/{macListStr}/_{DateTime.Now.Ticks}";
+                    if (pollingSec != Config.POLLING_LONGPOLLING)
+                    {
+                        url += "/" + Config.URL_NO_LONGPOLLING_KEY;
+                    }
 
                     if (token.IsCancellationRequested) { continue; }
                     if(await httpGetAsync(url) == false)
@@ -329,8 +360,14 @@ namespace MiotoBlazorClient
                 {
                     Console.WriteLine(e.ToString());
                 }
-
-                await Task.Delay(200);
+                if (pollingSec == Config.POLLING_LONGPOLLING)
+                {
+                    await Task.Delay(200);
+                }
+                else
+                {
+                    await Task.Delay(pollingSec * 1000);
+                }
             }
         }
 
@@ -393,7 +430,7 @@ namespace MiotoBlazorClient
                 this.StateHasChanged();
                 return;
             }
-
+            setPollingSec(panel2idx.panel.pollingSec);
             targetMacList = panel2idx.panel.listMac2Index.OrderBy(q => q.index).Select(q => q.mac).ToList();
             preparePanel();
         }
@@ -435,7 +472,7 @@ namespace MiotoBlazorClient
                 this.StateHasChanged();
                 return;
             }
-
+            setPollingSec(panel2idx.panel.pollingSec);
             targetMacList = panel2idx.panel.listMac2Index.OrderBy(q => q.index).Select(q => q.mac).ToList();
             preparePanel();
         }
@@ -461,6 +498,11 @@ namespace MiotoBlazorClient
                 debugMsg = "情報が見つかりません。管理者によって削除された可能性があります。";
                 this.StateHasChanged();
                 return;
+            }
+            var tweConfig = config.listTwe.Where(q => q.mac == id).FirstOrDefault();
+            if (tweConfig != null)
+            {
+                setPollingSec(tweConfig.pollingSec);
             }
             targetMacList = new List<long>();
             targetMacList.Add(id);

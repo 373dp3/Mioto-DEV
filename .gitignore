@@ -8,6 +8,8 @@
 *.lnk
 *.csv
 *.xlsx
+*.exe
+*.pdb
 /MiotoServer/bin/
 /MiotoServer/Installer/
 /MiotoServerCui/bin/

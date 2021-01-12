@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.3")]
-[assembly: AssemblyFileVersion("1.4.3")]
-[assembly: AssemblyInformationalVersion("1.4.3")]
+[assembly: AssemblyVersion("1.4.4")]
+[assembly: AssemblyFileVersion("1.4.4")]
+[assembly: AssemblyInformationalVersion("1.4.4")]
 /*
+ * 2021.1.12
+ * ・LongPolling以外への対応
+ * 
  * 2020.11.25
  * ・ガントチャート高さ変更機能の追加
  * 

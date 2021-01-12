@@ -39,6 +39,8 @@ namespace MiotoServer.Query
         //最小Ticks要求（この値は含まず、それよりも大きな値）
         public long orderMinTicks { get; set; } = 0;
 
+        public bool isLongPolling { get; set; } = true;
+
         public Param(string url)
         {
             this.url = url;

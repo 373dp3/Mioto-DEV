@@ -66,6 +66,35 @@ else
                     }
                 }
     </InputSelect>
+
+    <h3>情報の更新間隔</h3>
+    <p>
+        「即時更新」を指定し、MiotoServerをWindows 10で稼働させた場合、情報を取得できるのは最大で10台のPC（10接続）までに制限されます。
+        10台を超えるパソコンからアクセスする場合は、即時更新以外の値を設定してください。
+    </p>
+    <InputSelect @bind-Value="editPanel.pollingSec" class="mb-3">
+        @foreach (var item in new int[] { Config.POLLING_LONGPOLLING, 2, 5, 10, 20 })
+                {
+                    var opt = "";
+                    if (item == Config.POLLING_LONGPOLLING)
+                    {
+                        opt = "即時更新";
+                    }
+                    else
+                    {
+                        opt = $"{item}秒毎に更新";
+                    }
+                    if (editPanel.pollingSec.CompareTo(item.ToString()) == 0)
+                    {
+                <option value="@item" selected>@opt</option>
+                    }
+                    else
+                    {
+                <option value="@item">@opt </option>
+                    }
+                }
+    </InputSelect>
+
     <h3>グラフの高さ</h3>
     <InputSelect @bind-Value="editPanel.graphHeight" class="mb-3">
         @foreach (var item in new string[] { "3", "5", "10", "14", "18" })
@@ -111,9 +140,9 @@ else
     <table class="table m-0 p-0 w-auto">
         <tbody>
             @foreach (var item in config
-       .listTwe
-       .Where(q => editPanel.listMac2Index.Where(v => v.mac == q.mac).Count() == 0)
-       )
+      .listTwe
+      .Where(q => editPanel.listMac2Index.Where(v => v.mac == q.mac).Count() == 0)
+      )
             {
                 <tr>
                     <td>@(getTweInfoStringByMac(item.mac))</td>

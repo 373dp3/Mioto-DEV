@@ -66,5 +66,10 @@ namespace MiotoServer
             string str = readString(msg, ref ofs, 4);
             return Convert.ToInt32(str, 16);
         }
+
+        protected void d(string msg)
+        {
+            Program.d(msg);
+        }
     }
 }

@@ -15,6 +15,9 @@ namespace MiotoBlazorCommon.Struct
         public List<Mac2Index> listMac2Index { get; set; } = new List<Mac2Index>();
 
         public string fontSize { get; set; } = "16px";
+
+        public string pollingSec { get; set; } = Config.POLLING_LONGPOLLING.ToString();
+
     }
     public class Mac2Index
     {

@@ -33,6 +33,9 @@ namespace MiotoBlazorCommon.Struct
         public ConfigAlert alert = new ConfigAlert();
 
         public const string RELOAD_FORCE_KEY = "reload_force_key";
+
+        public const int POLLING_LONGPOLLING = -1;
+        public const string URL_NO_LONGPOLLING_KEY = "no_longpolling";
     }
 
     public class CtPanel2Index

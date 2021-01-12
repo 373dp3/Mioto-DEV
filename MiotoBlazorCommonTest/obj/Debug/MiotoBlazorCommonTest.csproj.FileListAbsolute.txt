@@ -1,9 +1,3 @@
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.resources.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.resources.dll
-C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\MiotoBlazorCommonTest.dll.config
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\MiotoBlazorCommonTest.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\MiotoBlazorCommonTest.pdb

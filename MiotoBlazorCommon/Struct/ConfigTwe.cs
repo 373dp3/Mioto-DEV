@@ -24,6 +24,8 @@ namespace MiotoBlazorCommon.Struct
 
         public bool isNegativeLogic { get; set; } = false;//停止状態で光点灯またはスイッチCloseの場合
 
+        public string pollingSec { get; set; } = Config.POLLING_LONGPOLLING.ToString();
+
         public List<ProductionConditions> listConditions { get; set; } = new List<ProductionConditions>();
 
         public string getConditionsTsv()

@@ -890,6 +890,8 @@ namespace MiotoServer
             var connCounter = new ConnCounter() { ticks = DateTime.Now.Ticks };
             memConn.InsertOrReplace(connCounter);
 
+            var ans = false;
+
             while (DateTime.Now < dtLimit)
             {
                 try
@@ -897,7 +899,8 @@ namespace MiotoServer
                     var ansList = memConn.Query<MacTicks>(query);
                     if ((ansList != null) && (ansList.Count() > 0))
                     {
-                        return true;
+                        ans = true;
+                        break;
                     }
                 }
                 catch (Exception e)
@@ -905,6 +908,10 @@ namespace MiotoServer
                     d("Exception:" + e.ToString());
                     d(e.StackTrace);
                 }
+
+                //LongPollingでない場合は処理を継続させない。
+                if(param.isLongPolling==false) { break; }
+
                 await Task.Delay(pollingIntervalMs);
                 if (param.context != null)
                 {
@@ -921,7 +928,7 @@ namespace MiotoServer
             }
             memConn.Delete(connCounter);
 
-            return false;
+            return ans;
         }
 
     }

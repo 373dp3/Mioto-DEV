@@ -54,6 +54,7 @@ else
         <tr>
             <td>
                 タブ区切り標準CTマスタ<br /><small>品番(タブ)標準CT(タブ)取数<br />取数を省略した場合は1</small><br />
+                <p><small>取数 : 1回の信号OFFあたりに作られる製品の個数・出来高</small></p>
                 <small>Excelの表をコピー＆ペーストすると便利です。</small>
             </td>
             <td>
@@ -61,10 +62,45 @@ else
                 <button type="button" class="btn btn-info btn-sm" @onclick="onUpdateTextArea">テキストボックスの反映</button>
             </td>
         </tr>
-        <tr><td>ON/OFFを反転させる<br /><small>停止時に点灯する光センサや、<br />停止時にONするリードスイッチ<br />の場合にチェック</small></td>
-        <td><InputCheckbox class="w-100" id="check" @bind-Value="editTwe.isNegativeLogic" /></td></tr>
+        <tr>
+            <td>ON/OFFを反転させる<br /><small>停止時に点灯する光センサや、<br />停止時にONするリードスイッチ<br />の場合にチェック</small></td>
+            <td><InputCheckbox class="w-100" id="check" @bind-Value="editTwe.isNegativeLogic" /></td>
+        </tr>
+
+        <tr>
+            <td>情報の更新間隔<br /><small>
+    「即時更新」を指定し、MiotoServerをWindows10<br />で稼働させた場合、<br/>最大で10台のPC（10接続）<br />までに制限されます。<br />
+    10台を超えるパソコンからアクセスする場合は、<br />即時更新以外の値を設定してください。
+</small></td>
+            <td>
+                <InputSelect @bind-Value="editTwe.pollingSec" class="mb-3">
+                    @foreach (var item in new int[] { Config.POLLING_LONGPOLLING, 2, 5, 10, 20 })
+                                {
+                                    var opt = "";
+                                    if (item == Config.POLLING_LONGPOLLING)
+                                    {
+                                        opt = "即時更新";
+                                    }
+                                    else
+                                    {
+                                        opt = $"{item}秒毎に更新";
+                                    }
+                                    if (editTwe.pollingSec.CompareTo(item.ToString()) == 0)
+                                    {
+                            <option value="@item" selected>@opt</option>
+                                    }
+                                    else
+                                    {
+                            <option value="@item">@opt </option>
+                                    }
+                                }
+                </InputSelect>
+            </td>
+        </tr>
+
+
     </table>
-    <p><small>取数 : 1回の信号OFFあたりに作られる製品の個数・出来高</small></p>
+    
     <h5>標準CTマスタ</h5>
     <table class="table m-0 p-0 w-auto">
         <thead>
