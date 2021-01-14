@@ -52,7 +52,7 @@ else
     <InputText id="name" @bind-Value="editPanel.name" class="mb-3" />
     <h3>フォントサイズ</h3>
     <InputSelect @bind-Value="editPanel.fontSize" class="mb-3">
-        @foreach (var item in new string[] { "12px", "16px", "24px", "36px" })
+        @foreach (var item in new string[] { "12px", "16px", "24px", "36px", "48px", "72px", "96px" })
                 {
                     var adj = "";
                     if (item.CompareTo("16px") == 0) { adj = "(標準)"; }

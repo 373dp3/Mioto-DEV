@@ -130,3 +130,9 @@ C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Debug\MiotoBlazorC
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Debug\MiotoBlazorCommonTest.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Debug\MiotoBlazorCommonTest.dll
 C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\obj\Debug\MiotoBlazorCommonTest.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.resources.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.resources.dll
+C:\Users\min\Source\Repos\Mioto-DEV\MiotoBlazorCommonTest\bin\Debug\ja\Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll

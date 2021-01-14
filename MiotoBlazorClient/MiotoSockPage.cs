@@ -151,6 +151,7 @@ namespace MiotoBlazorClient
         {
             if (cycle == null) return;
             var panel = _listPanelModel.Where(q => q.mac == cycle.mac).FirstOrDefault();
+            if (panel == null) return;//HttpPollingのタイムアウト時にnullになる場合がある
             panel.updateCycleTime(cycle);
         }
 

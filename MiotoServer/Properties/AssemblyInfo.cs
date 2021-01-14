@@ -36,8 +36,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.4.4")]
 [assembly: AssemblyInformationalVersion("1.4.4")]
 /*
- * 2021.1.12
+ * 2021.1.14
  * ・LongPolling以外への対応
+ * ・文字サイズの変更幅拡大
+ * ・Ganttページにて電圧、電波の非表示
+ * ・LongPollingタイムアウトときのNullPointerException対応
  * 
  * 2020.11.25
  * ・ガントチャート高さ変更機能の追加

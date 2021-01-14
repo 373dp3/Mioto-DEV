@@ -157,3 +157,9 @@ C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\System.Threading.T
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.csproj.CopyComplete
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.exe
 C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\obj\Debug\GoogleCloud_TTS.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\grpc_csharp_ext.x86.dll
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\grpc_csharp_ext.x64.dll
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\libgrpc_csharp_ext.x86.so
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\libgrpc_csharp_ext.x64.so
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\libgrpc_csharp_ext.x86.dylib
+C:\Users\min\Source\Repos\Mioto-DEV\GoogleCloud_TTS\bin\Debug\libgrpc_csharp_ext.x64.dylib
