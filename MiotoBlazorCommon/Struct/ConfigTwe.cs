@@ -92,6 +92,7 @@ namespace MiotoBlazorCommon.Struct
             to.name = (string)from.name.Clone();
             to.setConditionsTsv(from.getConditionsTsv());
             to.Ticks = from.Ticks;
+            to.pollingSec = from.pollingSec;
         }
             
     }
