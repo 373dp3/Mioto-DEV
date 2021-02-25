@@ -662,7 +662,7 @@ namespace MiotoServer
 
             refreshLastInfoList();//mac, btnにてGroup化したリストのみを残す。
 
-            conn.Execute("vacuum;");
+            this.vacuum();
 
             beginRowId = rowid;
 
@@ -779,16 +779,26 @@ namespace MiotoServer
         }
 
         public void refreshLastInfoList()
-        {
-            var list = conn.Query<LastInfo>("select * from LastInfo group by mac, btn order by ticks DESC").ToList();
+        {            
+            conn.BeginTransaction();
+            //var list = conn.Query<LastInfo>("select * from LastInfo group by mac, btn order by ticks DESC").ToList();
+            var list = conn.Query<LastInfo>(
+                "select null as id, lastinfo.mac as mac, lastinfo.seq as seq, lastinfo.btn as btn, lastinfo.lqi as lqi, lastinfo.batt as batt, lastinfo.ticks as ticks " +
+                " from lastinfo join(select mac, max(ticks) as ticks from LastInfo group by mac, btn) as master " +
+                " on master.ticks = lastinfo.ticks and master.mac = lastinfo.mac");
             conn.DropTable<LastInfo>();
             conn.CreateTable<LastInfo>();
             conn.InsertAll(list);
+            conn.Commit();
         }
 
         public void vacuum()
         {
-            conn.Execute("vacuum;");
+            //VACUUMは日曜日のみ実行
+            if(DateTime.Now.DayOfWeek == DayOfWeek.Sunday)
+            {
+                conn.Execute("vacuum;");
+            }
         }
 
         public string getConfig(string key)
