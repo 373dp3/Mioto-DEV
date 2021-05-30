@@ -111,8 +111,49 @@ else
                     }
                 }
     </InputSelect>
+
+    <h3>数値の表示項目(チェックONで表示)</h3>
+    <table class=" table m-0 p-0 w-auto">
+        <tbody>
+            <tr>
+                <td>
+                    出来高
+                </td>
+                <td>
+                    <InputCheckbox class="w-auto" id="isItemCounts" @bind-Value="editPanel.isItemCounts" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    可動率
+                </td>
+                <td>
+                    <InputCheckbox class="w-auto" id="isBekidou" @bind-Value="editPanel.isBekidou" />
+                </td>
+            </tr>
+            <tr>
+                <td>稼働時間(秒)</td>
+                <td>
+                    <InputCheckbox class="w-auto" id="isRunSec" @bind-Value="editPanel.isRunSec" />
+                </td>
+            </tr>
+            <tr>
+                <td>停止時間(秒)</td>
+                <td>
+                    <InputCheckbox class="w-auto" id="isStopSec" @bind-Value="editPanel.isStopSec" />
+                </td>
+            </tr>
+            <tr>
+                <td>直前のCT(秒)</td>
+                <td>
+                    <InputCheckbox class="w-auto" id="isCt" @bind-Value="editPanel.isCt" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
     <h3>表示対象子機</h3>
-    <table class="table m-0 p-0 w-auto">
+    <table class=" table m-0 p-0 w-auto">
         <tbody>
             @foreach (var item in editPanel.listMac2Index)
             {
@@ -140,9 +181,9 @@ else
     <table class="table m-0 p-0 w-auto">
         <tbody>
             @foreach (var item in config
-      .listTwe
-      .Where(q => editPanel.listMac2Index.Where(v => v.mac == q.mac).Count() == 0)
-      )
+.listTwe
+.Where(q => editPanel.listMac2Index.Where(v => v.mac == q.mac).Count() == 0)
+)
             {
                 <tr>
                     <td>@(getTweInfoStringByMac(item.mac))</td>

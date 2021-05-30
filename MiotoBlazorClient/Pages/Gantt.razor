@@ -98,52 +98,89 @@
                         <thead>
                             <tr>
                                 <!--
-                                <th class="m-0 p-0 text-center">
-                                    <small><span class="oi oi-battery-full @battAtt"></span></small>
-                                </th>
-                                <th class="m-0 p-0 text-center">
-                                    <small><span class="oi oi-signal @lqiAtt"></span></small>
-                                </th>-->
-                                <th class="m-0 p-0 text-center">
-                                    <small>出来高</small>
-                                </th>
-                                <th class="m-0 p-0 text-center">
-                                    <small>可動率</small>
-                                </th>
-                                <th class="m-0 p-0 text-center">
-                                    <small>稼働</small>
-                                </th>
-                                <th class="m-0 p-0 text-center">
-                                    <small>停止</small>
-                                </th>
-                                <th class="m-0 p-0 text-center">
-                                    <small>最終CT</small>
-                                </th>
+    <th class="m-0 p-0 text-center">
+        <small><span class="oi oi-battery-full @battAtt"></span></small>
+    </th>
+    <th class="m-0 p-0 text-center">
+        <small><span class="oi oi-signal @lqiAtt"></span></small>
+    </th>-->
+                                @if (configGantt.isItemCounts)
+                                {
+                                    <th class="m-0 p-0 text-center">
+                                        <small>出来高</small>
+                                    </th>
+                                }
+                                @if (configGantt.isBekidou)
+                                {
+                                    <th class="m-0 p-0 text-center">
+                                        <small>可動率</small>
+                                    </th>
+
+                                }
+                                @if (configGantt.isRunSec)
+                                {
+                                    <th class="m-0 p-0 text-center">
+                                        <small>稼働</small>
+                                    </th>
+
+                                }
+                                @if (configGantt.isStopSec)
+                                {
+                                    <th class="m-0 p-0 text-center">
+                                        <small>停止</small>
+                                    </th>
+
+                                }
+                                @if (configGantt.isCt)
+                                {
+                                    <th class="m-0 p-0 text-center">
+                                        <small>最終CT</small>
+                                    </th>
+                                }
                             </tr>
                         </thead>
                         <tr>
                             <!--
-                            <td class="m-0 p-1 text-center">
-                                @(item.lastCycleTime.batt.ToString("F1"))v
-                            </td>
-                            <td class="m-0 p-1 text-center">
-                                @(item.lastCycleTime.lqi)
-                            </td>-->
-                            <td class="m-0 p-1 text-center">
-                                @(item.itemCounts)
-                            </td>
-                            <td class="m-0 p-1 text-center">
-                                @(((item.bekidou * 100.0).ToString("F1")))%
-                            </td>
-                            <td class="m-0 p-1 text-center">
-                                @(item.getRunSecStr(factor))
-                            </td>
-                            <td class="m-0 p-1 text-center">
-                                @(item.getStopSecStr(factor))
-                            </td>
-                            <td class="m-0 p-1 text-center">
-                                @(item.lastCt00.ToString("F1"))
-                            </td>
+    <td class="m-0 p-1 text-center">
+        @(item.lastCycleTime.batt.ToString("F1"))v
+    </td>
+    <td class="m-0 p-1 text-center">
+        @(item.lastCycleTime.lqi)
+    </td>-->
+                            @if (configGantt.isItemCounts)
+                            {
+                                <td class="m-0 p-1 text-center">
+                                    @(item.itemCounts)
+                                </td>
+
+                            }
+                            @if (configGantt.isBekidou)
+                            {
+                                <td class="m-0 p-1 text-center">
+                                    @(((item.bekidou * 100.0).ToString("F1")))%
+                                </td>
+
+                            }
+                            @if (configGantt.isRunSec)
+                            {
+                                <td class="m-0 p-1 text-center">
+                                    @(item.getRunSecStr(factor))
+                                </td>
+
+                            }
+                            @if (configGantt.isStopSec)
+                            {
+                                <td class="m-0 p-1 text-center">
+                                    @(item.getStopSecStr(factor))
+                                </td>
+
+                            }
+                            @if (configGantt.isCt)
+                            {
+                                <td class="m-0 p-1 text-center">
+                                    @(item.lastCt00.ToString("F1"))
+                                </td>
+                            }
                         </tr>
                     </table>
                 </div>
@@ -198,6 +235,7 @@
 
     public string fontSize { get; set; } = "16px";
     public int graphHeight { get; set; } = 10;
+    public ConfigGanttPanel configGantt = new ConfigGanttPanel();
 
 
     /// <summary>
@@ -259,6 +297,7 @@
         var index = Convert.ToInt64(panelIndexStr);
         var ccp = config.listGanttPanel2Index.FirstOrDefault(q => q.index == index);
         fontSize = ccp.panel.fontSize;
+        configGantt = ccp.panel;
         graphHeight = Convert.ToInt32(ccp.panel.graphHeight);
 
         await base.OnParametersSetAsync();

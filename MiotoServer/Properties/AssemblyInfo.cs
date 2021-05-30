@@ -32,10 +32,13 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.6")]
-[assembly: AssemblyFileVersion("1.4.6")]
-[assembly: AssemblyInformationalVersion("1.4.6")]
+[assembly: AssemblyVersion("1.4.7")]
+[assembly: AssemblyFileVersion("1.4.7")]
+[assembly: AssemblyInformationalVersion("1.4.7")]
 /*
+ * 2021.5.30
+ * ・ガントチャート表示項目のチェックボックス追加
+ * 
  * 2021.2.25
  * ・SEQ計算に関連するバグの修正
  * ・VACUUMを日曜日のみ実行するように変更

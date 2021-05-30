@@ -21,5 +21,15 @@ namespace MiotoBlazorCommon.Struct
 
         public string pollingSec { get; set; } = Config.POLLING_LONGPOLLING.ToString();
 
+        public bool isItemCounts { get; set; } = true;//出来高
+
+        public bool isBekidou { get; set; } = true;//可動率
+
+        public bool isRunSec { get; set; } = true;//稼働時間秒
+
+        public bool isStopSec { get; set; } = true;//停止時間秒
+
+        public bool isCt { get; set; } = true; //最終CT
+
     }
 }
