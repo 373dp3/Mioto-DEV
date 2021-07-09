@@ -1,0 +1,15 @@
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\KmeansTool.exe.config
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\KmeansTool.exe
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\KmeansTool.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csprojAssemblyReference.cache
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.Form1.resources
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.Properties.Resources.resources
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csproj.GenerateResource.cache
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.exe
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.pdb
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\MathNet.Numerics.dll
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\System.ValueTuple.dll
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\MathNet.Numerics.xml
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\bin\Release\System.ValueTuple.xml
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csproj.CopyComplete
+C:\Users\min\Source\Repos\Mioto-DEV\KmeansTool\obj\Release\KmeansTool.csproj.CoreCompileInputs.cache

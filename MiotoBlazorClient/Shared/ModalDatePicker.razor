@@ -1,0 +1,157 @@
+﻿@code{
+    public string attr = " m-0 py-2 px-0 ";
+}
+
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">日付を選択してください</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="() => Close()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-0 m-0">
+                <table class="table w-100 m-0 p-0 text-center">
+                    <thead>
+                        <tr>
+                            <th class="@attr">
+                                <button type="button" class="btn btn-sm btn-secondary text-white"
+                                        @onclick="()=> { currentMonth = currentMonth.AddMonths(-1); }">
+                                    <small class="oi oi-chevron-left"></small>
+                                </button>
+                            </th>
+                            <th class="@attr" colspan="5">@(currentMonth.ToString("yyyy年M月"))</th>
+                            <th class="@attr" >
+                                <button type="button" class="btn btn-sm btn-secondary text-white"
+                                        @onclick="()=> { currentMonth = currentMonth.AddMonths(1); }">
+                                    <small class="oi oi-chevron-right"></small>
+                                </button>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th  class="@attr" >日</th>
+                            <th  class="@attr" >月</th>
+                            <th  class="@attr" >火</th>
+                            <th  class="@attr" >水</th>
+                            <th  class="@attr" >木</th>
+                            <th  class="@attr" >金</th>
+                            <th  class="@attr" >土</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (true)
+                        {
+                            var dt = currentMonth.AddDays(-1 * ((int)currentMonth.DayOfWeek));
+                            var dtEnd = currentMonth.AddMonths(1);
+                            while (dt < dtEnd)
+                            {
+                        <tr>
+                            @for (var i = 0; i < 7; i++)
+                            {
+                                if (dt.Month == currentMonth.Month)
+                                {
+                                    var clazz = "";
+                                    if (((int)dt.DayOfWeek) == 0)
+                                    {
+                                        clazz = "text-danger";
+                                    }
+                                    else if (((int)dt.DayOfWeek) == 6)
+                                    {
+                                        clazz = "text-primary";
+                                    }
+                                    if (CurrentDate == dt)
+                                    {
+                                        clazz = "btn-primary text-white";
+                                    }
+                                    clazz += " btn btn-sm";
+                                    var tmpDt = dt;//onclickイベントで日付個別処理するために複製
+                                    <td class="@attr" >
+                                    <button type="button" class="@clazz " id="@(dt.ToString("MMdd"))"
+                                        @onclick="()=> { onClickDate(tmpDt); }">
+                                        @(dt.Day)
+                                    </button>
+                                    </td>
+
+                                }
+                                else
+                                {
+                                    <td class="bg-light @attr"> </td>
+                                }
+                                dt = dt.AddDays(1);
+                            }
+                        </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="()=> Close(true)">OK</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+    [Parameter]
+    public DateTime CurrentDate { get; set; } = DateTime.Now;
+
+
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+    public enum Result { CLOSE, OK }
+    public Result result { get; set; } = Result.CLOSE;
+
+    public Action<DateTime> OnClose { get; set; } = null;
+    public DateTime currentMonth = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/01"));
+    public DateTime pickedDate { get; set; }
+
+    public void onClickDate(DateTime dt)
+    {
+        pickedDate = dt;
+        Close(true);
+    }
+    public void Open(Action<DateTime> onclose = null, long ticks=0)
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        OnClose = onclose;
+
+        if (ticks > 0)
+        {
+            CurrentDate = new DateTime(ticks);
+        }
+        pickedDate = CurrentDate;
+        StateHasChanged();
+    }
+    public void Close(bool isOk = false)
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        if (isOk)
+        {
+            result = Result.OK;
+        }
+        else
+        {
+            result = Result.CLOSE;
+        }
+        if (OnClose != null)
+        {
+            OnClose(pickedDate);
+        }
+        StateHasChanged();
+    }
+}

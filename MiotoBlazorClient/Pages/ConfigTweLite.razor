@@ -1,0 +1,241 @@
+﻿@page "/config/twe/"
+@page "/config/twe/{mode}/{id}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+
+<h1>各種設定</h1>
+
+<p>@debugMsg</p>
+@if (config == null)
+{
+    <p>設定情報を取得しています・・・</p>
+}
+else
+{
+    @if (status == Status.TWE_LIST)
+    {
+        <table class="table m-0 p-0 w-auto">
+            <thead>
+                <tr>
+                    <th>MAC</th>
+                    <th>名称</th>
+                    <th>最終信号日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in config.listTwe.OrderByDescending(q=> q.Ticks))
+                {
+                <tr>
+                    <td>@item.mac.ToString("x8") </td>
+                    <td>@item.name </td>
+                    @if (true)
+                    {
+                        Console.WriteLine(item.Ticks);
+                    }
+                    <td>@(new DateTime(item.Ticks).ToString("MM/dd HH:mm")) </td>
+                    <td><a class="btn btn-primary" href="config/twe/@(Status.TWE_EDIT)/@(item.mac)/">編集</a></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        <a class="btn btn-secondary" href="config/">一覧に戻る</a>
+    }
+    else if (status == Status.TWE_EDIT)
+    {
+        @if (editTwe != null)
+        {
+<EditForm Model="@editTwe" OnValidSubmit="SaveEditTwe">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <table class="table m-0 p-0 w-auto">
+        <tr><td>設備名称</td><td><InputText class="w-100" id="name" @bind-Value="editTwe.name" /></td></tr>
+        <tr>
+            <td>
+                タブ区切り標準CTマスタ<br /><small>品番(タブ)標準CT(タブ)取数<br />取数を省略した場合は1</small><br />
+                <p><small>取数 : 1回の信号OFFあたりに作られる製品の個数・出来高</small></p>
+                <small>Excelの表をコピー＆ペーストすると便利です。</small>
+            </td>
+            <td>
+                <InputTextArea class="w-100" id="tsvLines" @bind-Value="tsvLines" /><br />
+                <button type="button" class="btn btn-info btn-sm" @onclick="onUpdateTextArea">テキストボックスの反映</button>
+            </td>
+        </tr>
+        <tr>
+            <td>ON/OFFを反転させる<br /><small>停止時に点灯する光センサや、<br />停止時にONするリードスイッチ<br />の場合にチェック</small></td>
+            <td><InputCheckbox class="w-100" id="check" @bind-Value="editTwe.isNegativeLogic" /></td>
+        </tr>
+
+        <tr>
+            <td>情報の更新間隔<br /><small>
+    「即時更新」を指定し、MiotoServerをWindows10<br />で稼働させた場合、<br/>最大で10台のPC（10接続）<br />までに制限されます。<br />
+    10台を超えるパソコンからアクセスする場合は、<br />即時更新以外の値を設定してください。
+</small></td>
+            <td>
+                <InputSelect @bind-Value="editTwe.pollingSec" class="mb-3">
+                    @foreach (var item in new int[] { Config.POLLING_LONGPOLLING, 2, 5, 10, 20 })
+                                {
+                                    var opt = "";
+                                    if (item == Config.POLLING_LONGPOLLING)
+                                    {
+                                        opt = "即時更新";
+                                    }
+                                    else
+                                    {
+                                        opt = $"{item}秒毎に更新";
+                                    }
+                                    if (editTwe.pollingSec.CompareTo(item.ToString()) == 0)
+                                    {
+                            <option value="@item" selected>@opt</option>
+                                    }
+                                    else
+                                    {
+                            <option value="@item">@opt </option>
+                                    }
+                                }
+                </InputSelect>
+            </td>
+        </tr>
+
+
+    </table>
+    
+    <h5>標準CTマスタ</h5>
+    <table class="table m-0 p-0 w-auto">
+        <thead>
+            <tr>
+                <th>品番</th>
+                <th>標準CT(秒)</th>
+                <th>取数</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var con in editTwe.listConditions)
+            {
+                <tr>
+                    <td>@(con.itemNumber)</td>
+                    <td>@(con.standardCt)</td>
+                    <td>@(con.itemsPerOperation)</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" @onclick="()=> { moveItem(con, true); }">up</button>
+                        <button type="button" class="btn btn-sm btn-outline-info" @onclick="()=> { moveItem(con, false); }">down</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="()=> { deleteItem(con); }">削除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p>
+        <button type="button" class="btn btn-primary" @onclick="SaveEditTwe">保存</button>
+        <a class="btn btn-secondary" href="config/twe/">キャンセル</a>
+    </p>
+
+</EditForm>
+        }
+
+    }
+}
+
+@code {
+    [Parameter]
+    public string mode { get; set; }
+    [Parameter]
+    public string id { get; set; }
+
+    private string tsvLines { get; set; } = "";
+    public string debugMsg { get; set; }
+    private Config config;
+    enum Status { NOOP, TWE_LIST, TWE_EDIT }
+    private Status status = Status.TWE_LIST;
+    private ConfigTwe editTwe = null;
+
+    public void deleteItem(ProductionConditions con)
+    {
+        editTwe.listConditions.Remove(con);
+        tsvLines = editTwe.getConditionsTsv();
+    }
+    public void moveItem(ProductionConditions con, bool isUp)
+    {
+        editTwe.moveConditions(con, isUp);
+        tsvLines = editTwe.getConditionsTsv();
+    }
+    public void onUpdateTextArea()
+    {
+        editTwe.setConditionsTsv(tsvLines);
+    }
+    public void StartEditTwe(ConfigTwe twe)
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(twe);
+
+
+        editTwe = System.Text.Json.JsonSerializer.Deserialize<ConfigTwe>(json);
+        status = Status.TWE_EDIT;
+        tsvLines = editTwe.getConditionsTsv();
+    }
+    public async Task SaveEditTwe()
+    {
+        var twe = config.listTwe.Where(q => q.mac == editTwe.mac).FirstOrDefault();
+
+        if (twe.mac != 0)
+        {
+            ConfigTwe.Copy(editTwe, twe);
+        }
+        editTwe = null;
+        status = Status.TWE_LIST;
+        await UpdateConfig();
+        NavMgr.NavigateTo($"config/twe/");
+    }
+
+    protected async Task UpdateConfig()
+    {
+        await ConfigSingleton.getInstance().update(NavMgr);
+    }
+
+
+    public void OnPageChange()
+    {
+        if (id == null) { id = ""; }
+        if (mode == null) { mode = ""; }
+        long idNum = -1;
+        try
+        {
+            idNum = Convert.ToInt64(id);
+        }
+        catch (Exception e) { }
+        if ((mode.CompareTo("") == 0) || (idNum == -1))
+        {
+            status = Status.TWE_LIST;
+            return;
+        }
+        var twe = config.listTwe.Where(q => q.mac == idNum).FirstOrDefault();
+        if((twe==null) || (twe.mac == 0))
+        {
+            status = Status.TWE_LIST;
+            return;
+        }
+        if (mode.CompareTo(Status.TWE_EDIT.ToString()) == 0)
+        {
+            status = Status.TWE_EDIT;
+            StartEditTwe(twe);
+            return;
+        }
+        NavMgr.NavigateTo($"config/twe/");
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        OnPageChange();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c =>
+        {
+            config = c;
+            this.StateHasChanged();
+        });
+    }
+}

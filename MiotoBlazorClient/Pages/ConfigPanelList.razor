@@ -1,0 +1,353 @@
+﻿@page "/config/panellist"
+@page "/config/panellist/{mode}/{id}"
+@inject HttpClient Http
+@inject NavigationManager NavMgr
+
+<h1>各種設定</h1>
+
+<p>@debugMsg</p>
+@if (config == null)
+{
+    <p>設定情報を取得しています・・・</p>
+}
+else
+{
+    @if (status == Status.PANEL)
+    {
+        <table class="table m-0 p-0 w-auto">
+            <thead>
+                <tr>
+                    <th>パネル名称</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in config.listCtPanel2Index)
+                {
+                    <tr>
+                        <td>@item.panel.name</td>
+                        <td>
+                            <a class="btn btn-primary"
+                               href="config/panellist/@(Status.PANEL_EDIT)/@(item.panel.dtFirstTicks)/">
+                                編集
+                            </a>
+                            <a class="btn btn-danger"
+                               href="config/panellist/@(Status.PANEL_DELETE)/@(item.panel.dtFirstTicks)/">
+                                削除
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" @onclick="()=> { StartEditPanel(); }">新規作成</button>
+        <a class="btn btn-secondary" href="config/">一覧に戻る</a>
+    }
+    else if ((status == Status.PANEL_EDIT) && (editPanel != null))
+    {
+<EditForm Model="@editPanel" OnValidSubmit="SaveEditPanel">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <h3>パネル名称</h3>
+    <InputText id="name" @bind-Value="editPanel.name" class="mb-3" />
+    <h3>フォントサイズ</h3>
+    <InputSelect @bind-Value="editPanel.fontSize" class="mb-3">
+        @foreach (var item in new string[] { "12px", "16px", "24px", "36px", "48px", "72px", "96px" })
+                {
+                    var adj = "";
+                    if (item.CompareTo("16px") == 0) { adj = "(標準)"; }
+                    if (item.CompareTo(editPanel.fontSize) == 0)
+                    {
+                <option value="@item" selected>@item @adj</option>
+                    }
+                    else
+                    {
+                <option value="@item">@item @adj</option>
+                    }
+                }
+    </InputSelect>
+
+
+    <h3>情報の更新間隔</h3>
+    <p>「即時更新」を指定し、MiotoServerをWindows 10で稼働させた場合、情報を取得できるのは最大で10台のPC（10接続）までに制限されます。
+    10台を超えるパソコンからアクセスする場合は、即時更新以外の値を設定してください。</p>
+    <InputSelect @bind-Value="editPanel.pollingSec" class="mb-3">
+        @foreach (var item in new int[] { Config.POLLING_LONGPOLLING, 2, 5, 10, 20 })
+                {
+                    var opt = "";
+                    if (item == Config.POLLING_LONGPOLLING)
+                    {
+                        opt = "即時更新";
+                    }
+                    else
+                    {
+                        opt = $"{item}秒毎に更新";
+                    }
+                    if (editPanel.pollingSec.CompareTo(item.ToString())==0)
+                    {
+                <option value="@item" selected>@opt</option>
+                    }
+                    else
+                    {
+                <option value="@item">@opt </option>
+                    }
+                }
+    </InputSelect>
+
+    <h3>表示対象子機</h3>
+    <table class="table m-0 p-0 w-auto">
+        <tbody>
+            @foreach (var item in editPanel.listMac2Index)
+            {
+                <tr>
+                    <td>@(getTweInfoStringByMac(item.mac))</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-info"
+                                @onclick="()=> { updatePanelTwe(item.mac, true, item.index-15); }">
+                            up
+                        </button>
+                        <button type="button" class="btn btn-outline-info"
+                                @onclick="()=> { updatePanelTwe(item.mac, true, item.index+15); }">
+                            down
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                                @onclick="()=> { updatePanelTwe(item.mac, false); }">
+                            解除
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>非表示</h3>
+    <table class="table m-0 p-0 w-auto">
+        <tbody>
+            @foreach (var item in config
+        .listTwe
+        .Where(q => editPanel.listMac2Index.Where(v => v.mac == q.mac).Count() == 0)
+        )
+            {
+                <tr>
+                    <td>@(getTweInfoStringByMac(item.mac))</td>
+                    <td>
+                        <button type="button" class="btn btn-primary"
+                                @onclick="()=> { updatePanelTwe(item.mac, true); }">
+                            選択
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-primary" @onclick="SaveEditPanel">保存</button>
+    <a class="btn btn-secondary" href="config/panellist/">キャンセル</a>
+</EditForm>
+    }
+    else if (status == Status.PANEL_DELETE)
+    {
+        <h3>@editPanel.name を削除しますか？</h3>
+        <button type="button" class="btn btn-danger" @onclick="DeletePanel">削除</button>
+        <a class="btn btn-secondary" href="config/panellist/">キャンセル</a>
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public string mode { get; set; }
+    [Parameter]
+    public string id { get; set; }
+
+    public string debugMsg { get; set; }
+    private Config config;
+    enum Status { PANEL, PANEL_EDIT, PANEL_DELETE }
+    private Status status = Status.PANEL;
+    private ConfigCtPanel editPanel = null;
+
+    public void StartEditPanel(ConfigCtPanel panel = null)
+    {
+        if (panel == null)
+        {
+            editPanel = new ConfigCtPanel() { dtFirstTicks = DateTime.Now.Ticks };
+        }
+        else
+        {
+            //複製(編集後にキャンセルできるように)
+            editPanel = System.Text.Json.JsonSerializer.Deserialize<ConfigCtPanel>(
+                System.Text.Json.JsonSerializer.Serialize(panel));
+        }
+        status = Status.PANEL_EDIT;
+    }
+    public void CancelEditPanel()
+    {
+        editPanel = null;
+        status = Status.PANEL;
+    }
+    public void StartDeletePanel(ConfigCtPanel panel)
+    {
+        editPanel = panel;
+        status = Status.PANEL_DELETE;
+    }
+    public async Task DeletePanel()
+    {
+        var ary = config.listCtPanel2Index
+            .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks).ToArray();
+        foreach (var item in ary)
+        {
+            config.listCtPanel2Index.Remove(item);
+        }
+        editPanel = null;
+        status = Status.PANEL;
+        await UpdateConfig();
+        NavMgr.NavigateTo($"config/panellist/");
+    }
+    public async Task SaveEditPanel()
+    {
+        //dtFirstTicksでリストに存在するパネルかを判断する
+        var count = config.listCtPanel2Index
+            .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks)
+            .Count();
+        if (count == 0)
+        {
+            long maxCount = 0;
+            if (config.listCtPanel2Index.Count > 0)
+            {
+                maxCount = config.listCtPanel2Index.Max(q => q.index);
+                maxCount += 10;
+            }
+            config.listCtPanel2Index.Add(new CtPanel2Index()
+            {
+                index = DateTime.Now.Ticks,
+                panel = editPanel
+            });
+        }
+        else
+        {
+            var p2i = config.listCtPanel2Index
+                        .Where(q => q.panel.dtFirstTicks == editPanel.dtFirstTicks)
+                        .FirstOrDefault();
+            p2i.panel = editPanel;
+        }
+        editPanel = null;
+        status = Status.PANEL;
+        await UpdateConfig();
+        NavMgr.NavigateTo($"config/panellist/");
+    }
+    public string getTweInfoStringByMac(long mac)
+    {
+        if (config == null) { return ""; }
+        if (config.listTwe == null) { return ""; }
+        var twe = config.listTwe.Where(q => q.mac == mac).First();
+        if (twe == null) { return ""; }
+        return $"{twe.name} ({twe.mac.ToString("x8")})";
+    }
+    public void updatePanelTwe(long mac, bool isRegist, int index = -1)
+    {
+        if (isRegist)
+        {
+            //パネルに登録
+            if (index == -1)
+            {
+                try
+                {
+                    index = editPanel.listMac2Index.Max(q => q.index) + 10;
+                }
+                catch (Exception e)
+                {
+                    index = 0;
+                }
+                editPanel.listMac2Index.Add(new Mac2Index() { index = index, mac = mac });
+            }
+            else
+            {
+                foreach (var item in editPanel.listMac2Index.Where(q => q.mac == mac))
+                {
+                    item.index = index;
+                }
+            }
+        }
+        else
+        {
+            //パネルから解除
+            var matchList = editPanel.listMac2Index.Where(q => q.mac == mac).ToArray();
+            foreach (var info in matchList)
+            {
+                editPanel.listMac2Index.Remove(info);
+            }
+        }
+        editPanel.listMac2Index = editPanel.listMac2Index.OrderBy(q => q.index).ToList();
+        index = 0;
+        foreach (var item in editPanel.listMac2Index)
+        {
+            item.index = index;
+            index += 10;
+        }
+    }
+    protected async Task UpdateConfig()
+    {
+        await ConfigSingleton.getInstance().update(NavMgr);
+    }
+
+    public void OnPageChange()
+    {
+        if(id==null) { id = ""; }
+        if (mode == null) { mode = ""; }
+        long idNum = -1;
+        try
+        {
+            idNum = Convert.ToInt64(id);
+        }
+        catch (Exception e) { }
+        if ((mode.CompareTo("") == 0) || (idNum == -1))
+        {
+            status = Status.PANEL;
+            return;
+        }
+        var editPanel = config.listCtPanel2Index.Where(q => q.panel.dtFirstTicks == idNum).FirstOrDefault();
+        if (((editPanel == null) || (editPanel.panel == null)) && (idNum != 0))
+        {
+            status = Status.PANEL;
+            return;
+        }
+        if (mode.CompareTo(Status.PANEL_EDIT.ToString()) == 0)
+        {
+            status = Status.PANEL_EDIT;
+            if (idNum == 0)
+            {
+                StartEditPanel(null);
+                return;
+            }
+            StartEditPanel(editPanel.panel);
+            return;
+        }
+        if (mode.CompareTo(Status.PANEL_DELETE.ToString()) == 0)
+        {
+            if (idNum == 0)
+            {
+                status = Status.PANEL;
+                return;
+            }
+            status = Status.PANEL_DELETE;
+            StartDeletePanel(editPanel.panel);
+            return;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        OnPageChange();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConfigSingleton.getInstance().getConfigAsync(NavMgr, c =>
+        {
+            config = c;
+            OnPageChange();
+            this.StateHasChanged();
+        });
+    }
+}

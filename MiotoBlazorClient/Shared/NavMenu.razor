@@ -1,0 +1,43 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">弥音<small> @appVer</small></a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> 表示
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="config">
+                <span class="oi oi-wrench" aria-hidden="true"></span> 設定
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    public string appVer { get; set; } = "";
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        ConfigSingleton.getInstance().setNavMenu(this);
+        return base.SetParametersAsync(parameters);
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    public void Reflesh()
+    {
+        this.StateHasChanged();
+    }
+}
