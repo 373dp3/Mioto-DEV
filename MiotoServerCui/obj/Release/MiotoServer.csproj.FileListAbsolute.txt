@@ -1,8 +1,0 @@
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\bin\Release\MiotoServer.exe
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\bin\Release\System.Data.SQLite.dll
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\bin\Release\MiotoServer.exe.config
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\bin\Release\MiotoServer.pdb
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\bin\Release\System.Data.SQLite.xml
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\obj\Release\MiotoServer.exe
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\obj\Release\MiotoServer.pdb
-C:\Users\min\Documents\Visual Studio 2015\Projects\IoTBasics\MiotoSever\obj\Release\MiotoServer.csprojResolveAssemblyReference.cache
