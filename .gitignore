@@ -19,7 +19,8 @@
 /GoogleCloud_TTS/bin/
 /packages/
 /TestResults/
-/TwePacketTest/
+/TwePacketTest/bin/
+/TwePacketTest/obj/
 /MiotoBlazorClient/bin/
 /MiotoBlazorClient/obj/
 /KmeansTool/
