@@ -48,6 +48,7 @@ namespace MiotoServer
             listPacketFilter.Add(new TwePalSensePacket());
             listPacketFilter.Add(new Twe2525APacket());
             listPacketFilter.Add(new TweComSerialPacket());
+            listPacketFilter.Add(new TweShotCT());
         }
 
         public void parse(string msg)

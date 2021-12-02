@@ -49,7 +49,7 @@ Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Text
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\System.Text.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.dll.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServer.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\MiotoServerW.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\min\Source\Repos\Mioto-DEV\MiotoServer\iot.ico"; DestDir: "{app}"; Flags: ignoreversion

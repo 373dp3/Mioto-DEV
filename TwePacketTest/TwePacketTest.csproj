@@ -73,6 +73,7 @@
     <Compile Include="SQLiteAsync.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTestTweShotCT.cs" />
     <Compile Include="UnitTestTwePacketBase.cs" />
     <Compile Include="UnitTestComSerialPacket.cs" />
     <Compile Include="UnitTestTwePalSensePacket.cs" />

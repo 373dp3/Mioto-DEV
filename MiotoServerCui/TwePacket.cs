@@ -15,6 +15,19 @@ namespace MiotoServer
     public class TwePacket : PacketCommon
     {
         public List<ushort> adList { get; }
+        public TwePacket(uint mac, byte btn, byte lqi, float batt)
+        {
+            dt = DateTime.Now;
+            this.mac = mac;
+            this.btn = btn;
+            this.lqi = lqi;
+            this.batt = (ushort)(batt*1000);
+            adList = new List<ushort>();
+            adList.Add((ushort)0);
+            adList.Add((ushort)0);
+            adList.Add((ushort)0);
+            adList.Add((ushort)0);
+        }
         public TwePacket(string msg, ref int ofs)
         {
             read1Byte(msg, ref ofs);//pver

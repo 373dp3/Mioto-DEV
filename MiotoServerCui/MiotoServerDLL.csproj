@@ -131,6 +131,7 @@
     <Compile Include="TwePacket.cs" />
     <Compile Include="TwePacketParser.cs" />
     <Compile Include="TwePalSensePacket.cs" />
+    <Compile Include="TweShotCT.cs" />
     <Compile Include="WebSocketMgr.cs" />
     <Compile Include="WebSocketWorker.cs" />
   </ItemGroup>
