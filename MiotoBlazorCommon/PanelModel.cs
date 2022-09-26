@@ -107,6 +107,24 @@ namespace MiotoBlazorCommon
         {
             get { return productionHelper.list.Select(q => q.itemCounts).Sum(); }
         }
+        /// <summary>
+        /// 生産要因を考慮したカウント表示用文字列の生成
+        /// </summary>
+        public string itemCountsString
+        {
+            get
+            {
+                if ((productionHelper.list.Count > 0)
+                    && (productionHelper.list.Last().ct!=ProductionFactor.CT_NOOP))
+                {
+                    var cur = productionHelper.list.Last().itemCounts;
+                    var total = itemCounts;
+                    return $"{cur} / {total}";
+                }
+
+                return itemCounts.ToString();
+            }
+        }
         public double bekidou
         {
             get {

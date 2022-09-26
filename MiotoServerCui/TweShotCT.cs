@@ -33,6 +33,10 @@ namespace MiotoServer
             appKey += (char)this.read1Byte(msg, ref ofs);//appKey bytes
             appKey += (char)this.read1Byte(msg, ref ofs);//appKey bytes
             appKey += (char)this.read1Byte(msg, ref ofs);//appKey bytes
+            if(appKey.CompareTo("SHT1")!=0)
+            {
+                goto FALSE;
+            }
             seq = this.read2Byte(msg, ref ofs);//SHOT用シーケンス番号
             shots = this.read2Byte(msg, ref ofs);//ショット数
             batt = (float)(0.1 * this.read1Byte(msg, ref ofs));//電圧
@@ -45,10 +49,16 @@ namespace MiotoServer
             }
             sum = (byte)(0x100 - sum);
             var checksum = read1Byte(msg, ref ofs);
-            if(sum != checksum) { return false; }
-
+            if (sum != checksum)
+            {
+                goto FALSE;
+            }
 
             return true;
+
+        FALSE:
+            ofs = ofsBackup;
+            return false;
         }
         public TwePacket convertToTwePacket()
         {

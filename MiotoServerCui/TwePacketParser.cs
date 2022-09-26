@@ -46,7 +46,7 @@ namespace MiotoServer
         {
             listPacketFilter = new List<IMonoPacket>();
             listPacketFilter.Add(new TwePalSensePacket());
-            listPacketFilter.Add(new Twe2525APacket());
+            //2525Aは生産終了であり標準TWE-CTと競合する為、コメントアウトlistPacketFilter.Add(new Twe2525APacket());
             listPacketFilter.Add(new TweComSerialPacket());
             listPacketFilter.Add(new TweShotCT());
         }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TweLitePalToSQLite": {
+      "commandName": "Project",
+      "commandLineArgs": "COM10"
+    }
+  }
+}

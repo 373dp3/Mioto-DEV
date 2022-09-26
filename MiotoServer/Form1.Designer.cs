@@ -57,6 +57,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.comboBoxSerialCurrent = new System.Windows.Forms.ComboBox();
+            this.checkBoxAutoMinimize = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericServerPortNumber)).BeginInit();
@@ -146,7 +147,7 @@
             this.textBoxDbDir.Location = new System.Drawing.Point(220, 61);
             this.textBoxDbDir.Name = "textBoxDbDir";
             this.textBoxDbDir.ReadOnly = true;
-            this.textBoxDbDir.Size = new System.Drawing.Size(286, 19);
+            this.textBoxDbDir.Size = new System.Drawing.Size(193, 19);
             this.textBoxDbDir.TabIndex = 4;
             // 
             // label5
@@ -160,7 +161,7 @@
             // 
             // buttonDbDir
             // 
-            this.buttonDbDir.Location = new System.Drawing.Point(512, 61);
+            this.buttonDbDir.Location = new System.Drawing.Point(419, 61);
             this.buttonDbDir.Name = "buttonDbDir";
             this.buttonDbDir.Size = new System.Drawing.Size(49, 23);
             this.buttonDbDir.TabIndex = 5;
@@ -217,6 +218,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.checkBoxAutoMinimize);
             this.tabPage1.Controls.Add(this.listBoxComport);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.numericServerPortNumber);
@@ -382,6 +384,17 @@
             this.comboBoxSerialCurrent.TabIndex = 0;
             this.comboBoxSerialCurrent.SelectedIndexChanged += new System.EventHandler(this.comboBoxSerialCurrent_SelectedIndexChanged);
             // 
+            // checkBoxAutoMinimize
+            // 
+            this.checkBoxAutoMinimize.AutoSize = true;
+            this.checkBoxAutoMinimize.Location = new System.Drawing.Point(475, 64);
+            this.checkBoxAutoMinimize.Name = "checkBoxAutoMinimize";
+            this.checkBoxAutoMinimize.Size = new System.Drawing.Size(79, 16);
+            this.checkBoxAutoMinimize.TabIndex = 20;
+            this.checkBoxAutoMinimize.Text = "最小化する";
+            this.checkBoxAutoMinimize.UseVisualStyleBackColor = true;
+            this.checkBoxAutoMinimize.CheckedChanged += new System.EventHandler(this.checkBoxAutoMinimize_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -436,6 +449,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.NumericUpDown numericServerPortNumber;
         private System.Windows.Forms.ListBox listBoxComport;
+        private System.Windows.Forms.CheckBox checkBoxAutoMinimize;
     }
 }
 

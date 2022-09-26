@@ -5,7 +5,7 @@
 ; アプリケーションの削除メニューに表示されるバージョンは、メニューを閉じて再表示すれば更新される。
 ;
 #define MyAppName "MiotoServer"
-#define MyAppVersion "1.4.7"
+#define MyAppVersion "1.4.11"
 #define MyAppPublisher "dp3"
 #define MyAppURL "https://mioto.dp3.jp"
 #define MyAppExeName "MiotoServerW.exe"
@@ -25,7 +25,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputBaseFilename=MiotoServerSetup
+OutputBaseFilename=MiotoServerSetup{#MyAppVersion}
 OutputDir=Installer
 Compression=lzma
 SolidCompression=yes

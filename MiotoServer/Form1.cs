@@ -63,6 +63,7 @@ namespace MiotoServerW
             var cfg = JsonSerializer.Deserialize<Config>(msg);
             cfg.dateLineHHMM = config.hhmm;
             cfg.appVer = config.appVer;
+            cfg.isHideAfer15s = config.isHideAfer15s;
             msg = JsonSerializer.Serialize<Config>(cfg);
             DbWrapper.getInstance().setConfig(WebSocketWorker.CONFIG_DB_KEY, msg);
         }
@@ -207,6 +208,9 @@ namespace MiotoServerW
             var hhmmStr = string.Format("{0:D2}:{1:D2}", hh, mm);
             dateTimePickerHHMM.Value = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd")+" "+hhmmStr+":00");
 
+            //自動的に隠すチェックボックス
+            checkBoxAutoMinimize.Checked = config.isHideAfer15s;
+
             //サービス開始
             buttonStart_Click(null, null);
 
@@ -216,12 +220,37 @@ namespace MiotoServerW
         private Process p = null;
         private Thread thPoling = null;
 
+        private void setMinimize()
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
         private void buttonStart_Click(object sender, EventArgs e)
         {
             //timepicker情報をpropに更新
             var hhmm = dateTimePickerHHMM.Value.ToString("HH:mm");
             hhmm = hhmm.Replace(":", "");
             config.hhmm = Convert.ToInt32(hhmm);
+
+            //隠す設定を動作に反映
+            if (checkBoxAutoMinimize.Checked)
+            {
+                d("15秒後に自動的に最小化します。");
+                Task.Factory.StartNew(() => {
+                    Thread.Sleep(15 * 1000);
+                    if (InvokeRequired)
+                    {
+                        //間接呼び出し
+                        Invoke(new Action(setMinimize));
+                    }
+                    else
+                    {
+                        //直接呼び出し
+                        setMinimize();
+                    }
+
+                });
+            }
 
             //ポート設定更新確認
             config.serverPortNumber = (int)numericServerPortNumber.Value;
@@ -308,6 +337,7 @@ namespace MiotoServerW
             this.textBoxBackupDir.Enabled = !isStart;
             this.buttonBackupDir.Enabled = !isStart;
             this.checkBoxMemBackup.Enabled = !isStart;
+            this.checkBoxAutoMinimize.Enabled = !isStart;
             this.numericServerPortNumber.Enabled = !isStart;
             this.listBoxComport.Enabled = !isStart;
 
@@ -511,8 +541,17 @@ namespace MiotoServerW
         }
 
 
+
         #endregion //-- 電流関連
 
-
+        private void checkBoxAutoMinimize_CheckedChanged(object sender, EventArgs e)
+        {
+            if (MiotoServerWrapper.config != null)
+            {
+                MiotoServerWrapper.config.isHideAfer15s = this.checkBoxAutoMinimize.Checked;
+                config.isMemoryDbBackup = MiotoServerWrapper.config.isMemoryDbBackup;
+                saveConfigJson();
+            }
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace MiotoServer
 
         public List<ComPort> listComPort { get; set; } = new List<ComPort>();
 
+        public bool isHideAfer15s { get; set; } = false;
 
         #region 電流センサ・オンメモリDBの関連
         /// <summary>

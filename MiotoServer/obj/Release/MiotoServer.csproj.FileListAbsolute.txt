@@ -62,3 +62,4 @@ C:\Users\min\source\repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServer.csproj.C
 C:\Users\min\source\repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServer.csproj.CopyComplete
 C:\Users\min\source\repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServerW.exe
 C:\Users\min\source\repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServerW.pdb
+C:\Users\min\source\repos\Mioto-DEV\MiotoServer\obj\Release\MiotoServer.csproj.SuggestedBindingRedirects.cache

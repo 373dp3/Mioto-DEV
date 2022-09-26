@@ -32,10 +32,20 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.8")]
-[assembly: AssemblyFileVersion("1.4.8")]
-[assembly: AssemblyInformationalVersion("1.4.8")]
+[assembly: AssemblyVersion("1.4.11")]
+[assembly: AssemblyFileVersion("1.4.11")]
+[assembly: AssemblyInformationalVersion("1.4.11")]
 /*
+ * 2022.9.26 1.4.11
+ * ・出来高表示について、現在の品番の出来高と当日合計を別々に表示するように修正
+ * 　
+ * 2022.2.10 1.4.10
+ * ・自動最小化機能の追加
+ * 　
+ * 2022.1.22 1.4.9
+ * ・平面研削盤、フリッカーCT対応試作版(TweShotCT)がTWE標準F/WのCT利用と競合するため、
+ * 　AppKeyによるフィルタ機能を追加
+ * 
  * 2021.12.2 1.4.8
  * ・平面研削盤、フリッカーCT対応試作版
  * 

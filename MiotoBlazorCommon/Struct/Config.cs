@@ -19,6 +19,8 @@ namespace MiotoBlazorCommon.Struct
         public List<GanttPanel2Index> listGanttPanel2Index { get; set; } = new List<GanttPanel2Index>();
         public List<ConfigTwe> listTwe { get; set; } = new List<ConfigTwe>();
 
+        public bool isHideAfer15s { get; set; } = false;
+
         public void insertOrUpdateTwe(List<LastInfo> list)
         {
             if(list == null) { return; }

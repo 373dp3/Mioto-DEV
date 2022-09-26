@@ -5,3 +5,4 @@ C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiM
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.csproj.CoreCompileInputs.cache
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.exe
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.pdb
+C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Debug\MiotoServerCuiMono.csproj.SuggestedBindingRedirects.cache
