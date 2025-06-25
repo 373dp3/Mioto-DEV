@@ -5,4 +5,3 @@ C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Release\MiotoServerCu
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Release\MiotoServerCuiMono.exe
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Release\MiotoServerCuiMono.pdb
 C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Release\MiotoServerCuiMono.csproj.AssemblyReference.cache
-C:\Users\min\source\repos\Mioto-DEV\MiotoServerCuiMono\obj\Release\MiotoServerCuiMono.csproj.SuggestedBindingRedirects.cache

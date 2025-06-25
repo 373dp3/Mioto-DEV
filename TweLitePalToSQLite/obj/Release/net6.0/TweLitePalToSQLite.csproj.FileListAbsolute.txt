@@ -64,3 +64,4 @@ C:\Users\min\source\repos\Mioto-DEV\TweLitePalToSQLite\obj\Release\net6.0\refint
 C:\Users\min\source\repos\Mioto-DEV\TweLitePalToSQLite\obj\Release\net6.0\TweLitePalToSQLite.pdb
 C:\Users\min\source\repos\Mioto-DEV\TweLitePalToSQLite\obj\Release\net6.0\TweLitePalToSQLite.genruntimeconfig.cache
 C:\Users\min\source\repos\Mioto-DEV\TweLitePalToSQLite\obj\Release\net6.0\ref\TweLitePalToSQLite.dll
+C:\Users\min\source\repos\Mioto-DEV\TweLitePalToSQLite\obj\Release\net6.0\TweLitePalToSQLite.sourcelink.json
